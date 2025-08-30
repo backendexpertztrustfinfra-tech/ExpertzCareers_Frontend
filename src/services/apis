@@ -1,0 +1,428 @@
+import { BASE_URL } from "../config";
+import Cookies from "js-cookie";
+
+// ------------------------------------------------------------------- USER -----------------------------------------------
+
+// Get user profile
+export const fetchUserProfile = async (token) => {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${BASE_URL}/user/getUser`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
+
+    const text = await res.text();
+    const data = JSON.parse(text);
+
+    if (!res.ok)
+      throw new Error(data.msg || data.message || "Failed to fetch user");
+
+    return {
+      name: data.user.username || "No Name",
+      email: data.user.useremail || "No Email",
+      phone: data.user.recruterPhone || "No Phone",
+      recruterCompany: data.user.recruterCompany || "",
+      recruterCompanyAddress: data.user.recruterCompanyAddress || "",
+      recruterGstIn: data.user.recruterGstIn || "",
+      recruterIndustry: data.user.recruterIndustry || "",
+      usertype: data.usertype || "",
+    };
+  } catch (err) {
+    console.error("❌ GetUser Error:", err.message);
+    return null;
+  }
+};
+
+//udate user
+export const updateUserProfile = async (token, formData, login) => {
+  if (!token) return null;
+
+  try {
+    const payload = {
+      ...(formData.name && { username: formData.name }),
+      ...(formData.email && { useremail: formData.email }),
+      ...(formData.password && { password: formData.password }),
+      ...(formData.recruterPhone && { recruterPhone: formData.recruterPhone }),
+      ...(formData.recruterCompany && {
+        recruterCompany: formData.recruterCompany,
+      }),
+      ...(formData.recruterCompanyAddress && {
+        recruterCompanyAddress: formData.recruterCompanyAddress,
+      }),
+      ...(formData.recruterGstIn && { recruterGstIn: formData.recruterGstIn }),
+      ...(formData.recruterIndustry && {
+        recruterIndustry: formData.recruterIndustry,
+      }),
+      ...(formData.usertype && { usertype: formData.usertype }),
+    };
+
+    const res = await fetch(`${BASE_URL}/user/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errMsg = await res.text();
+      throw new Error(errMsg || "Profile update failed");
+    }
+
+    const data = await res.json();
+    console.log("✅ Profile Updated:", data);
+
+    if (data.token && login) {
+      login(data.token);
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Update Profile Error:", err.message);
+    return null;
+  }
+};
+
+// Dshboard count
+export const getDashboardStats = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/job/dashboard/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log("✅ Dashboard Stats:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Error fetching dashboard stats:", error);
+    return null;
+  }
+};
+
+// -------------------------------------------------------------------  new api USER -----------------------------------------------
+
+// Get recuiter profile
+export const getRecruiterProfile = async () => {
+  try {
+    const token = Cookies.get("userToken"); // ✅ fixed key
+
+    const response = await fetch(`${BASE_URL}/recruiter/getRecruiterProfile`, {
+      // ✅ fixed URL
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Error ${response.status}: ${text}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("API Error:", err);
+    throw err;
+  }
+};
+
+export const updateRecruiterProfile = async (token, formData, login) => {
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/updateRecruiterProfile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+    console.log("send data: ", formData);
+    if (!res.ok) {
+      const errMsg = await res.text();
+      throw new Error(errMsg || "Profile update failed");
+    }
+
+    const data = await res.json();
+
+    if (data.token && login) {
+      login(data.token);
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Update Profile Error:", err.message);
+    return null;
+  }
+};
+
+// ------------------------------------------------------------ SAVED CANDIDATES -----------------------------------------------
+
+// Save a candidate
+export const saveCandidate = async (token, candidateId) => {
+  try {
+    const res = await fetch(
+      `${BASE_URL}/recruiter/savecandidate/${candidateId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        errorData.message || `Failed to save candidate: ${res.status}`
+      );
+    }
+
+    return await res.json(); // ✅ Returns { message, user }
+  } catch (error) {
+    console.error("❌ SaveCandidate API Error:", error);
+    throw error;
+  }
+};
+
+// Get saved candidate
+export const getSavedCandidates = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/getsavedcandidates`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        errorData.message || `Failed to get saved candidate: ${res.status}`
+      );
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Saved candidate API error", error);
+    throw error;
+  }
+};
+
+// Get Applied candidate
+export const getAppliedUser = async (token, jobId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/getapplieduser/${jobId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        errorData.message || `Failed to get Applied candidate: ${res.status}`
+      );
+    }
+    return await res.json(); // will contain { candidatesApplied, count }
+  } catch (error) {
+    console.error("get applied candidate API error", error);
+    throw error;
+  }
+};
+
+// ------------------------------------------------------------ JOBS -----------------------------------------------------------
+
+//post a job
+export const postJob = async (token, jobData) => {
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/postjob`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ...jobData,
+      }),
+    });
+
+    if (!res.ok) {
+      const errMsg = await res.text();
+      throw new Error(errMsg || "Failed to post job");
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("❌ Post Job Error:", err.message);
+    return null;
+  }
+};
+
+//update  job
+export const updateJob = async (token, jobId, formData) => {
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/updatejob/${jobId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!res.ok) {
+      const errMsg = await res.text();
+      throw new Error(errMsg || "Job update failed");
+    }
+
+    const data = await res.json();
+    console.log("✅ Job Updated:", data);
+    return data;
+  } catch (err) {
+    console.error("Update Job Error:", err.message);
+    return null;
+  }
+};
+
+// Fetch jobs created by the recruiter
+export const getCreatedJobs = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/getcreatedjobs`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch jobs");
+
+    const data = await res.json();
+    return data.jobs;
+  } catch (err) {
+    console.error("Error in getCreatedJobs:", err.message);
+    return [];
+  }
+};
+
+//Get live job
+export const getLiveJobs = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/getlivejobs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to fetch live jobs");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error fetching live jobs:", error);
+    throw error;
+  }
+};
+
+// Get pending jobs
+export const getPendingJobs = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/getpendingjobs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        errorData.message || `Failed to fetch pending jobs: ${res.status}`
+      );
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Pending jobs API error:", error);
+    throw error;
+  }
+};
+
+// Get closed job
+export const getClosedJobs = async () => {
+  try {
+    const token = Cookies.get("userToken");
+    const response = await fetch(`${BASE_URL}/recruiter/getclosedjobs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch closed jobs");
+    }
+
+    const data = await response.json();
+    return data.jobs;
+  } catch (error) {
+    console.error("Error fetching closed jobs:", error);
+    return [];
+  }
+};
+
+//Delete a job
+export async function deleteJob(jobId, token) {
+  try {
+    const response = await fetch(`${BASE_URL}/recruiter/deletejob/${jobId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.msg || "Failed to delete job");
+    }
+
+    const data = await response.json();
+    console.log("Job deleted successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    throw error;
+  }
+}
