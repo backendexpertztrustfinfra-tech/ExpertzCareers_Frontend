@@ -51,7 +51,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
         setIsCollapsed(true);
       }
-    };
+    }; 
     if (!isCollapsed) {
       document.addEventListener("mousedown", handleOutside);
       document.addEventListener("touchstart", handleOutside);

@@ -1,19 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+
+// ✅ UI Components (tumne already JSX me convert kiye hain)
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "../Components/ui/card";
+import { Button } from "../Components/ui/button";
+import { Badge } from "../Components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../Components/ui/avatar";
+import { Progress } from "../Components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabs";
+
+// ✅ Icons from lucide-react
 import {
   MapPin,
   Phone,
@@ -52,8 +56,11 @@ import {
   Bell,
   X,
 } from "lucide-react";
+
+// ✅ Custom Components
 import generateResumeHtml from "../Components/UserProfile/generateResume";
 import ShareMenu from "../Components/UserProfile/ShareMenu";
+
 
 const EditableField = ({
   field,
