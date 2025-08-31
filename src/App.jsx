@@ -4,7 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { SearchProvider } from "./Components/Home/SearchContext";
 import { SavedJobsProvider } from "./context/SavedJobsContext";
 import ScrollToTop from "./Components/Common/ScrollToTop";
-import Layout from "./Layout"; 
+import Layout from "./Layout";
 import Home from "./Pages/Home";
 import JobBoard from "./Pages/JobBoard";
 import JobDetailsPage from "./Components/JobAbt/JobDetailsPage";  
