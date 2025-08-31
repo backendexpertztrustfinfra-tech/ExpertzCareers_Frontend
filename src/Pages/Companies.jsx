@@ -19,7 +19,7 @@ import {
 import { Button } from "../Components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../Components/ui/card";
 import { Badge } from "../Components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabss";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabs";
 import {
   Select,
   SelectContent,
