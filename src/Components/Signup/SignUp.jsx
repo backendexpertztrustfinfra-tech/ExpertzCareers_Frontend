@@ -9,7 +9,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
-  // 👉 Handle role selection (update backend immediately)
+  // Handle role selection and update backend immediately
   const handleRoleSelect = async (selectedRole) => {
     setRole(selectedRole);
 
@@ -21,7 +21,7 @@ const SignUp = () => {
 
     try {
       const payload = {
-        usertype: selectedRole === "Job Seeker" ? "jobseeker" : "recruter",
+        usertype: selectedRole === "Job Seeker" ? "jobseeker" : "recruiter",
       };
 
       const response = await updateRecruiterProfile(token, payload, login);
@@ -29,7 +29,6 @@ const SignUp = () => {
       if (response?.msg === "User Update Succssfully") {
         Cookies.set("usertype", response.UpdatedData.usertype, { expires: 7 });
         login(token); // refresh AuthContext
-
         console.log("✅ Role updated:", response.UpdatedData);
       }
     } catch (error) {
@@ -37,7 +36,7 @@ const SignUp = () => {
     }
   };
 
-  // 👉 Handle final SignUp (just redirect)
+  // Handle final SignUp (redirect)
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -46,11 +45,8 @@ const SignUp = () => {
       return;
     }
 
-    if (role === "Job Seeker") {
-      navigate("/jobs");
-    } else if (role === "Recruiter") {
-      navigate("/admin");
-    }
+    if (role === "Job Seeker") navigate("/jobs");
+    else if (role === "Recruiter") navigate("/admin");
   };
 
   return (
