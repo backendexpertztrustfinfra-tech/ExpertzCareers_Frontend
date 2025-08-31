@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-
-// ✅ UI Components (tumne already JSX me convert kiye hain)
 import {
   Card,
   CardHeader,
@@ -57,8 +55,6 @@ import {
   Bell,
   X,
 } from "lucide-react";
-
-// ✅ Custom Components
 import generateResumeHtml from "../Components/UserProfile/generateResume";
 import ShareMenu from "../Components/UserProfile/ShareMenu";
 

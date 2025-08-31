@@ -16,18 +16,18 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "../Components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../Components/ui/card";
+import { Badge } from "../Components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabss";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
+} from "../Components/ui/select";
+import { Progress } from "../Components/ui/progress";
 import companies from "../Components/Data/companiesData";
 
 export default function JobPortal() {
