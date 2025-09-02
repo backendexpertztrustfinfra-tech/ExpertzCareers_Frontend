@@ -16,23 +16,13 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-/**
- * Expected filters shape (example):
- * {
- *   type: [], qualification: [], experience: [],
- *   location: [], company: [], industry: [],
- *   workMode: [], datePosted: [],
- *   salary: { min: 0, max: 50 } // LPA
- * }
- */
-
 const SECTION_CLASSES =
   "rounded-xl border border-gray-200 bg-white shadow-sm p-4";
 
 const chipBase =
   "px-3 py-1.5 text-xs rounded-full border transition cursor-pointer select-none";
 const chipOn =
-  "bg-yellow-50 border-yellow-400 text-yellow-700 font-medium shadow-sm";
+  "bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium shadow";
 const chipOff =
   "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50";
 
@@ -43,7 +33,6 @@ export default function FilterPanel({
   className = "",
 }) {
   const [openMobile, setOpenMobile] = useState(false);
-
   const [openSection, setOpenSection] = useState("type");
 
   const [search, setSearch] = useState({
@@ -160,7 +149,8 @@ export default function FilterPanel({
   };
 
   const PanelBody = (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24 md:pb-0">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Filter size={18} className="text-yellow-500" />
@@ -168,12 +158,13 @@ export default function FilterPanel({
         </div>
         <button
           onClick={clearAll}
-          className="text-xs font-medium text-gray-600 hover:text-orange-600 flex items-center gap-1 transition-colors"
+          className="text-xs font-medium text-gray-600 hover:text-orange-600 flex items-center gap-1"
         >
           <X size={14} /> Clear All
         </button>
       </div>
 
+      {/* Salary Range */}
       <div className={SECTION_CLASSES}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
@@ -187,35 +178,32 @@ export default function FilterPanel({
             Reset
           </button>
         </div>
-
-        <div className="px-1 py-1">
-          <div className="relative h-8">
+        <div>
+          <div className="flex gap-3">
             <input
-              type="range"
+              type="number"
               min={0}
-              max={60}
-              step={1}
+              max={salary.max}
               value={salary.min}
               onChange={(e) => setMin(e.target.value)}
-              className="absolute w-full top-1/2 -translate-y-1/2 pointer-events-auto accent-yellow-400"
+              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
             />
             <input
-              type="range"
-              min={0}
+              type="number"
+              min={salary.min}
               max={60}
-              step={1}
               value={salary.max}
               onChange={(e) => setMax(e.target.value)}
-              className="absolute w-full top-1/2 -translate-y-1/2 pointer-events-auto accent-orange-400"
+              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
             />
           </div>
-          <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
-            <span>₹{salary.min} LPA</span>
-            <span>₹{salary.max} LPA</span>
-          </div>
+          <p className="mt-2 text-xs text-gray-600">
+            Range: ₹{salary.min} – ₹{salary.max} LPA
+          </p>
         </div>
       </div>
 
+      {/* Sections */}
       {sections.map(({ key, title, icon: Icon, searchable }) => {
         const values = filters[key] || [];
         const count = values.length;
@@ -274,11 +262,7 @@ export default function FilterPanel({
                     return (
                       <label
                         key={opt}
-                        className={`${chipBase} ${
-                          active
-                            ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none"
-                            : "bg-gray-100 text-gray-700 hover:bg-yellow-100"
-                        }`}
+                        className={`${chipBase} ${active ? chipOn : chipOff}`}
                       >
                         <input
                           type="checkbox"
@@ -292,40 +276,31 @@ export default function FilterPanel({
                   })}
                 </div>
 
-                <div className="pt-1">
-                  {count > 0 && (
-                    <button
-                      onClick={() => clearSection(key)}
-                      className="text-xs text-gray-500 hover:text-orange-600"
-                    >
-                      Clear {title}
-                    </button>
-                  )}
-                </div>
+                {count > 0 && (
+                  <button
+                    onClick={() => clearSection(key)}
+                    className="text-xs text-gray-500 hover:text-orange-600"
+                  >
+                    Clear {title}
+                  </button>
+                )}
               </div>
             )}
           </div>
         );
       })}
 
-      {/* footer actions */}
-      <div className="flex gap-2">
+      {/* Desktop buttons */}
+      <div className="hidden md:flex gap-2">
         <button
           onClick={applyNow}
-          className="flex-1 inline-flex items-center justify-center gap-2 
-                   px-5 py-2.5 rounded-lg font-semibold text-sm 
-                   bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
-                   hover:from-yellow-500 hover:to-orange-600 
-                   transition-all duration-300 shadow-md hover:shadow-lg"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 shadow-md"
         >
-          <SlidersHorizontal size={16} />
-          Apply Filters
+          <SlidersHorizontal size={16} /> Apply Filters
         </button>
-
         <button
           onClick={clearAll}
-          className="px-5 py-2.5 text-sm font-medium rounded-lg border border-orange-300 
-                   text-orange-600 hover:bg-orange-50 transition-colors duration-200"
+          className="px-5 py-2.5 text-sm font-medium rounded-lg border border-orange-300 text-orange-600 hover:bg-orange-50"
         >
           Reset
         </button>
@@ -335,29 +310,37 @@ export default function FilterPanel({
 
   return (
     <>
+      {/* Mobile toggle button */}
       <div className="md:hidden flex justify-end mb-3">
         <button
           onClick={() => setOpenMobile(true)}
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white shadow-sm text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl 
+               bg-gradient-to-r from-yellow-400 to-orange-500 
+               text-white text-sm font-semibold shadow-md 
+               hover:from-yellow-500 hover:to-orange-600 
+               active:scale-95 transition-all duration-200"
         >
-          <Filter size={16} /> Filters
+          <Filter size={18} className="text-white" />
+          Filters
         </button>
       </div>
 
+      {/* Desktop Sidebar */}
       <aside
         className={`hidden md:block w-80 sticky top-24 max-h-[80vh] overflow-y-auto ${className}`}
       >
         {PanelBody}
       </aside>
 
+      {/* Mobile Drawer */}
       {openMobile && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setOpenMobile(false)}
           />
-          <div className="absolute right-0 top-0 h-full w-[86%] bg-white p-4 overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between mb-2">
+          <div className="absolute right-0 top-0 h-full w-[86%] bg-white p-4 overflow-y-auto shadow-2xl transition-all duration-300">
+            <div className="sticky top-0 flex items-center justify-between bg-white pb-2 z-10">
               <h3 className="text-base font-semibold">Filters</h3>
               <button
                 onClick={() => setOpenMobile(false)}
@@ -367,72 +350,24 @@ export default function FilterPanel({
               </button>
             </div>
             {PanelBody}
+            {/* Mobile bottom buttons */}
+            <div className="fixed bottom-0 left-0 w-full bg-white border-t p-3 flex gap-2">
+              <button
+                onClick={applyNow}
+                className="flex-1 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow"
+              >
+                Apply
+              </button>
+              <button
+                onClick={clearAll}
+                className="px-5 py-3 text-sm font-medium rounded-lg border border-orange-300 text-orange-600"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
       )}
     </>
-  );
-}
-
-/* ---------- OPTIONAL: Selected Filters Bar (place above results) ---------- */
-export function SelectedFiltersBar({ filters, onRemove, onClearAll }) {
-  const chips = [];
-
-  const pushChips = (key, labelPrefix) => {
-    (filters[key] || []).forEach((v) =>
-      chips.push({
-        key,
-        value: v,
-        label: `${labelPrefix ? labelPrefix + ": " : ""}${v}`,
-      })
-    );
-  };
-
-  pushChips("type", "Type");
-  pushChips("qualification", "Edu");
-  pushChips("experience", "Exp");
-  pushChips("location", "Loc");
-  pushChips("company", "Company");
-  pushChips("industry", "Industry");
-  pushChips("workMode", "Mode");
-  pushChips("datePosted", "Posted");
-
-  const hasSalary =
-    filters.salary && (filters.salary.min > 0 || filters.salary.max < 50);
-
-  if (hasSalary) {
-    chips.push({
-      key: "salary",
-      value: "range",
-      label: `₹{filters.salary.min}–₹{filters.salary.max} LPA`,
-    });
-  }
-
-  if (chips.length === 0) return null;
-
-  return (
-    <div className="mb-4 flex flex-wrap items-center gap-2">
-      {chips.map((c, idx) => (
-        <span
-          key={idx}
-          className="inline-flex items-center gap-1 bg-gray-100 border border-gray-200 text-gray-800 text-xs px-3 py-1.5 rounded-full"
-        >
-          {c.label}
-          <button
-            onClick={() => onRemove(c.key, c.value)}
-            className="hover:text-red-600"
-            aria-label={`Remove ${c.label}`}
-          >
-            <X size={14} />
-          </button>
-        </span>
-      ))}
-      <button
-        onClick={onClearAll}
-        className="text-xs text-gray-600 underline ml-1"
-      >
-        Clear all
-      </button>
-    </div>
   );
 }

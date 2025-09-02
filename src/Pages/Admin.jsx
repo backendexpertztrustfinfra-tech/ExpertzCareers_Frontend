@@ -1,6 +1,4 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Admin/Sidebar/Sidebar";
 import Navbar from "../Components/Home/Navbar/Navbar";
 import StatCards from "../Components/Admin/Home/StatCards";
@@ -13,15 +11,23 @@ import defaultLogo from "../assets/Image/download.jpg";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("Home");
+  const [collapsed, setCollapsed] = useState(false);
 
   const [userProfile, setUserProfile] = useState({
-    name: "Nanda",
-    phone: "+91 9811377155",
-    email: "nanda@example.com",
+    name: "username",
+    phone: "number",
+    email: "email",
     logo: defaultLogo,
   });
 
   const [selectedJob, setSelectedJob] = useState(null);
+
+  // Collapse sidebar automatically only when Database tab is active
+  useEffect(() => {
+    if (activeTab === "Database") {
+      setCollapsed(true);
+    }
+  }, [activeTab]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -29,10 +35,7 @@ const Admin = () => {
         return <StatCards setActiveTab={setActiveTab} />;
       case "Job":
         return (
-          <JobTabs
-            setActiveTab={setActiveTab}
-            setSelectedJob={setSelectedJob}
-          />
+          <JobTabs setActiveTab={setActiveTab} setSelectedJob={setSelectedJob} />
         );
       case "Database":
         return <DatabaseView selectedJob={selectedJob} />;
@@ -60,12 +63,18 @@ const Admin = () => {
       <Navbar />
 
       <div className="flex flex-1 bg-[#fefcf9]">
-        {/* Sidebar fixed left */}
-        <div className="fixed top-[64px] left-0 h-[calc(100vh-64px)] w-64">
+        {/* Sidebar */}
+        <div
+          className={`fixed top-[64px] left-0 h-[calc(100vh-64px)] z-20 
+          ${collapsed ? "w-20" : "w-64"} 
+          transition-all duration-300 bg-white shadow-md`}
+        >
           <Sidebar
             setActiveTab={setActiveTab}
             activeTab={activeTab}
             userProfile={userProfile}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
             onUpdate={(data) =>
               setUserProfile((prev) => ({ ...prev, ...data }))
             }
@@ -73,7 +82,11 @@ const Admin = () => {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 ml-64 p-6 overflow-y-auto">
+        <main
+          className={`flex-1 transition-all duration-300 p-6 overflow-y-auto 
+          ${collapsed ? "ml-20" : "ml-64"} 
+          md:ml-${collapsed ? "20" : "64"} sm:ml-20`}
+        >
           {renderTabContent()}
         </main>
       </div>

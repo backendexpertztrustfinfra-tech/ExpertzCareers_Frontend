@@ -14,7 +14,12 @@ import { Button } from "../Components/ui/button";
 import { Badge } from "../Components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../Components/ui/avatar";
 import { Progress } from "../Components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../Components/ui/tabs";
 
 // ✅ Icons from lucide-react
 import {
@@ -58,8 +63,7 @@ import {
 import generateResumeHtml from "../Components/UserProfile/generateResume";
 import ShareMenu from "../Components/UserProfile/ShareMenu";
 
-
-
+// ✅ ----------------- Reusable Component for Editable Fields -----------------
 const EditableField = ({
   field,
   value,
@@ -120,6 +124,7 @@ const EditableField = ({
   );
 };
 
+// ✅ ----------------- Reusable Component for Stat Cards -----------------
 const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
   <div
     className={`text-center p-4 ${bg} rounded-xl hover:scale-105 transition-transform duration-300 border border-orange-100/50 yellow:border-orange-800/50`}
@@ -131,6 +136,7 @@ const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
   </div>
 );
 
+// ✅ ----------------- Main Profile Page Component -----------------
 const ProfilePage = () => {
   const [profile, setProfile] = useState({
     name: "",
@@ -147,10 +153,10 @@ const ProfilePage = () => {
     responseRate: 0,
     videoIntro: null,
     summary: "",
-    currentSalary: "", // Mapped to previousSalary
-    expectedSalary: "", // Mapped to salaryExpectation
+    currentSalary: "",
+    expectedSalary: "",
     preferredLocation: "",
-    Skills: "", // Mapped to Skills (string)
+    Skills: "",
     projects: "",
     qualification: "",
     certificationlink: "",
@@ -193,9 +199,13 @@ const ProfilePage = () => {
   });
 
   const [SkillAssessments, setSkillAssessments] = useState([]);
+  const [editingField, setEditingField] = useState("");
+  const [tempValue, setTempValue] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   // ----------------- SKILLS HELPERS & HANDLERS ----------------- //
-
   function parseSkillsStringToAssessments(SkillString) {
     if (!SkillString) return [];
     return SkillString.split(",").map((s) => ({
@@ -311,42 +321,7 @@ const ProfilePage = () => {
     syncProfileSkillsFromAssessments(SkillAssessments);
   }, [SkillAssessments]);
 
-  // ----------------- END SKILLS HELPERS & HANDLERS ----------------- //
-
-  const [achievements, setAchievements] = useState([
-    {
-      title: "Profile Completionist",
-      icon: CheckCircle,
-      earned: true,
-      description: "Completed 100% of profile",
-    },
-    {
-      title: "Skill Master",
-      icon: Trophy,
-      earned: true,
-      description: "Verified 5+ Skills",
-    },
-    {
-      title: "Interview Pro",
-      icon: Star,
-      earned: false,
-      description: "Complete 10 interviews",
-    },
-    {
-      title: "Network Builder",
-      icon: Users,
-      earned: false,
-      description: "Connect with 50+ professionals",
-    },
-  ]);
-
-  const [editingField, setEditingField] = useState("");
-  const [tempValue, setTempValue] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-
+  // ✅ ----------------- API and Data Handling ----------------- //
   const uiToBackendMap = {
     name: "username",
     email: "useremail",
@@ -408,7 +383,6 @@ const ProfilePage = () => {
         );
 
         const data = await response.json();
-        console.log("Fetched profile:", data);
 
         if (!response.ok) {
           throw new Error(data.message || "Failed to fetch profile");
@@ -445,7 +419,6 @@ const ProfilePage = () => {
           recruterIndustry: u.recruterIndustry || "",
         }));
 
-        // ✅ FIX: Initialize SkillAssessments from the fetched data
         setSkillAssessments(parseSkillsStringToAssessments(u.Skill));
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -464,7 +437,6 @@ const ProfilePage = () => {
     const updatedBackendPayload = buildBackendPayload(profile);
     const fieldToUpdate = uiToBackendMap[editingField];
 
-    // ✅ FIX: Correctly map the editing field to the backend key
     if (fieldToUpdate) {
       updatedBackendPayload[fieldToUpdate] = tempValue;
     } else {
@@ -588,7 +560,6 @@ const ProfilePage = () => {
           recruterIndustry: u.recruterIndustry || "",
         }));
 
-        // ✅ FIX: Re-sync skills from the backend response
         setSkillAssessments(parseSkillsStringToAssessments(u.Skill));
       }
 
@@ -748,6 +719,7 @@ const ProfilePage = () => {
     }
   };
 
+  // ✅ ----------------- Data for UI rendering -----------------
   const contactInfo = [
     {
       key: "location",
@@ -814,17 +786,16 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 yellow:from-orange-950/20 yellow:via-yellow-950/20 yellow:to-amber-950/20">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
         <Card className="overflow-hidden bg-gradient-to-br from-white via-orange-50 to-yellow-50 yellow:from-gray-900 yellow:via-orange-950/30 yellow:to-yellow-950/30 border-2 border-orange-200/50 yellow:border-orange-800/50 shadow-2xl mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5"></div>
-          <CardContent className="relative p-8">
-            <div className="w-full max-w-5xl mx-auto space-y-8"></div>
+          <CardContent className="relative p-6 sm:p-8">
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
-              {/* Avatar Section */}
-              <div className="relative group">
-                <div className="relative">
-                  <Avatar className="w-36 h-36 border-4 border-gradient-to-br from-orange-400 to-yellow-400 shadow-2xl ring-4 ring-orange-200/50 yellow:ring-orange-800/50">
+              {/* Avatar and Video Intro Section */}
+              <div className="relative group text-center md:text-left mb-6 md:mb-0">
+                <div className="relative inline-block">
+                  <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-4 border-gradient-to-br from-orange-400 to-yellow-400 shadow-2xl ring-4 ring-orange-200/50 yellow:ring-orange-800/50">
                     <AvatarImage
                       src={profile.image || "/placeholder.svg"}
                       alt={profile.name}
@@ -837,7 +808,7 @@ const ProfilePage = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <Camera className="w-10 h-10 text-white" />
+                    <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
                   <input
                     type="file"
@@ -850,13 +821,12 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Video Intro Section */}
-                <div className="mt-4 text-center">
+                <div className="mt-4">
                   {profile.videoIntro ? (
                     <div className="relative">
                       <video
                         src={profile.videoIntro}
-                        className="w-36 h-24 rounded-xl object-cover border-2 border-orange-300/50 shadow-lg"
+                        className="w-full max-w-xs mx-auto h-24 rounded-xl object-cover border-2 border-orange-300/50 shadow-lg"
                         controls
                       />
                       <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
@@ -865,8 +835,8 @@ const ProfilePage = () => {
                       </Badge>
                     </div>
                   ) : (
-                    <div className="relative group">
-                      <div className="w-36 h-24 bg-gradient-to-br from-orange-100 to-yellow-100 yellow:from-orange-900/30 yellow:to-yellow-900/30 rounded-xl border-2 border-dashed border-orange-300/50 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-yellow-200 yellow:hover:from-orange-800/50 yellow:hover:to-yellow-800/50 transition-all duration-300 group-hover:scale-105">
+                    <div className="relative group w-full max-w-xs mx-auto">
+                      <div className="w-full h-24 bg-gradient-to-br from-orange-100 to-yellow-100 yellow:from-orange-900/30 yellow:to-yellow-900/30 rounded-xl border-2 border-dashed border-orange-300/50 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-yellow-200 yellow:hover:from-orange-800/50 yellow:hover:to-yellow-800/50 transition-all duration-300 group-hover:scale-105">
                         <div className="text-center">
                           <Video className="w-8 h-8 text-orange-500 mx-auto mb-2" />
                           <p className="text-xs text-orange-600 yellow:text-orange-400 font-medium">
@@ -891,7 +861,7 @@ const ProfilePage = () => {
               {/* Profile Info Section */}
               <div className="flex-1 space-y-6">
                 <div>
-                  <h1 className="text-4xl font-bold cursor-pointer hover:text-orange-600 transition-colors flex items-center group">
+                  <h1 className="text-3xl sm:text-4xl font-bold flex items-center group">
                     <EditableField
                       field="name"
                       value={profile.name}
@@ -901,14 +871,14 @@ const ProfilePage = () => {
                       onSave={handleSave}
                       onCancel={handleCancel}
                       onTempChange={setTempValue}
-                      className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 yellow:from-white yellow:to-gray-200 bg-clip-text text-transparent"
+                      className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 yellow:from-white yellow:to-gray-200 bg-clip-text text-transparent"
                     />
                     {editingField !== "name" && (
-                      <Edit3 className="w-6 h-6 ml-3 opacity-0 group-hover:opacity-100 transition-opacity text-orange-500" />
+                      <Edit3 className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-orange-500" />
                     )}
                   </h1>
 
-                  <p className="text-xl text-gray-600 yellow:text-gray-300 cursor-pointer hover:text-orange-600 transition-colors mt-2">
+                  <p className="text-base sm:text-xl text-gray-600 yellow:text-gray-300 mt-1 sm:mt-2">
                     <EditableField
                       field="headline"
                       value={profile.headline}
@@ -918,16 +888,16 @@ const ProfilePage = () => {
                       onSave={handleSave}
                       onCancel={handleCancel}
                       onTempChange={setTempValue}
-                      className="text-xl text-gray-600 yellow:text-gray-300"
+                      className="text-base sm:text-xl text-gray-600 yellow:text-gray-300"
                     />
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {contactInfo.map(({ key, icon: Icon, value, color }) => (
                     <div
                       key={key}
-                      className="flex items-center space-x-3 p-4 rounded-xl bg-white/60 yellow:bg-gray-800/60 hover:bg-orange-50 yellow:hover:bg-orange-900/20 transition-all duration-300 group border border-orange-100/50 yellow:border-orange-800/50 hover:border-orange-300/50 hover:shadow-lg"
+                      className="flex items-center space-x-3 p-3 rounded-xl bg-white/60 yellow:bg-gray-800/60 hover:bg-orange-50 yellow:hover:bg-orange-900/20 transition-all duration-300 group border border-orange-100/50 yellow:border-orange-800/50 hover:border-orange-300/50 hover:shadow-lg"
                     >
                       <Icon className={`w-5 h-5 ${color}`} />
                       <EditableField
@@ -939,19 +909,19 @@ const ProfilePage = () => {
                         onSave={handleSave}
                         onCancel={handleCancel}
                         onTempChange={setTempValue}
-                        className="flex-1 group-hover:text-orange-600 transition-colors font-medium"
+                        className="flex-1 group-hover:text-orange-600 transition-colors text-sm sm:text-base font-medium"
                       />
                     </div>
                   ))}
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-4 mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
                   <div className="text-center p-6 bg-gradient-to-br from-orange-100 to-orange-200 yellow:from-orange-900/30 yellow:to-orange-800/30 rounded-xl border border-orange-200/50 yellow:border-orange-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-3xl font-bold text-orange-600 yellow:text-orange-400">
+                    <div className="text-2xl sm:text-3xl font-bold text-orange-600 yellow:text-orange-400">
                       {profile.profileStrength}%
                     </div>
-                    <div className="text-sm text-orange-700 yellow:text-orange-300 font-medium">
+                    <div className="text-xs sm:text-sm text-orange-700 yellow:text-orange-300 font-medium">
                       Profile Strength
                     </div>
                     <Progress
@@ -966,10 +936,10 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   <div className="text-center p-6 bg-gradient-to-br from-yellow-100 to-yellow-200 yellow:from-yellow-900/30 yellow:to-yellow-800/30 rounded-xl border border-yellow-200/50 yellow:border-yellow-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-3xl font-bold text-yellow-600 yellow:text-yellow-400">
+                    <div className="text-2xl sm:text-3xl font-bold text-yellow-600 yellow:text-yellow-400">
                       {profile.responseRate}%
                     </div>
-                    <div className="text-sm text-yellow-700 yellow:text-yellow-300 font-medium">
+                    <div className="text-xs sm:text-sm text-yellow-700 yellow:text-yellow-300 font-medium">
                       Response Rate
                     </div>
                     <div className="flex items-center justify-center mt-2">
@@ -980,10 +950,10 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   <div className="text-center p-6 bg-gradient-to-br from-amber-100 to-amber-200 yellow:from-amber-900/30 yellow:to-amber-800/30 rounded-xl border border-amber-200/50 yellow:border-amber-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-3xl font-bold text-amber-600 yellow:text-amber-400">
+                    <div className="text-2xl sm:text-3xl font-bold text-amber-600 yellow:text-amber-400">
                       {jobStats.searchAppearances}
                     </div>
-                    <div className="text-sm text-amber-700 yellow:text-amber-300 font-medium">
+                    <div className="text-xs sm:text-sm text-amber-700 yellow:text-amber-300 font-medium">
                       Search Appearances
                     </div>
                     <div className="flex items-center justify-center mt-2">
@@ -1005,7 +975,7 @@ const ProfilePage = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4 h-16 bg-white/80 yellow:bg-gray-900/80 backdrop-blur-sm border border-orange-200/50 yellow:border-orange-800/50 rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-14 sm:h-16 bg-white/80 yellow:bg-gray-900/80 backdrop-blur-sm border border-orange-200/50 yellow:border-orange-800/50 rounded-xl">
             {[
               {
                 value: "overview",
@@ -1031,9 +1001,9 @@ const ProfilePage = () => {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white"
+                className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white"
               >
-                <Icon className="w-5 h-5 mr-2" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
                 {label}
               </TabsTrigger>
             ))}
@@ -1045,8 +1015,8 @@ const ProfilePage = () => {
               <div className="lg:col-span-2">
                 <Card className="border-orange-200/50 yellow:border-orange-800/50 h-full">
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <BarChart3 className="w-5 h-5 mr-2 text-orange-500" />
+                    <CardTitle className="flex items-center text-lg sm:text-2xl">
+                      <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-orange-500" />
                       Job Activity Dashboard
                     </CardTitle>
                     <CardDescription>
@@ -1143,21 +1113,19 @@ const ProfilePage = () => {
                           </Badge>
                         )}
 
-                        {/* Edit button */}
                         <button
                           type="button"
                           onClick={() => handleEditSkill(index)}
-                          className="px-2 py-1 rounded-md hover:bg-orange-50"
+                          className="p-1 rounded-md hover:bg-orange-50"
                           title="Edit Skill"
                         >
                           <Edit3 className="w-4 h-4 text-orange-600" />
                         </button>
 
-                        {/* Delete button */}
                         <button
                           type="button"
                           onClick={() => handleRemoveSkill(index)}
-                          className="px-2 py-1 rounded-md hover:bg-red-50"
+                          className="p-1 rounded-md hover:bg-red-50"
                           title="Remove Skill"
                         >
                           <X className="w-4 h-4 text-red-500" />
@@ -1174,7 +1142,7 @@ const ProfilePage = () => {
                       value={Skill.level}
                       className="h-3 bg-orange-100 yellow:bg-orange-900"
                     />
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center space-x-1 text-sm text-gray-500 yellow:text-gray-400">
                         <Users className="w-4 h-4" />
                         <span>{Skill.endorsements} endorsements</span>
@@ -1279,7 +1247,7 @@ const ProfilePage = () => {
                     />
                   ) : profile[field.key] ? (
                     <div className="space-y-4">
-                      <p className="whitespace-pre-line">
+                      <p className="whitespace-pre-line text-sm sm:text-base">
                         {profile[field.key]}
                       </p>
                       <Button
@@ -1294,8 +1262,8 @@ const ProfilePage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <field.icon className="w-16 h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
+                    <div className="text-center py-8 sm:py-12">
+                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">
                         Add Your {field.title}
                       </h3>
@@ -1329,7 +1297,7 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* ✅ Resume Upload */}
+                  {/* Resume Upload */}
                   <div
                     className="text-center p-8 border-2 border-dashed border-orange-300/50 rounded-lg hover:border-orange-500 transition-colors cursor-pointer yellow:border-orange-700/50 yellow:hover:border-orange-400"
                     onClick={() =>
@@ -1354,7 +1322,7 @@ const ProfilePage = () => {
                     />
                   </div>
 
-                  {/* ✅ Portfolio Links */}
+                  {/* Portfolio Links */}
                   <div className="text-center p-8 border-2 border-dashed border-yellow-300/50 rounded-lg hover:border-yellow-500 transition-colors cursor-pointer yellow:border-yellow-700/50 yellow:hover:border-yellow-400">
                     <Lightbulb className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
                     <h3 className="font-semibold mb-2">Portfolio Links</h3>
@@ -1374,7 +1342,7 @@ const ProfilePage = () => {
               </CardContent>
             </Card>
 
-            {/* ✅ Other Sections */}
+            {/* Other Sections */}
             {[
               {
                 key: "projects",
@@ -1422,7 +1390,7 @@ const ProfilePage = () => {
                   ) : profile[field.key] ? (
                     <div className="space-y-4">
                       <div className="prose max-w-none">
-                        <p className="whitespace-pre-line">
+                        <p className="whitespace-pre-line text-sm sm:text-base">
                           {profile[field.key]}
                         </p>
                       </div>
@@ -1438,8 +1406,8 @@ const ProfilePage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <field.icon className="w-16 h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
+                    <div className="text-center py-8 sm:py-12">
+                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">
                         Add Your {field.title}
                       </h3>
@@ -1466,7 +1434,7 @@ const ProfilePage = () => {
         </Tabs>
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-4 mt-12">
+        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-12">
           <Button
             size="lg"
             onClick={handleSaveAll}
