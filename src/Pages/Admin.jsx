@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Admin/Sidebar/Sidebar";
 import Navbar from "../Components/Home/Navbar/Navbar";
@@ -22,10 +24,12 @@ const Admin = () => {
 
   const [selectedJob, setSelectedJob] = useState(null);
 
-  // Collapse sidebar automatically only when Database tab is active
+  // Auto collapse sidebar when Database tab is active
   useEffect(() => {
     if (activeTab === "Database") {
       setCollapsed(true);
+    } else {
+      setCollapsed(false);
     }
   }, [activeTab]);
 
@@ -35,7 +39,10 @@ const Admin = () => {
         return <StatCards setActiveTab={setActiveTab} />;
       case "Job":
         return (
-          <JobTabs setActiveTab={setActiveTab} setSelectedJob={setSelectedJob} />
+          <JobTabs
+            setActiveTab={setActiveTab}
+            setSelectedJob={setSelectedJob}
+          />
         );
       case "Database":
         return <DatabaseView selectedJob={selectedJob} />;
@@ -63,11 +70,11 @@ const Admin = () => {
       <Navbar />
 
       <div className="flex flex-1 bg-[#fefcf9]">
-        {/* Sidebar */}
+        {/* Sidebar fixed left */}
         <div
-          className={`fixed top-[64px] left-0 h-[calc(100vh-64px)] z-20 
-          ${collapsed ? "w-20" : "w-64"} 
-          transition-all duration-300 bg-white shadow-md`}
+          className={`fixed top-[64px] left-0 h-[calc(100vh-64px)] ${
+            collapsed ? "w-20" : "w-64"
+          } transition-all duration-300`}
         >
           <Sidebar
             setActiveTab={setActiveTab}
@@ -83,9 +90,9 @@ const Admin = () => {
 
         {/* Main Content */}
         <main
-          className={`flex-1 transition-all duration-300 p-6 overflow-y-auto 
-          ${collapsed ? "ml-20" : "ml-64"} 
-          md:ml-${collapsed ? "20" : "64"} sm:ml-20`}
+          className={`flex-1 transition-all duration-300 p-6 overflow-y-auto ${
+            collapsed ? "ml-20" : "ml-64"
+          } ${activeTab === "Database" ? "w-full ml-20 md:ml-20" : ""}`}
         >
           {renderTabContent()}
         </main>
