@@ -7,7 +7,7 @@ import {
   saveCandidate,
 } from "../../../services/apis";
 import { Listbox } from "@headlessui/react";
-import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
@@ -55,8 +55,8 @@ const DatabaseView = ({ selectedJob }) => {
           expectedSalary: user.expectedSalary || "N/A",
           lastActive: user.lastActive || "Recently",
           experience: user.experience || null,
-          assets: user.assets || [],
           distance: user.distance || null,
+          phonenumber: user.phonenumber || "Not Provided",
         }));
 
         setAppliedCandidates(mapped);
@@ -200,7 +200,7 @@ const DatabaseView = ({ selectedJob }) => {
               <Listbox.Button className="w-full border rounded-full py-2 px-3 text-left bg-gray-50">
                 <span>{filters.location || "Select Location"}</span>
                 <span className="absolute right-2 inset-y-0 flex items-center pointer-events-none">
-                  <SelectorIcon className="w-5 h-5 text-gray-400" />
+                  <ChevronUpDownIcon className="w-5 h-5 text-gray-400" /> {/* ✅ FIXED */}
                 </span>
               </Listbox.Button>
               <Listbox.Options className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">
@@ -238,7 +238,7 @@ const DatabaseView = ({ selectedJob }) => {
               <Listbox.Button className="w-full border rounded-full py-2 px-3 text-left bg-gray-50">
                 <span>{filters.qualification || "Select Qualification"}</span>
                 <span className="absolute right-2 inset-y-0 flex items-center pointer-events-none">
-                  <SelectorIcon className="w-5 h-5 text-gray-400" />
+                  <ChevronUpDownIcon className="w-5 h-5 text-gray-400" /> {/* ✅ FIXED */}
                 </span>
               </Listbox.Button>
               <Listbox.Options className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">

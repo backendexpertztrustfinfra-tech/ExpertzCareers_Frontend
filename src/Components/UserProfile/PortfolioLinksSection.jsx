@@ -50,7 +50,7 @@ const PortfolioLinksSection = ({ profile, setProfile, uiToBackendMap, setShowMod
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedBackendPayloadForPortfolio), // Send updated links
+          body: JSON.stringify(updatedBackendPayloadForPortfolio), 
         }
       );
 
@@ -100,7 +100,7 @@ const PortfolioLinksSection = ({ profile, setProfile, uiToBackendMap, setShowMod
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedBackendPayloadForPortfolioEdit), // Send updated links
+          body: JSON.stringify(updatedBackendPayloadForPortfolioEdit), 
         }
       );
 
