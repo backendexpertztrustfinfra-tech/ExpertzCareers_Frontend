@@ -17,46 +17,56 @@ import { getRecruiterProfile } from "../../../services/apis";
 
 const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
   const token = Cookies.get("userToken");
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
 
-  // ✅ Detect screen size for mobile
+  // ✅ Detect screen size (auto collapse on mobile)
   useEffect(() => {
-    const handleResize = () => setCollapsed(window.innerWidth < 768);
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCollapsed(true);
+      }
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [setCollapsed]);
 
-  // ✅ Fetch user profile
+  // ✅ Fetch user profile (non-blocking)
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
-        const profile = await getRecruiterProfile(token);
-        setUserProfile(profile);
+        try {
+          const profile = await getRecruiterProfile(token);
+          setUserProfile(profile);
+        } catch (err) {
+          console.error("Profile fetch error:", err);
+        }
       }
-      setLoading(false);
     };
     loadUser();
   }, [token]);
 
-  // ✅ Collapse when clicking outside (mobile)
+  // ✅ Close when clicking outside (only on mobile / collapsed = false)
   useEffect(() => {
-    const handleOutside = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+    const handleClickOutside = (e) => {
+      if (
+        window.innerWidth < 768 &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(e.target)
+      ) {
         setCollapsed(true);
       }
     };
     if (!collapsed) {
-      document.addEventListener("mousedown", handleOutside);
-      document.addEventListener("touchstart", handleOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
     return () => {
-      document.removeEventListener("mousedown", handleOutside);
-      document.removeEventListener("touchstart", handleOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [collapsed, setCollapsed]);
 
@@ -70,9 +80,6 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     }
   };
 
-  if (loading) return <Loader text="Loading..." />;
-  if (!userProfile) return <Loader text="No user data" error />;
-
   const tabs = [
     { icon: <FaHome />, label: "Home" },
     { icon: <FaBriefcase />, label: "Job" },
@@ -83,58 +90,69 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   ];
 
   return (
-    <div
-      ref={sidebarRef}
-      className={`fixed top-[15vh] left-0 mt-4 h-[calc(100vh-100px)] bg-white shadow-lg z-50 
-        transition-all duration-300 overflow-hidden
-        ${collapsed ? "w-20" : "w-64"}`}
-    >
-      {/* Profile */}
-      <div className="flex items-center gap-3 p-5 bg-gradient-to-r from-yellow-100 to-white shadow-md">
-        <img
-          src={userProfile?.user?.recruterLogo || "/default-logo.png"}
-          alt="Logo"
-          className="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover"
-        />
-        {!collapsed && (
-          <div>
-            <h2 className="font-bold text-gray-800">
-              {userProfile?.user?.username || "Recruiter"}
-            </h2>
-            <p className="text-xs text-gray-600">
-              {userProfile?.user?.useremail || "No Email"}
-            </p>
-            <p className="text-xs text-gray-500">
-              {userProfile?.user?.recruterPhone || "No Phone"}
-            </p>
-          </div>
-        )}
-      </div>
+    <>
+      {/* Mobile Overlay (when sidebar open) */}
+      {!collapsed && window.innerWidth < 768 && (
+        <div className="fixed inset-0 bg-black/40 z-30"></div>
+      )}
 
-      {/* Navigation */}
-      <nav className="mt-4 space-y-2 px-2">
-        {tabs.map((tab) => (
-          <SidebarTab
-            key={tab.label}
-            {...tab}
-            activeTab={activeTab}
-            onClick={() => setActiveTab(tab.label)}
-            collapsed={collapsed}
+      <div
+        ref={sidebarRef}
+        className={`fixed top-[64px] left-0 h-[calc(100vh-64px)] bg-white shadow-lg z-40
+          flex flex-col justify-between
+          transition-all duration-300 ease-in-out
+          ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
+        `}
+      >
+        {/* Profile */}
+        <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+          <img
+            src={userProfile?.user?.recruterLogo || "/default-logo.png"}
+            alt="Logo"
+            className="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover"
           />
-        ))}
-      </nav>
+          {!collapsed && (
+            <div className="truncate">
+              <h2 className="font-bold text-gray-800 truncate">
+                {userProfile?.user?.username || "Recruiter"}
+              </h2>
+              <p className="text-xs text-gray-600 truncate">
+                {userProfile?.user?.useremail || "No Email"}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {userProfile?.user?.recruterPhone || "No Phone"}
+              </p>
+            </div>
+          )}
+        </div>
 
-      {/* Logout */}
-      <div className="absolute bottom-0 w-full p-4">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold shadow hover:scale-105 transition-all duration-200"
-        >
-          <FaSignOutAlt />
-          {!collapsed && <span>Logout</span>}
-        </button>
+        {/* Navigation */}
+        <nav className="flex-1 mt-4 space-y-2 px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
+          {tabs.map((tab) => (
+            <SidebarTab
+              key={tab.label}
+              {...tab}
+              activeTab={activeTab}
+              onClick={() => setActiveTab(tab.label)}
+              collapsed={collapsed}
+            />
+          ))}
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg 
+              bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold 
+              shadow hover:scale-105 transition-all duration-200"
+          >
+            <FaSignOutAlt className="text-lg" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -152,12 +170,6 @@ const SidebarTab = ({ icon, label, activeTab, onClick, collapsed }) => (
     <span className="text-lg">{icon}</span>
     {!collapsed && <span>{label}</span>}
   </button>
-);
-
-const Loader = ({ text, error }) => (
-  <div className="fixed top-0 left-0 h-full w-20 bg-white flex items-center justify-center shadow-lg z-50">
-    <p className={error ? "text-red-500" : "text-gray-500"}>{text}</p>
-  </div>
 );
 
 export default Sidebar;

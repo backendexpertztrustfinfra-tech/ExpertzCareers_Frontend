@@ -13,7 +13,6 @@ const RecSign = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
     recruterPhone: "",
     recruterCompany: "",
     recruterCompanyAddress: "",
@@ -116,15 +115,7 @@ const handleSubmit = async (e) => {
             className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
             required
           />
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
-            required
-          />
+         
           <input
             type="tel"
             name="recruterPhone"

@@ -49,14 +49,25 @@ const JobListCard = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900">Job Listings</h3>
+    <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-lg border border-gray-200 w-full relative">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+        <div>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Job Listings
+          </h3>
+          {!loading && (
+            <p className="text-sm text-gray-500">
+              Total Jobs: {jobs.length}
+            </p>
+          )}
+        </div>
         <button
           onClick={() => setActiveTab("Job")}
-          className="px-6 py-2 text-sm rounded-lg font-semibold 
-          bg-gradient-to-r from-yellow-300 via-amber-500 to-orange-500 text-white 
-          hover:from-yellow-500 hover:to-yellow-700 shadow-md transition transform hover:scale-105"
+          className="px-6 py-2 text-sm sm:text-base rounded-lg font-semibold 
+            bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white 
+            hover:from-yellow-500 hover:via-amber-600 hover:to-orange-600 
+            shadow-md transition-transform hover:scale-105"
         >
           View All
         </button>
@@ -64,11 +75,27 @@ const JobListCard = ({ setActiveTab }) => {
 
       {/* Job Cards */}
       {loading ? (
-        <p className="text-center text-gray-400">Loading jobs...</p>
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="animate-pulse bg-gray-100 h-24 rounded-xl"
+            ></div>
+          ))}
+        </div>
       ) : jobs.length === 0 ? (
-        <p className="text-center text-gray-400">No jobs found</p>
+        <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+          <span className="text-5xl mb-3">📭</span>
+          <p className="mb-3">No jobs found</p>
+          <button
+            onClick={() => setActiveTab("Job")}
+            className="px-5 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white font-medium shadow"
+          >
+            ➕ Post a Job
+          </button>
+        </div>
       ) : (
-        <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[22rem] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-100">
           {jobs.map((job) => (
             <DashboardJobCard
               key={job._id}
@@ -79,6 +106,11 @@ const JobListCard = ({ setActiveTab }) => {
             />
           ))}
         </div>
+      )}
+
+      {/* Scroll Fade Effect */}
+      {!loading && jobs.length > 4 && (
+        <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-b-2xl"></div>
       )}
     </div>
   );

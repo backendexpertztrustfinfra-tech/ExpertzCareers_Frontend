@@ -9,32 +9,35 @@ const VerificationBox = () => {
   };
 
   return (
-    <div className="bg-white border rounded-xl p-6 shadow space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Verification Status</h3>
+    <div className="bg-white border rounded-xl p-4 sm:p-6 shadow-md space-y-4 w-full max-w-md mx-auto">
+      {/* Header */}
+      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+        Verification Status
+      </h3>
 
-      <Item
-        icon={<FaFileAlt />}
-        label="Document Submission"
-        status="Completed"
-      />
-      <Item
-        icon={<FaEnvelope />}
-        label="Email Verification"
-        status={verified ? "Verified" : "Pending"}
-      />
-      <Item
-        icon={<FaCheckCircle />}
-        label="General Verification"
-        status={verified ? "Verified" : "Pending"}
-      />
+      {/* Items */}
+      <div className="space-y-3">
+        <Item icon={<FaFileAlt />} label="Document Submission" status="Completed" />
+        <Item
+          icon={<FaEnvelope />}
+          label="Email Verification"
+          status={verified ? "Verified" : "Pending"}
+        />
+        <Item
+          icon={<FaCheckCircle />}
+          label="General Verification"
+          status={verified ? "Verified" : "Pending"}
+        />
+      </div>
 
+      {/* Button */}
       <button
         onClick={handleVerify}
         disabled={verified}
-        className={`mt-4 w-full py-2 rounded-lg text-white font-semibold transition ${
+        className={`w-full py-2.5 rounded-lg text-sm sm:text-base font-semibold transition ${
           verified
-            ? "bg-green-600 cursor-not-allowed"
-            : "bg-yellow-500 hover:bg-yellow-600"
+            ? "bg-green-600 text-white cursor-not-allowed"
+            : "bg-yellow-500 text-white hover:bg-yellow-600"
         }`}
       >
         {verified ? "Verified" : "Verify Now"}
@@ -50,12 +53,14 @@ const Item = ({ icon, label, status }) => {
       : "text-yellow-500";
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1 sm:gap-2">
       <div className="flex items-center gap-2 text-gray-700">
-        <div className="text-yellow-500 text-md">{icon}</div>
-        <span className="text-sm font-medium">{label}</span>
+        <div className="text-yellow-500 text-base sm:text-lg">{icon}</div>
+        <span className="text-sm sm:text-base font-medium">{label}</span>
       </div>
-      <span className={`text-sm font-semibold ${statusColor}`}>{status}</span>
+      <span className={`text-xs sm:text-sm font-semibold ${statusColor}`}>
+        {status}
+      </span>
     </div>
   );
 };

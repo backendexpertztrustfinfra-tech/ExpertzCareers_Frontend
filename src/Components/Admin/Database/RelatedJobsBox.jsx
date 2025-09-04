@@ -72,48 +72,66 @@ const RelatedJobsBox = ({ jobId }) => {
   }, [jobId, token]);
 
   const tabs = [
-    { key: "all", label: "All Candidates" },
-    { key: "saved", label: "Saved Candidates" },
-    { key: "selected", label: "Selected Candidates" },
+    { key: "all", label: "All" },
+    { key: "saved", label: "Saved" },
+    { key: "selected", label: "Selected" },
   ];
 
   return (
-    <div className="bg-white rounded-[20px] shadow-md border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Candidates</h2>
+    <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-5 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+        Candidates
+      </h2>
 
-      {/* Tab Buttons */}
-      <div className="space-y-3 mb-4">
-        {tabs.map((tab) => (
-          <div
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`p-3 rounded-lg cursor-pointer transition text-sm font-medium ${
-              activeTab === tab.key
-                ? "bg-yellow-100 text-yellow-800 font-semibold"
-                : "bg-[#f9f9f9] text-gray-700 hover:bg-yellow-50"
-            }`}
-          >
-            {tab.label}
-          </div>
-        ))}
+      {/* Tab Buttons with Counts */}
+      <div className="flex sm:gap-3 gap-2 mb-5 overflow-x-auto no-scrollbar">
+        {tabs.map((tab) => {
+          const count = candidates[tab.key]?.length || 0;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 sm:flex-none px-4 py-2 rounded-full text-sm sm:text-base font-medium whitespace-nowrap transition-all flex items-center justify-center gap-2 ${
+                activeTab === tab.key
+                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-yellow-50"
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`px-2 py-0.5 text-xs rounded-full ${
+                  activeTab === tab.key
+                    ? "bg-white text-yellow-700"
+                    : "bg-yellow-200 text-yellow-800"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Candidate Cards */}
       {loading ? (
-        <p className="text-center text-gray-500">Loading candidates...</p>
+        <p className="text-center text-gray-500 py-6">Loading candidates...</p>
       ) : candidates[activeTab].length === 0 ? (
-        <p className="text-center text-gray-400">No candidates found.</p>
+        <p className="text-center text-gray-400 py-6">No candidates found.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {candidates[activeTab].map((candidate) => (
             <div
               key={candidate._id}
-              className="flex items-center gap-3 p-4 rounded-xl bg-[#fdf8e8] hover:bg-yellow-50 border border-yellow-200 transition shadow-sm"
+              className="flex items-center gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-200 hover:shadow-md transition"
             >
-              <FaUserCircle className="text-yellow-600 text-3xl" />
+              <FaUserCircle className="text-yellow-600 text-3xl flex-shrink-0" />
               <div>
-                <p className="font-semibold text-gray-800">{candidate.name}</p>
-                <p className="text-sm text-gray-600">{candidate.role}</p>
+                <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                  {candidate.name}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {candidate.role}
+                </p>
               </div>
             </div>
           ))}

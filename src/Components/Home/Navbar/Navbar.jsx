@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import LOGO from "../../../assets/Image/logo_2.png";
 import { signOut as firebaseSignOut } from "firebase/auth";
@@ -15,10 +15,23 @@ import {
 } from "lucide-react";
 import { AuthContext } from "../../../context/AuthContext";
 
-const Navbar = () => {
+// ✅ Hook to detect mobile
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile;
+};
+
+const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -94,6 +107,7 @@ const Navbar = () => {
   return (
     <nav className="backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-md sticky top-0 z-[9999]">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3">
+        {/* Logo */}
         <div className="flex items-center gap-2">
           <img
             src={LOGO || "/placeholder.svg"}
@@ -103,8 +117,8 @@ const Navbar = () => {
           />
         </div>
 
-        {/* Desktop Nav */}
-        {!isAdminRoute && (
+        {/* ✅ Desktop Jobseeker Mega Menu */}
+        {!isAdminRoute && !isMobile && (
           <div className="hidden lg:flex flex-1 items-center justify-center gap-8">
             {navItems.map((item, idx) => (
               <div
@@ -150,7 +164,7 @@ const Navbar = () => {
                                     `/services?name=${encodeURIComponent(sub)}`
                                   );
                                 }
-                                setMenuOpen(null); // close mega menu
+                                setMenuOpen(null);
                               }}
                             >
                               {sub}
@@ -241,18 +255,24 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Hamburger */}
+          {/* ✅ Hamburger Button */}
           <button
             className="lg:hidden text-gray-700"
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => {
+              if (isAdminRoute) {
+                onToggleSidebar?.(); // recruiter → open sidebar drawer
+              } else {
+                setMobileOpen(!mobileOpen); // jobseeker → open mobile menu
+              }
+            }}
           >
             {mobileOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {!isAdminRoute && mobileOpen && (
+      {/* ✅ Mobile Jobseeker Menu */}
+      {!isAdminRoute && isMobile && mobileOpen && (
         <div className="lg:hidden bg-white border-t border-gray-200 shadow-md">
           <div className="flex flex-col px-6 py-4 gap-4">
             {navItems.map((item, idx) => {
@@ -320,7 +340,7 @@ const Navbar = () => {
                                       )}`
                                     );
                                   }
-                                  setMobileOpen(false); // close mobile menu
+                                  setMobileOpen(false);
                                 }}
                               >
                                 {sub}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import DashboardJobCard from "./dashboardJobCard";
 import PostJobForm from "./PostJobForm";
 import Cookies from "js-cookie";
@@ -7,7 +8,7 @@ import {
   deleteJob,
   getLiveJobs,
   getPendingJobs,
-  getClosedJobs, // ⬅️ import new API function
+  getClosedJobs,
 } from "../../../services/apis";
 
 const statusTabs = ["All", "Live Jobs", "Pending Jobs", "Closed Jobs"];
@@ -32,14 +33,13 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
         data = await getPendingJobs(token);
         list = data.jobs || [];
       } else if (status === "Closed Jobs") {
-        data = await getClosedJobs(token); // ⬅️ call closed jobs API
+        data = await getClosedJobs(token);
         list = data.jobs || [];
       } else {
         data = await getCreatedJobs(token);
         list = Array.isArray(data) ? data : data.jobs || [];
       }
 
-      // 🔑 Normalize for unique stable keys
       const normalized = list.map((j, index) => ({
         ...j,
         id: j._id ?? j.id ?? `job-${index}`,
@@ -97,75 +97,126 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 items-center">
-        {statusTabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setActiveStatus(tab);
-              fetchJobsFromAPI(tab);
-            }}
-            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all border
-              ${
-                activeStatus === tab
-                  ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-          >
-            {tab}
-          </button>
-        ))}
+    <div className="space-y-6 pb-20">
+      {/* Tabs + Post Job Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Tabs */}
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+          {statusTabs.map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => {
+                setActiveStatus(tab);
+                fetchJobsFromAPI(tab);
+              }}
+              whileTap={{ scale: 0.9 }}
+              animate={{
+                scale: activeStatus === tab ? 1.05 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${
+                  activeStatus === tab
+                    ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              {tab}
+            </motion.button>
+          ))}
+        </div>
 
-        <div className="ml-auto">
-          <button
+        {/* Post Job Button (Desktop) */}
+        <div className="hidden sm:block ml-auto">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => {
               setSelectedJobEdit(null);
               setShowForm(true);
             }}
             className="bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 
-            text-white px-6 py-2 rounded-lg font-semibold shadow-md transition transform hover:scale-105"
+              text-white px-6 py-2 rounded-lg font-semibold shadow-md"
           >
             + Post New Job
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {jobs.length > 0 ? (
-          jobs.map((job) => (
-            <DashboardJobCard
-              key={job.id}
-              job={job}
-              onDelete={handleDelete}
-              onEditClick={handleEditClick}
-              onJobClick={() => handleJobClick(job)}
-            />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 py-10 bg-white rounded-xl shadow border border-gray-200">
-            No jobs found
-          </p>
-        )}
+      {/* Post Job Button (Mobile Floating Button) */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          setSelectedJobEdit(null);
+          setShowForm(true);
+        }}
+        className="sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg 
+          bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 
+          text-white w-16 h-16 flex items-center justify-center text-3xl"
+      >
+        +
+      </motion.button>
+
+      {/* Job Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <AnimatePresence>
+          {jobs.length > 0 ? (
+            jobs.map((job, index) => (
+              <motion.div
+                key={job.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <DashboardJobCard
+                  job={job}
+                  onDelete={handleDelete}
+                  onEditClick={handleEditClick}
+                  onJobClick={() => handleJobClick(job)}
+                />
+              </motion.div>
+            ))
+          ) : (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-gray-500 py-10 bg-white rounded-xl shadow border border-gray-200 col-span-full"
+            >
+              No jobs found
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
-      {showForm && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-start w-full p-6 max-h-[100vh] justify-center overflow-y-auto"
-          onClick={() => setShowForm(false)}
-        >
-          <div
-            className="form w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg"
-            onClick={(e) => e.stopPropagation()}
+      {/* Job Form Modal */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+            onClick={() => setShowForm(false)}
           >
-            <PostJobForm
-              onClose={() => setShowForm(false)}
-              onSubmit={handleFormSubmit}
-              initialData={selectedJobEdit}
-            />
-          </div>
-        </div>
-      )}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="form w-full max-w-lg sm:max-w-3xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PostJobForm
+                onClose={() => setShowForm(false)}
+                onSubmit={handleFormSubmit}
+                initialData={selectedJobEdit}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

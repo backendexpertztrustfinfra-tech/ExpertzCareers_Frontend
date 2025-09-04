@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { BASE_URL } from "../../../config";
 import { getRecruiterProfile } from "../../../services/apis";
 
 const statusTabs = ["All", "Success", "Pending", "Failed"];
@@ -54,9 +53,9 @@ const BillingProfileCard = () => {
       : billingData.filter((b) => b.status === activeTab);
 
   return (
-    <div className="w-full min-h-screen bg-[#fffef5]  ">
+    <div className="w-full min-h-screen bg-[#fffef5] p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-gray-800">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">
           Billing Profile
         </h2>
 
@@ -64,22 +63,22 @@ const BillingProfileCard = () => {
         {loading ? (
           <p className="text-gray-400 mb-6">Loading profile...</p>
         ) : (
-          <div className="bg-white rounded-2xl p-6 shadow-md  mb-8">
-            <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base text-gray-700">
               <p>
-                <span className="font-semibold text-gray-900">Name: </span>{" "}
+                <span className="font-semibold text-gray-900">Name: </span>
                 {profile.name}
               </p>
               <p>
-                <span className="font-semibold text-gray-900">Company: </span>{" "}
+                <span className="font-semibold text-gray-900">Company: </span>
                 {profile.companyName}
               </p>
               <p>
-                <span className="font-semibold text-gray-900">GSTIN:</span>{" "}
+                <span className="font-semibold text-gray-900">GSTIN: </span>
                 {profile.gstin}
               </p>
               <p>
-                <span className="font-semibold text-gray-900">Address:</span>{" "}
+                <span className="font-semibold text-gray-900">Address: </span>
                 {profile.address}
               </p>
             </div>
@@ -87,15 +86,15 @@ const BillingProfileCard = () => {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-3 mb-6 flex-wrap">
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-2 justify-center">
           {statusTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all border shadow-sm ${
+              className={`flex-shrink-0 px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all border shadow-sm ${
                 activeTab === tab
                   ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-500 shadow-md scale-105"
-                  : "bg-white text-gray-700 bg-gradient-to-r hover:from-yellow-300 hover:to-orange-400 border-gray-300"
+                  : "bg-white text-gray-700 hover:bg-yellow-100 border-gray-300"
               }`}
             >
               {tab}
@@ -105,9 +104,9 @@ const BillingProfileCard = () => {
 
         {/* Billing Table */}
         <div className="overflow-x-auto rounded-xl shadow-md bg-white">
-          <table className="w-full text-sm text-left border-collapse">
+          <table className="w-full min-w-[650px] text-sm sm:text-base text-left border-collapse">
             <thead>
-              <tr className="bg-gradient-to-r from-yellow-300 via-amber-500 to-orange-500 text-gray-700 text-sm">
+              <tr className="bg-gradient-to-r from-yellow-300 via-amber-500 to-orange-500 text-gray-800 text-sm sm:text-base">
                 <th className="p-3 border-b">Date</th>
                 <th className="p-3 border-b">Plan</th>
                 <th className="p-3 border-b">Expires</th>
