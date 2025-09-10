@@ -1,4 +1,3 @@
-// src/Layout.jsx
 import React from "react";
 import Navbar from "./Components/Home/Navbar/Navbar";
 import Footer from "./Components/Home/Footer";
@@ -9,7 +8,7 @@ const Layout = () => {
     <>
       <Navbar />
       <main className="min-h-screen">
-        <Outlet /> {/* Renders the current route's component here */}
+        <Outlet />
       </main>
       <Footer />
     </>

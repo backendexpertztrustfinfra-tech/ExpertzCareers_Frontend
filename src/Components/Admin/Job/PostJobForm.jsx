@@ -63,8 +63,6 @@ function RichTextEditor({
             ref={editorRef}
             className="min-h-[160px] max-h-[420px] overflow-y-auto p-3 leading-6 outline-none focus:ring-0 prose prose-sm prose-p:my-2 prose-li:my-1"
             contentEditable
-
-            onContextMenuCapture={FileReader}
             dir="ltr"
             role="textbox"
             aria-multiline="true"

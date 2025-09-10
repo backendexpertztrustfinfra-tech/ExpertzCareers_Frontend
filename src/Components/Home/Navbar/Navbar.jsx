@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { AuthContext } from "../../../context/AuthContext";
 
-// ✅ Hook to detect mobile
+// Hook to detect mobile
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
@@ -27,11 +27,7 @@ const useIsMobile = () => {
 };
 
 const Navbar = ({ onToggleSidebar }) => {
-  const { user, logout
-
-
-    
-   } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -62,7 +58,6 @@ const Navbar = ({ onToggleSidebar }) => {
     { label: "About", path: "/about" },
   ];
 
-  // Mega menu data
   const megaMenuData = {
     Jobs: [
       {
@@ -117,11 +112,11 @@ const Navbar = ({ onToggleSidebar }) => {
             src={LOGO || "/placeholder.svg"}
             alt="Logo"
             className="h-14 sm:h-18 w-22 sm:w-28 cursor-pointer transition-transform hover:scale-105"
-            onClick={() => navigate("/")}
+            onClick={() => navigate(isAdminRoute ? "/admin?tab=Home" : "/")}
           />
         </div>
 
-        {/* ✅ Desktop Jobseeker Mega Menu */}
+        {/* Desktop Jobseeker Mega Menu */}
         {!isAdminRoute && !isMobile && (
           <div className="hidden lg:flex flex-1 items-center justify-center gap-8">
             {navItems.map((item, idx) => (
@@ -141,7 +136,6 @@ const Navbar = ({ onToggleSidebar }) => {
                   <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-gradient-to-r from-yellow-500 to-pink-500 transition-all group-hover:w-full" />
                 </button>
 
-                {/* Desktop Mega Menu */}
                 {["Jobs", "Companies", "Services"].includes(item.label) &&
                   menuOpen === item.label && (
                     <div className="absolute left-0 mt-3 w-[700px] bg-white shadow-xl rounded-xl p-6 grid grid-cols-3 gap-6 border border-gray-100 animate-fadeIn z-50">
@@ -185,7 +179,6 @@ const Navbar = ({ onToggleSidebar }) => {
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          {/* Notifications + Saved */}
           {user && (
             <>
               <button
@@ -208,7 +201,6 @@ const Navbar = ({ onToggleSidebar }) => {
             </>
           )}
 
-          {/* Login / User */}
           {!user ? (
             <button
               type="button"
@@ -259,14 +251,14 @@ const Navbar = ({ onToggleSidebar }) => {
             </div>
           )}
 
-          {/* ✅ Hamburger Button */}
+          {/* Hamburger */}
           <button
             className="lg:hidden text-gray-700"
             onClick={() => {
               if (isAdminRoute) {
-                onToggleSidebar?.(); // recruiter → open sidebar drawer
+                onToggleSidebar?.(); // recruiter: open sidebar drawer
               } else {
-                setMobileOpen(!mobileOpen); // jobseeker → open mobile menu
+                setMobileOpen(!mobileOpen); // jobseeker mobile menu
               }
             }}
           >
@@ -275,7 +267,7 @@ const Navbar = ({ onToggleSidebar }) => {
         </div>
       </div>
 
-      {/* ✅ Mobile Jobseeker Menu */}
+      {/* Mobile Jobseeker Menu */}
       {!isAdminRoute && isMobile && mobileOpen && (
         <div className="lg:hidden bg-white border-t border-gray-200 shadow-md">
           <div className="flex flex-col px-6 py-4 gap-4">
@@ -311,7 +303,6 @@ const Navbar = ({ onToggleSidebar }) => {
                     )}
                   </button>
 
-                  {/* Accordion */}
                   {hasMega && mobileMegaOpen === item.label && (
                     <div className="mt-2 pl-4 border-l border-gray-200 space-y-3">
                       {megaMenuData[item.label].map((col, i) => (
@@ -359,7 +350,6 @@ const Navbar = ({ onToggleSidebar }) => {
               );
             })}
 
-            {/* Search */}
             <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-200">
               <input
                 type="text"

@@ -7,7 +7,7 @@ import ScrollToTop from "./Components/Common/ScrollToTop";
 import Layout from "./Layout";
 import Home from "./Pages/Home";
 import JobBoard from "./Pages/JobBoard";
-import JobDetailsPage from "./Components/JobAbt/JobDetailsPage";  
+import JobDetailsPage from "./Components/JobAbt/JobDetailsPage";
 import SearchResults from "./Components/Home/SearchResults";
 import Sign from "./Pages/Sign";
 import About from "./Pages/About";
@@ -35,7 +35,7 @@ function App() {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route path="/jobs" element={<JobBoard />} />
-                <Route path="/jobs/:id" element={<JobDetailsPage />} /> 
+                <Route path="/jobs/:id" element={<JobDetailsPage />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/signup" element={<Sign />} />
                 <Route path="/about" element={<About />} />
@@ -43,10 +43,7 @@ function App() {
                 <Route path="/companies" element={<Companies />} />
                 <Route path="/companies/:id" element={<CompanyPage />} />
                 <Route path="/services" element={<Services />} />
-                <Route
-                  path="/post-job"
-                  element={<PostJobPage />}
-                />
+                <Route path="/post-job" element={<PostJobPage />} />
 
                 <Route
                   path="/my-jobs"
@@ -75,6 +72,8 @@ function App() {
                 <Route path="/rec" element={<RecSign />} />
                 <Route path="/reg" element={<Register />} />
               </Route>
+
+              {/* Recruiter route (protected) */}
               <Route
                 path="/admin"
                 element={

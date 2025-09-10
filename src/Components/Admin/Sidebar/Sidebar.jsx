@@ -13,7 +13,7 @@ import {
 import { signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../../../firebase-config";
 import { AuthContext } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getRecruiterProfile } from "../../../services/apis";
 
 const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
@@ -21,6 +21,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   const token = Cookies.get("userToken");
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const sidebarRef = useRef(null);
 
   // ✅ Detect screen size (auto collapse on mobile)
@@ -35,7 +36,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [setCollapsed]);
 
-  // Fetch user profile 
+  // ✅ Fetch recruiter profile
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
@@ -50,7 +51,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     loadUser();
   }, [token]);
 
-  //  Close when clicking outside 
+  // ✅ Close sidebar when clicking outside (on mobile)
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -71,6 +72,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     };
   }, [collapsed, setCollapsed]);
 
+  // ✅ Logout
   const handleLogout = async () => {
     try {
       if (user?.source === "firebase") await firebaseSignOut(auth);
@@ -81,6 +83,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     }
   };
 
+  // ✅ Sidebar tabs
   const tabs = [
     { icon: <FaHome />, label: "Home" },
     { icon: <FaBriefcase />, label: "Job" },
@@ -91,9 +94,16 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     { icon: <FaEllipsisH />, label: "Profile" },
   ];
 
+  // ✅ When user clicks tab → change state + update URL
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    navigate(`/admin?tab=${tab}`, { replace: false });
+    if (window.innerWidth < 768) setCollapsed(true); // auto close on mobile
+  };
+
   return (
     <>
-      {/* Mobile Overlay (when sidebar open) */}
+      {/* Mobile Overlay */}
       {!collapsed && window.innerWidth < 768 && (
         <div className="fixed inset-0 bg-black/40 z-30"></div>
       )}
@@ -101,12 +111,11 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
       <div
         ref={sidebarRef}
         className={`fixed top-[100px] left-0 h-[calc(100vh-100px)] bg-white shadow-lg z-40
-    flex flex-col justify-between
-    transition-all duration-300 ease-in-out
-    ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
-  `}
+          flex flex-col justify-between
+          transition-all duration-300 ease-in-out
+          ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
+        `}
       >
-
         {/* Profile */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-100">
           <img
@@ -136,7 +145,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
               key={tab.label}
               {...tab}
               activeTab={activeTab}
-              onClick={() => setActiveTab(tab.label)}
+              onClick={() => handleTabChange(tab.label)}
               collapsed={collapsed}
             />
           ))}
@@ -164,9 +173,10 @@ const SidebarTab = ({ icon, label, activeTab, onClick, collapsed }) => (
     onClick={onClick}
     title={collapsed ? label : ""}
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
-      ${activeTab === label
-        ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
-        : "text-gray-700 hover:bg-yellow-100 hover:text-yellow-700"
+      ${
+        activeTab === label
+          ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
+          : "text-gray-700 hover:bg-yellow-100 hover:text-yellow-700"
       }`}
   >
     <span className="text-lg">{icon}</span>

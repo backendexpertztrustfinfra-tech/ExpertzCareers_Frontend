@@ -7,9 +7,9 @@ import DatabaseView from "../Components/Admin/Database/DatabaseView";
 import CreditPlanCard from "../Components/Admin/Credits/CreditPlanCard";
 import BillingProfileCard from "../Components/Admin/Billing/BillingProfileCard";
 import ProfileEditor from "../Components/Admin/More/ProfileEditor";
-import PostJobPage from "../Components/Admin/Job/PostJobForm"; // ✅ added
+import PostJobPage from "../Components/Admin/Job/PostJobForm";
 import defaultLogo from "../assets/Image/download.jpg";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { getRecruiterProfile } from "../services/apis";
 import CandidateView from "../Components/Admin/Candidate/CandidateView";
@@ -20,17 +20,19 @@ const Admin = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-  const location = useLocation();
   const [selectedJob, setSelectedJob] = useState(null);
 
-  // ✅ Load profile once
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // ✅ Load recruiter profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = Cookies.get("userToken");
         if (token) {
           const profile = await getRecruiterProfile(token);
-          setUserProfile(profile || {}); // ✅ keep full object
+          setUserProfile(profile || {});
         }
       } catch (err) {
         console.error("Profile load failed", err);
@@ -39,30 +41,37 @@ const Admin = () => {
     fetchProfile();
   }, []);
 
-  // ✅ Set activeTab if passed via navigate state
+  // ✅ Redirect to default tab=Home if none
   useEffect(() => {
-    if (location.state?.tab) {
-      setActiveTab(location.state.tab);
+    const query = new URLSearchParams(location.search);
+    const tab = query.get("tab");
+    if (!tab) {
+      navigate("/admin?tab=Home", { replace: true }); // replace so it doesn't add extra history
+    } else {
+      setActiveTab(tab);
     }
-  }, [location.state]);
+  }, [location.search, navigate]);
 
   // ✅ Collapse sidebar for some tabs
   useEffect(() => {
     setCollapsed(activeTab === "Database" || activeTab === "JobPost");
   }, [activeTab]);
 
+  // ✅ updateTab helper (updates URL)
+  const updateTab = (tab) => {
+    navigate(`/admin?tab=${tab}`);
+  };
+
+  // ✅ Render tab content
   const renderTabContent = () => {
     switch (activeTab) {
       case "Home":
-        return <StatCards setActiveTab={setActiveTab} />;
+        return <StatCards setActiveTab={updateTab} />;
       case "Job":
         return (
-          <JobTabs
-            setActiveTab={setActiveTab}
-            setSelectedJob={setSelectedJob}
-          />
+          <JobTabs setActiveTab={updateTab} setSelectedJob={setSelectedJob} />
         );
-      case "JobPost": // ✅ added
+      case "JobPost":
         return <PostJobPage />;
       case "Candidate":
         return <CandidateView selectedJob={selectedJob} />;
@@ -70,7 +79,7 @@ const Admin = () => {
         return (
           <DatabaseView
             hasSubscription={userProfile?.subscriptionActive}
-            onShowPlan={() => setActiveTab("Credits")}
+            onShowPlan={() => updateTab("Credits")}
           />
         );
       case "Credits":
@@ -87,14 +96,16 @@ const Admin = () => {
           />
         );
       default:
-        return <StatCards setActiveTab={setActiveTab} />;
+        return <StatCards setActiveTab={updateTab} />;
     }
   };
 
   return (
     <SubscriptionProvider>
       <div className="h-screen flex flex-col bg-[#fefcf9]">
+        {/* ✅ Navbar */}
         <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+
         <div className="flex flex-1">
           {/* ✅ Desktop Sidebar */}
           <div
@@ -102,7 +113,7 @@ const Admin = () => {
             ${collapsed ? "w-20" : "w-64"}`}
           >
             <Sidebar
-              setActiveTab={setActiveTab}
+              setActiveTab={updateTab}
               activeTab={activeTab}
               collapsed={collapsed}
               setCollapsed={setCollapsed}
@@ -120,7 +131,7 @@ const Admin = () => {
               <div className="relative w-64 bg-white h-full shadow-lg z-50">
                 <Sidebar
                   setActiveTab={(tab) => {
-                    setActiveTab(tab);
+                    updateTab(tab);
                     setSidebarOpen(false);
                   }}
                   activeTab={activeTab}
