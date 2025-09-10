@@ -13,7 +13,7 @@ import {
 import { signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../../../firebase-config";
 import { AuthContext } from "../../../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getRecruiterProfile } from "../../../services/apis";
 
 const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
@@ -21,7 +21,6 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   const token = Cookies.get("userToken");
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
   const sidebarRef = useRef(null);
 
   // ✅ Detect screen size (auto collapse on mobile)
@@ -72,7 +71,6 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     };
   }, [collapsed, setCollapsed]);
 
-  // ✅ Logout
   const handleLogout = async () => {
     try {
       if (user?.source === "firebase") await firebaseSignOut(auth);
@@ -94,11 +92,15 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     { icon: <FaEllipsisH />, label: "Profile" },
   ];
 
-  // ✅ When user clicks tab → change state + update URL
+  // ✅ Prevent duplicate history entries
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    navigate(`/admin?tab=${tab}`, { replace: false });
-    if (window.innerWidth < 768) setCollapsed(true); // auto close on mobile
+    if (tab === activeTab) {
+      navigate(`/admin?tab=${tab}`, { replace: true });
+    } else {
+      navigate(`/admin?tab=${tab}`);
+    }
+    if (window.innerWidth < 768) setCollapsed(true);
   };
 
   return (

@@ -41,12 +41,12 @@ const Admin = () => {
     fetchProfile();
   }, []);
 
-  // ✅ Redirect to default tab=Home if none
+  // ✅ Sync tab from query param
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const tab = query.get("tab");
     if (!tab) {
-      navigate("/admin?tab=Home", { replace: true }); // replace so it doesn't add extra history
+      navigate("/admin?tab=Home", { replace: true });
     } else {
       setActiveTab(tab);
     }
@@ -57,9 +57,15 @@ const Admin = () => {
     setCollapsed(activeTab === "Database" || activeTab === "JobPost");
   }, [activeTab]);
 
-  // ✅ updateTab helper (updates URL)
+  // ✅ updateTab helper (prevents duplicate history entries)
   const updateTab = (tab) => {
-    navigate(`/admin?tab=${tab}`);
+    if (tab === activeTab) {
+      // same tab → replace (no duplicate in history)
+      navigate(`/admin?tab=${tab}`, { replace: true });
+    } else {
+      // new tab → push new entry in history
+      navigate(`/admin?tab=${tab}`);
+    }
   };
 
   // ✅ Render tab content

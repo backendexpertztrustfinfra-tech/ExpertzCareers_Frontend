@@ -112,7 +112,21 @@ const Navbar = ({ onToggleSidebar }) => {
             src={LOGO || "/placeholder.svg"}
             alt="Logo"
             className="h-14 sm:h-18 w-22 sm:w-28 cursor-pointer transition-transform hover:scale-105"
-            onClick={() => navigate(isAdminRoute ? "/admin?tab=Home" : "/")}
+            onClick={() => {
+              if (isAdminRoute) {
+                if (location.pathname.startsWith("/admin")) {
+                  navigate("/admin?tab=Home", { replace: true });
+                } else {
+                  navigate("/admin?tab=Home");
+                }
+              } else {
+                if (location.pathname === "/") {
+                  navigate("/", { replace: true });
+                } else {
+                  navigate("/");
+                }
+              }
+            }}
           />
         </div>
 
@@ -127,7 +141,13 @@ const Navbar = ({ onToggleSidebar }) => {
                 onMouseLeave={() => setMenuOpen(null)}
               >
                 <button
-                  onClick={() => navigate(item.path)}
+                  onClick={() => {
+                    if (location.pathname === item.path) {
+                      navigate(item.path, { replace: true });
+                    } else {
+                      navigate(item.path);
+                    }
+                  }}
                   className={`relative text-gray-700 font-medium transition hover:text-yellow-600 ${
                     location.pathname === item.path ? "text-yellow-600" : ""
                   }`}
@@ -256,9 +276,9 @@ const Navbar = ({ onToggleSidebar }) => {
             className="lg:hidden text-gray-700"
             onClick={() => {
               if (isAdminRoute) {
-                onToggleSidebar?.(); // recruiter: open sidebar drawer
+                onToggleSidebar?.();
               } else {
-                setMobileOpen(!mobileOpen); // jobseeker mobile menu
+                setMobileOpen(!mobileOpen);
               }
             }}
           >
@@ -284,7 +304,11 @@ const Navbar = ({ onToggleSidebar }) => {
                           mobileMegaOpen === item.label ? null : item.label
                         );
                       } else {
-                        navigate(item.path);
+                        if (location.pathname === item.path) {
+                          navigate(item.path, { replace: true });
+                        } else {
+                          navigate(item.path);
+                        }
                         setMobileOpen(false);
                       }
                     }}
@@ -318,21 +342,15 @@ const Navbar = ({ onToggleSidebar }) => {
                                 onClick={() => {
                                   if (item.label === "Jobs") {
                                     navigate(
-                                      `/jobs?category=${encodeURIComponent(
-                                        sub
-                                      )}`
+                                      `/jobs?category=${encodeURIComponent(sub)}`
                                     );
                                   } else if (item.label === "Companies") {
                                     navigate(
-                                      `/companies?type=${encodeURIComponent(
-                                        sub
-                                      )}`
+                                      `/companies?type=${encodeURIComponent(sub)}`
                                     );
                                   } else if (item.label === "Services") {
                                     navigate(
-                                      `/services?name=${encodeURIComponent(
-                                        sub
-                                      )}`
+                                      `/services?name=${encodeURIComponent(sub)}`
                                     );
                                   }
                                   setMobileOpen(false);
