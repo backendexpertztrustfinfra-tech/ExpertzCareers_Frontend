@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Cookies from "js-cookie";
 import JobListCard from "./JobListCard";
-import PostJobForm from "../Job/PostJobForm";
 import {
   getCreatedJobs,
   getRecruiterProfile,
   getLiveJobs,
   getPendingJobs,
   getClosedJobs,
+  getActiveSubscription,
 } from "../../../services/apis";
 import {
   FaBriefcase,
@@ -16,13 +18,13 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import DatabaseQuickBox from "./DatabaseQuickBox";
+import PostJobPage from "../Job/PostJobForm";
 
 // ✅ normalize API response
 const normalizeJobs = (data) =>
   Array.isArray(data) ? data : Array.isArray(data?.jobs) ? data.jobs : [];
 
 const StatCards = ({ setActiveTab }) => {
-  const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
 
@@ -34,6 +36,7 @@ const StatCards = ({ setActiveTab }) => {
   });
 
   const token = Cookies.get("userToken");
+  const navigate = useNavigate();
 
   // ✅ fetch profile
   useEffect(() => {
@@ -77,19 +80,57 @@ const StatCards = ({ setActiveTab }) => {
     return () => clearInterval(interval);
   }, [token]);
 
-  // ✅ add new job
-  const handlePostJob = (newJob) => {
-    setJobs((prev) => [...prev, { ...newJob, id: Date.now() }]);
-    setStats((prev) => ({
-      ...prev,
-      totalJobs: prev.totalJobs + 1,
-      liveJobs: newJob.status === "live" ? prev.liveJobs + 1 : prev.liveJobs,
-      pendingJobs:
-        newJob.status === "pending" ? prev.pendingJobs + 1 : prev.pendingJobs,
-      closedJobs:
-        newJob.status === "closed" ? prev.closedJobs + 1 : prev.closedJobs,
-    }));
-    setShowForm(false);
+  // ✅ check if new job was just posted via PostJobPage
+  useEffect(() => {
+    const latestJob = localStorage.getItem("latest_posted_job");
+    if (latestJob) {
+      try {
+        const job = JSON.parse(latestJob);
+        setJobs((prev) => [...prev, job]);
+        setStats((prev) => ({
+          ...prev,
+          totalJobs: prev.totalJobs + 1,
+          liveJobs: job.status === "live" ? prev.liveJobs + 1 : prev.liveJobs,
+          pendingJobs:
+            job.status === "pending" ? prev.pendingJobs + 1 : prev.pendingJobs,
+          closedJobs:
+            job.status === "closed" ? prev.closedJobs + 1 : prev.closedJobs,
+        }));
+      } catch (err) {
+        console.error("Error parsing latest_posted_job:", err);
+      }
+      localStorage.removeItem("latest_posted_job");
+    }
+  }, []);
+
+  // ✅ handle Post Job button click
+  const handlePostJobClick = async () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    try {
+      const sub = await getActiveSubscription();
+      console.log("👉 Active Subscription API Response:", sub);
+
+      // ✅ Handle multiple possible API shapes
+      const remainingJobs =
+        sub?.remainingJobs ?? sub?.subscription?.remainingJobs ?? 0;
+
+      console.log("👉 Extracted Remaining Jobs:", remainingJobs);
+
+      if (remainingJobs > 0) {
+        // ✅ Recruiter has credits → open Post Job form in Admin
+        setActiveTab("JobPost");
+      } else {
+        // ❌ No subscription OR credits = 0 → go to credits
+        console.warn("⚠️ No active credits. Redirecting to Credits page...");
+        setActiveTab("Credits");
+      }
+    } catch (err) {
+      console.error("❌ Subscription check failed:", err);
+      setActiveTab("Credits");
+    }
   };
 
   return (
@@ -104,33 +145,29 @@ const StatCards = ({ setActiveTab }) => {
             Here’s a quick overview of your hiring activity.
           </p>
         </div>
+
+        {/* ✅ Desktop button */}
         <button
-          onClick={() => setShowForm(true)}
-          className="w-full sm:w-auto px-5 py-3 rounded-xl font-semibold 
+          onClick={handlePostJobClick}
+          className="hidden sm:inline-block w-full sm:w-auto px-5 py-3 rounded-xl font-semibold 
             bg-gradient-to-r from-amber-400 to-orange-500 text-white 
             shadow-md hover:shadow-lg hover:scale-105 transition"
         >
           + Post New Job
         </button>
-      </div>
 
-      {/* ✅ Modal */}
-      {showForm && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          onClick={() => setShowForm(false)}
+        {/* ✅ Mobile floating button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handlePostJobClick}
+          className="sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg 
+            bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 
+            text-white w-16 h-16 flex items-center justify-center text-3xl"
         >
-          <div
-            className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 animate-[fadeIn_0.3s_ease-out]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <PostJobForm
-              onClose={() => setShowForm(false)}
-              onSubmit={handlePostJob}
-            />
-          </div>
-        </div>
-      )}
+          +
+        </motion.button>
+      </div>
 
       {/* ✅ Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -141,7 +178,11 @@ const StatCards = ({ setActiveTab }) => {
             value: stats.totalJobs,
             icon: <FaClipboardList />,
           },
-          { title: "Pending Jobs", value: stats.pendingJobs, icon: <FaClock /> },
+          {
+            title: "Pending Jobs",
+            value: stats.pendingJobs,
+            icon: <FaClock />,
+          },
           {
             title: "Closed Jobs",
             value: stats.closedJobs,

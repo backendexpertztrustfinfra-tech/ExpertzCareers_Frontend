@@ -22,6 +22,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import Companies from "./Pages/Companies";
 import CompanyPage from "./Pages/CompanyPage";
 import Services from "./Pages/Services";
+import PostJobPage from "./Components/Admin/Job/PostJobPage";
 
 function App() {
   return (
@@ -42,6 +43,10 @@ function App() {
                 <Route path="/companies" element={<Companies />} />
                 <Route path="/companies/:id" element={<CompanyPage />} />
                 <Route path="/services" element={<Services />} />
+                <Route
+                  path="/post-job"
+                  element={<PostJobPage />}
+                />
 
                 <Route
                   path="/my-jobs"

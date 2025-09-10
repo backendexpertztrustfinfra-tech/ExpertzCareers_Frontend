@@ -2,83 +2,46 @@ import React, { useEffect, useState, useContext } from "react";
 import Cookies from "js-cookie";
 import { AuthContext } from "../../../context/AuthContext";
 import { getRecruiterProfile } from "../../../services/apis";
+import { BASE_URL } from "../../../config";
+import { SubscriptionContext } from "../../../context/SubscriptionContext";
 
-const creditPlans = [
-  {
-    name: "1XPremium Job",
-    price: "INR 499",
-    details: [
-      "3 Jobs Credits",
-      "Use These Credits In 30 Days",
-      "Job Active 7 days",
-      "5 Advance Filter",
-      "Whatsapp & call based Management System",
-    ],
-  },
-  {
-    name: "5XPremium Job",
-    price: "INR 999",
-    details: [
-      "5 Jobs Credits",
-      "Use These Credits In 90 Days",
-      "Job Active 14 days",
-      "8+Advance Filter",
-      "Whatsapp & call based Management System",
-    ],
-  },
-  {
-    name: "10XPremium Job",
-    price: "INR 2499",
-    details: [
-      "15 Jobs Credits",
-      "Use These Credits In 180 Days",
-      "Job Active 20 days",
-      "12+Advance Filter",
-      "Whatsapp & call based Management System",
-    ],
-    recommended: true,
-  },
-  {
-    name: "25XPremium Job",
-    price: "INR 4999",
-    details: [
-      "40 Jobs Credits",
-      "Use These Credits In 360 Days",
-      "Job Active 45 days",
-      "15+Advance Filter",
-      "Whatsapp & call based Management System",
-    ],
-  },
-  {
-    name: "Create Your Own",
-    price: "Lets Talk",
-    details: [
-      "Dedicated account manager",
-      "Use These Credits Accordingly",
-      "Multiple Logins & Reports",
-      "Customised Filter",
-      "Whatsapp & call based Management System",
-    ],
-  },
-];
+const creditPlans = {
+  "1 Month": [
+    { name: "Free Plan", price: "Free", details: ["6 Jobs", "0 DB Points", "Job Live 15 days", "Validity 30 days"] },
+    { name: "Basic", price: "Rs 599", details: ["1 Job", "50 DB Points", "Job Live 15 days", "Validity 30 days"] },
+    { name: "Basic+", price: "Rs 799", details: ["2 Jobs", "90 DB Points", "Job Live 15 days", "Validity 30 days"] },
+  ],
+  "3 Month": [
+    { name: "Standard", price: "Rs 2999", details: ["5 Jobs", "150 DB Points", "Job Live 15 days", "Validity 90 days"] },
+    { name: "Standard Plus", price: "Rs 3999", details: ["7 Jobs", "200 DB Points", "Job Live 15 days", "Validity 90 days"] },
+  ],
+  "6 Month": [
+    { name: "Premium", price: "Rs 4999", details: ["10 Jobs", "220 DB Points", "Job Live 15 days", "Validity 180 days"] },
+    { name: "Premium Plus", price: "Rs 5999", details: ["13 Jobs", "250 DB Points", "Job Live 15 days", "Validity 180 days"] },
+  ],
+  "1 Year": [
+    { name: "Platinum", price: "Rs 12999", details: ["25 Jobs", "500 DB Points", "Job Live 15 days", "Validity 365 days"] },
+    { name: "Platinum Plus", price: "", details: ["Custom Plan"] },
+  ],
+};
 
 const CreditPlanCard = () => {
   const { user } = useContext(AuthContext);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("1 Month");
   const token = Cookies.get("userToken");
+
+  const { subscription, refreshSubscription } = useContext(SubscriptionContext);
 
   useEffect(() => {
     const loadProfile = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+      if (!token) return setLoading(false);
       try {
         const profile = await getRecruiterProfile(token);
         setUserProfile(profile);
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("Error loading recruiter profile:", err);
       } finally {
         setLoading(false);
       }
@@ -86,76 +49,185 @@ const CreditPlanCard = () => {
     loadProfile();
   }, [token]);
 
-  const handleBuyNow = (planName) => {
-    alert(`You selected: ${planName}`);
+  const loadScript = (src) =>
+    new Promise((resolve) => {
+      if (document.querySelector(`script[src="${src}"]`)) return resolve(true);
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const extractAmount = (price) => {
+    const num = parseInt(price.replace(/\D/g, ""), 10);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const handleBuyNow = async (plan) => {
+    if (plan.price === "Free" || plan.price === "" || plan.details.includes("Custom")) {
+      return alert("⚠️ Please contact support for this plan.");
+    }
+
+    const sdkLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!sdkLoaded) return alert("❌ Razorpay SDK failed to load");
+
+    try {
+      const amountInNumber = extractAmount(plan.price);
+      if (amountInNumber <= 0) return alert("Invalid plan price.");
+
+      // ✅ Create order from backend
+      const orderRes = await fetch(`${BASE_URL}/recruiter/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount: amountInNumber }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderData.order_id) return alert("Failed to create order");
+
+      // ✅ Razorpay Checkout Options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: orderData.userDetails.name,
+        // description: plan.name,
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch(`${BASE_URL}/recruiter/payment-success`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+                signature: response.razorpay_signature,
+                planName: plan.name,
+                amount: orderData.amount,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert("✅ Payment Successful! Subscription Activated.");
+              refreshSubscription(); // refresh subscription context
+            } else {
+              alert("❌ Payment Failed: " + (verifyData.message || "Unknown error"));
+            }
+          } catch (err) {
+            console.error("Payment verification error:", err);
+            alert("❌ Payment verification failed.");
+          }
+        },
+        prefill: {
+          name: orderData.userDetails?.name || "Guest User",
+          email: orderData.userDetails?.email || "guest@example.com",
+          contact: orderData.userDetails?.contact || "9999999999",
+        },
+        theme: { color: "#f59e0b" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("BuyNow error:", err);
+      alert("Something went wrong while processing payment.");
+    }
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="flex-1 max-w-6xl mx-auto flex flex-col">
-        {/* Heading */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800 mb-3 text-center sm:text-left">
-          🎉 Buy Job Credits
-        </h2>
-        <p className="text-base sm:text-lg font-medium text-gray-600 mb-2 text-center sm:text-left">
-          {loading
-            ? "Loading profile..."
-            : `Welcome back, ${userProfile?.user?.username || user?.username || "User"}`}
+    <div className="min-h-screen py-4 px-4 sm:px-6 lg:px-4">
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-3 text-center sm:text-left">
+        🎉 Buy Job Credits
+      </h2>
+      <p className="text-lg font-medium text-gray-600 mb-2 text-center sm:text-left">
+        {loading
+          ? "Loading profile..."
+          : `Welcome back, ${userProfile?.user?.username || user?.username || "User"}`}
+      </p>
+
+      {subscription ? (
+        <p className="text-green-600 font-medium text-center sm:text-left mb-4">
+          ✅ Active plan: {subscription.planId?.planName} (valid till{" "}
+          {new Date(subscription.endDate).toLocaleDateString()})
         </p>
-        <p className="text-sm sm:text-base text-gray-500 mb-8 sm:mb-10 text-center sm:text-left">
+      ) : (
+        <p className="text-sm text-gray-500 mb-8 text-center sm:text-left">
           Get Premium Employees With Expertz Careers
         </p>
+      )}
 
-        {/* Credit Plan Cards */}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {creditPlans.map((plan) => (
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6 flex-wrap">
+        {Object.keys(creditPlans).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-full font-semibold ${
+              activeTab === tab
+                ? "bg-yellow-500 text-white shadow-lg"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            } transition`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Plans */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {(creditPlans[activeTab] || []).map((plan) => {
+          const isActivePlan = subscription?.planId?.planName === plan.name;
+          return (
             <div
               key={plan.name}
-              className={`relative bg-white/90 backdrop-blur-md rounded-2xl border p-5 sm:p-6 lg:p-8 shadow-md hover:shadow-xl hover:scale-105 transform transition duration-300 ${
-                plan.recommended
-                  ? "text-white ring-2 ring-yellow-400 shadow-yellow-100"
-                  : "border-gray-200"
-              }`}
+              className="relative bg-white rounded-2xl border p-5 shadow-md hover:shadow-xl hover:scale-105 transition"
             >
-              {/* Recommended Badge */}
-              {plan.recommended && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1 rounded-full shadow-md">
-                  ⭐ Recommended
-                </div>
-              )}
-
-              {/* Plan Name */}
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 text-center mt-4">
-                {plan.name}
-              </h3>
-
-              {/* Plan Price */}
-              <p className="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent tracking-wide text-center mb-4">
-                {plan.price}
-              </p>
-
-              {/* Plan Features */}
-              <ul className="text-sm sm:text-base text-gray-700 space-y-1 sm:space-y-2 mb-5">
+              <div className="mb-4 text-center">
+                <h3 className="text-2xl font-extrabold bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 bg-clip-text text-transparent">
+                  {plan.name}
+                </h3>
+                <p className="mt-2 text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                  {plan.price}
+                </p>
+              </div>
+              <ul className="flex-1 flex flex-col gap-3 mb-6">
                 {plan.details.map((line, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white rounded-full text-xs sm:text-sm font-bold mt-1">
+                  <li key={i} className="flex items-center gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white rounded-full text-sm font-bold">
                       ✓
                     </span>
-                    <span>{line}</span>
+                    <span className="text-gray-700 font-medium text-sm">
+                      {line}
+                    </span>
                   </li>
                 ))}
               </ul>
-
-              {/* Buy Now Button */}
-              <button
-                onClick={() => handleBuyNow(plan.name)}
-                className="w-full py-3 sm:py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600 shadow-md hover:shadow-lg transition"
-              >
-                Buy Now
-              </button>
+              {isActivePlan ? (
+                <button
+                  disabled
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-green-500 cursor-not-allowed shadow-md"
+                >
+                  Active Plan
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleBuyNow(plan)}
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600 shadow-md hover:shadow-lg transition"
+                >
+                  Buy Now
+                </button>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );

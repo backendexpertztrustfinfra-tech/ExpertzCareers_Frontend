@@ -7,19 +7,20 @@ import DatabaseView from "../Components/Admin/Database/DatabaseView";
 import CreditPlanCard from "../Components/Admin/Credits/CreditPlanCard";
 import BillingProfileCard from "../Components/Admin/Billing/BillingProfileCard";
 import ProfileEditor from "../Components/Admin/More/ProfileEditor";
+import PostJobPage from "../Components/Admin/Job/PostJobForm"; // ✅ added
 import defaultLogo from "../assets/Image/download.jpg";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import { getRecruiterProfile } from "../services/apis";
+import CandidateView from "../Components/Admin/Candidate/CandidateView";
+import { SubscriptionProvider } from "../context/SubscriptionContext";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("Home");
-  const [collapsed, setCollapsed] = useState(false); // desktop collapse
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
+  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-  const navigate = useNavigate();
   const location = useLocation();
-
   const [selectedJob, setSelectedJob] = useState(null);
 
   // ✅ Load profile once
@@ -29,7 +30,7 @@ const Admin = () => {
         const token = Cookies.get("userToken");
         if (token) {
           const profile = await getRecruiterProfile(token);
-          setUserProfile(profile?.user || {});
+          setUserProfile(profile || {}); // ✅ keep full object
         }
       } catch (err) {
         console.error("Profile load failed", err);
@@ -38,20 +39,16 @@ const Admin = () => {
     fetchProfile();
   }, []);
 
-  // ✅ Redirect to Google if back pressed on dashboard root
+  // ✅ Set activeTab if passed via navigate state
   useEffect(() => {
-    const handlePopState = () => {
-      if (location.pathname === "/admin") {
-        window.location.href = "https://www.google.com";
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [location]);
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
-  // ✅ Collapse sidebar when Database tab is active
+  // ✅ Collapse sidebar for some tabs
   useEffect(() => {
-    setCollapsed(activeTab === "Database");
+    setCollapsed(activeTab === "Database" || activeTab === "JobPost");
   }, [activeTab]);
 
   const renderTabContent = () => {
@@ -65,13 +62,22 @@ const Admin = () => {
             setSelectedJob={setSelectedJob}
           />
         );
+      case "JobPost": // ✅ added
+        return <PostJobPage />;
+      case "Candidate":
+        return <CandidateView selectedJob={selectedJob} />;
       case "Database":
-        return <DatabaseView selectedJob={selectedJob} />;
+        return (
+          <DatabaseView
+            hasSubscription={userProfile?.subscriptionActive}
+            onShowPlan={() => setActiveTab("Credits")}
+          />
+        );
       case "Credits":
         return <CreditPlanCard />;
       case "Billing":
         return <BillingProfileCard />;
-      case "More":
+      case "Profile":
         return (
           <ProfileEditor
             profile={userProfile || { logo: defaultLogo }}
@@ -86,59 +92,57 @@ const Admin = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#fefcf9]">
-      {/* ✅ Navbar with mobile toggle */}
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
-      <div className="flex flex-1 pt-[64px]">
-        {/* ✅ Desktop Sidebar */}
-        <div
-          className={`hidden md:block fixed top-[64px] left-0 h-[calc(100vh-64px)] bg-white shadow-md transition-all duration-300 
+    <SubscriptionProvider>
+      <div className="h-screen flex flex-col bg-[#fefcf9]">
+        <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <div className="flex flex-1">
+          {/* ✅ Desktop Sidebar */}
+          <div
+            className={`hidden md:block fixed bg-white shadow-md transition-all duration-300 
             ${collapsed ? "w-20" : "w-64"}`}
-        >
-          <Sidebar
-            setActiveTab={setActiveTab}
-            activeTab={activeTab}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-            userProfile={userProfile}
-          />
-        </div>
-
-        {/* ✅ Mobile Sidebar Drawer */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-            {/* Overlay */}
-            <div
-              className="fixed inset-0 bg-black/50"
-              onClick={() => setSidebarOpen(false)}
+          >
+            <Sidebar
+              setActiveTab={setActiveTab}
+              activeTab={activeTab}
+              collapsed={collapsed}
+              setCollapsed={setCollapsed}
+              userProfile={userProfile}
             />
-            {/* Drawer */}
-            <div className="relative w-64 bg-white h-full shadow-lg z-50">
-              <Sidebar
-                setActiveTab={(tab) => {
-                  setActiveTab(tab);
-                  setSidebarOpen(false);
-                }}
-                activeTab={activeTab}
-                collapsed={false}
-                setCollapsed={() => {}}
-                userProfile={userProfile}
-              />
-            </div>
           </div>
-        )}
 
-        {/* ✅ Main Content */}
-        <main
-          className={`flex-1 transition-all duration-300 p-4 md:p-6 overflow-y-auto 
+          {/* ✅ Mobile Sidebar Drawer */}
+          {sidebarOpen && (
+            <div className="fixed inset-0 z-50 flex md:hidden">
+              <div
+                className="fixed inset-0 bg-black/50"
+                onClick={() => setSidebarOpen(false)}
+              />
+              <div className="relative w-64 bg-white h-full shadow-lg z-50">
+                <Sidebar
+                  setActiveTab={(tab) => {
+                    setActiveTab(tab);
+                    setSidebarOpen(false);
+                  }}
+                  activeTab={activeTab}
+                  collapsed={false}
+                  setCollapsed={() => {}}
+                  userProfile={userProfile}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ✅ Main Content */}
+          <main
+            className={`flex-1 transition-all duration-300 p-4 md:p-6 overflow-y-auto 
             ${collapsed ? "md:ml-20" : "md:ml-64"} 
-            ${activeTab === "Database" ? "w-full md:ml-20" : ""}`}
-        >
-          {renderTabContent()}
-        </main>
+            ${activeTab === "Database" || activeTab === "JobPost" ? "w-full md:ml-20" : ""}`}
+          >
+            {renderTabContent()}
+          </main>
+        </div>
       </div>
-    </div>
+    </SubscriptionProvider>
   );
 };
 

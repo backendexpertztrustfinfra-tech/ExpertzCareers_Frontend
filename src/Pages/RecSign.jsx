@@ -7,6 +7,8 @@ import { updateRecruiterProfile } from "../../src/services/apis";
 
 const RecSign = () => {
   const [companyType, setCompanyType] = useState(null);
+  const [verificationType, setVerificationType] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
@@ -28,6 +30,11 @@ const RecSign = () => {
     { value: "LLP", label: "LLP" },
     { value: "PVT LTD", label: "PVT LTD" },
     { value: "LTD", label: "LTD" },
+  ];
+
+  const verificationOptions = [
+    { value: "gst", label: "GST Number" },
+    { value: "document", label: "Upload Company Document" },
   ];
 
   const customStyles = {
@@ -53,42 +60,64 @@ const RecSign = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!companyType) {
-    alert("Please select company type.");
-    return;
-  }
-
-  const token = Cookies.get("userToken");
-  const payload = {
-    ...formData,
-    recruterCompanyType: companyType.value,
+  const handleFileChange = (e) => {
+    setDocumentFile(e.target.files[0]);
   };
 
-  try {
-    const response = await updateRecruiterProfile(token, payload, login);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // Check based on response.msg instead of response.success
-    if (response.msg === "User Update Succssfully") {
-      console.log("Profile updated:", response.ObjectUpdatedData);
-
-      // Update AuthContext if needed
-      if (response.ObjectUpdatedData) {
-        await login(response.ObjectUpdatedData); // optional
-      }
-
-      // Now navigate
-      navigate("/admin", { replace: true });
-    } else {
-      alert(response.msg || "Failed to update profile.");
+    if (!companyType) {
+      alert("Please select company type.");
+      return;
     }
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
+
+    if (!verificationType) {
+      alert("Please select verification type.");
+      return;
+    }
+
+    // GST validation
+    if (verificationType.value === "gst") {
+      if (!formData.recruterGstIn || formData.recruterGstIn.length !== 15) {
+        alert("Please enter a valid 15-digit GSTIN.");
+        return;
+      }
+    }
+
+    // Document validation
+    if (verificationType.value === "document" && !documentFile) {
+      alert("Please upload a valid company document.");
+      return;
+    }
+
+    const token = Cookies.get("userToken");
+    const payload = {
+      ...formData,
+      recruterCompanyType: companyType.value,
+      verificationType: verificationType.value,
+      documentFile: documentFile ? documentFile.name : null, // आप backend में file upload भी भेज सकते हैं FormData से
+    };
+
+    try {
+      const response = await updateRecruiterProfile(token, payload, login);
+
+      if (response.msg === "User Update Succssfully") {
+        console.log("Profile updated:", response.ObjectUpdatedData);
+
+        if (response.ObjectUpdatedData) {
+          await login(response.ObjectUpdatedData);
+        }
+
+        navigate("/admin", { replace: true });
+      } else {
+        alert(response.msg || "Failed to update profile.");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#ffffff] flex justify-center items-center py-10 px-4">
@@ -115,7 +144,7 @@ const handleSubmit = async (e) => {
             className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
             required
           />
-         
+
           <input
             type="tel"
             name="recruterPhone"
@@ -155,15 +184,39 @@ const handleSubmit = async (e) => {
             required
           ></textarea>
 
-          <input
-            type="text"
-            name="recruterGstIn"
-            placeholder="GSTIN"
-            value={formData.recruterGstIn}
-            onChange={handleChange}
-            className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
-            required
+          {/* Verification Section */}
+          <label className="block">Verification Type</label>
+          <Select
+            options={verificationOptions}
+            value={verificationType}
+            onChange={setVerificationType}
+            styles={customStyles}
+            placeholder="Select Verification Type"
+            isSearchable={false}
           />
+
+          {verificationType?.value === "gst" && (
+            <input
+              type="text"
+              name="recruterGstIn"
+              placeholder="Enter GSTIN (15 digits)"
+              value={formData.recruterGstIn}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
+              required
+            />
+          )}
+
+          {verificationType?.value === "document" && (
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handleFileChange}
+              className="w-full p-2 rounded bg-white border border-[#D4AF37] focus:outline-none"
+              required
+            />
+          )}
+
           <input
             type="text"
             name="recruterIndustry"
@@ -187,4 +240,3 @@ const handleSubmit = async (e) => {
 };
 
 export default RecSign;
- 

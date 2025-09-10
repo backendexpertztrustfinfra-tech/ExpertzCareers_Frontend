@@ -9,11 +9,7 @@ import {
 import Cookies from "js-cookie";
 import { deleteJob } from "../../../services/apis";
 
-const DashboardJobCard = ({
-  job,
-  onDeleteSuccess,
-  onEditClick,
-  onJobClick,
+const DashboardJobCard = ({  job,  onDeleteSuccess,  onEditClick,  onJobClick,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -172,7 +168,7 @@ const DashboardJobCard = ({
             onJobClick && onJobClick(job);
           }}
         >
-          👥 Candidates: {job.appliedCount ?? 0}
+          👥 Candidates: {job.appliedCount}
         </button>
         <button
           className="py-2 text-sm font-medium rounded-lg border border-green-200 bg-green-50 
@@ -181,29 +177,29 @@ const DashboardJobCard = ({
         >
           📞 Contacted: {job.contactedCount ?? 0}
         </button>
-        <button
+        {/* <button
           className="py-2 text-sm font-medium rounded-lg border border-purple-200 bg-purple-50 
                      hover:bg-purple-100 text-purple-700"
           onClick={(e) => e.stopPropagation()}
         >
           ⭐ Review: {job.reviewCount ?? 0}
-        </button>
+        </button> */}
       </div>
 
       {/* Upgrade CTA */}
-      <div className="mt-4">
-        <button
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm md:text-base font-semibold rounded-lg 
-                     bg-gradient-to-r from-orange-400 via-amber-500 to-red-500 
-                     text-white shadow-md 
-                     hover:from-orange-500 hover:via-amber-600 hover:to-red-600 
-                     hover:shadow-lg hover:scale-[1.02] 
-                     transition-all duration-300"
-          onClick={(e) => e.stopPropagation()}
-        >
-          🚀 Unlock More Candidates – Upgrade Now
-        </button>
-      </div>
+        {/* <div className="mt-4">
+          <button
+            className="w-full flex items-center justify-center gap-2 py-3 text-sm md:text-base font-semibold rounded-lg 
+                      bg-gradient-to-r from-orange-400 via-amber-500 to-red-500 
+                      text-white shadow-md 
+                      hover:from-orange-500 hover:via-amber-600 hover:to-red-600 
+                      hover:shadow-lg hover:scale-[1.02] 
+                      transition-all duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            🚀 Unlock More Candidates – Upgrade Now
+          </button>
+        </div> */}
     </div>
   );
 };

@@ -243,6 +243,10 @@ export const getAppliedUser = async (token, jobId) => {
         errorData.message || `Failed to get Applied candidate: ${res.status}`
       );
     }
+
+    // const result = await res.json();
+    //   console.log("Applied candidate result:", result);
+
     return await res.json(); // will contain { candidatesApplied, count }
   } catch (error) {
     console.error("get applied candidate API error", error);
@@ -426,3 +430,119 @@ export async function deleteJob(jobId, token) {
     throw error;
   }
 }
+
+// ------------------------------------------------------------ PAYMENTS -----------------------------------------------------------
+
+// ✅ Create Razorpay order
+export const createOrder = async (amount) => {
+  try {
+    const token = Cookies.get("userToken");
+    const res = await fetch(`${BASE_URL}/recruiter/create-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ amount }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to create order");
+    return data; // { order_id, amount, currency, userDetails }
+  } catch (err) {
+    console.error("❌ CreateOrder API Error:", err.message);
+    throw err;
+  }
+};
+
+// ✅ Verify payment after Razorpay callback
+export const verifyPayment = async (paymentResponse) => {
+  try {
+    const token = Cookies.get("userToken");
+    const res = await fetch(`${BASE_URL}/recruiter/payment-success`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(paymentResponse),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Payment verification failed");
+    return data; // { success, subscription, billing }
+  } catch (err) {
+    console.error("❌ VerifyPayment API Error:", err.message);
+    throw err;
+  }
+};
+
+// ✅ Get active subscription (for gating job posting, etc.)
+export const getActiveSubscription = async () => {
+  try {
+    const token = Cookies.get("userToken");
+    const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok)
+      throw new Error(data.message || "Failed to fetch active subscription");
+    // return data;
+    return {
+      planName: data?.planName || null,
+      remainingJobs: data?.remainingJobs ?? 0,
+    };
+  } catch (err) {
+    console.error("❌ getActiveSubscription API Error:", err.message);
+    // throw err;
+    return { planName: null, remainingJobs: 0 };
+  }
+};
+
+// ✅ (Optional) Get recruiter billing history
+export const getPaymentHistory = async () => {
+  try {
+    const token = Cookies.get("userToken");
+    const res = await fetch(`${BASE_URL}/recruiter/getPaymentHistory`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok)
+      throw new Error(data.message || "Failed to fetch billing history");
+    return data; // { billing: [...] }
+  } catch (err) {
+    console.error("❌ getPaymentHistory API Error:", err.message);
+    throw err;
+  }
+};
+
+// Get recruiter DB points (like user points, credits, etc.)
+export const getDbPointUser = async () => {
+  try {
+    const token = Cookies.get("userToken");
+    const res = await fetch(`${BASE_URL}/recruiter/dbpointUser`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to fetch DB points");
+    return data; // { points: number, details: {...} }
+  } catch (err) {
+    console.error("❌ getDbPointUser API Error:", err.message);
+    throw err;
+  }
+};

@@ -27,7 +27,11 @@ const useIsMobile = () => {
 };
 
 const Navbar = ({ onToggleSidebar }) => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout
+
+
+    
+   } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();

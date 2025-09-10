@@ -87,6 +87,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
 
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

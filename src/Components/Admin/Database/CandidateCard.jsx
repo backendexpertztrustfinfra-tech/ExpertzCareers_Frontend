@@ -55,7 +55,7 @@ const CandidateCard = ({ candidate }) => {
     }
   };
 
-  console.log("Candidate Data:", candidate);
+
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5 sm:p-8 w-full max-w-5xl mx-auto transition-transform hover:scale-[1.01]">

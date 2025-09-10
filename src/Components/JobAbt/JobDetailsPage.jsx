@@ -16,6 +16,73 @@ import {
 } from "lucide-react";
 import Cookies from "js-cookie";
 
+/**
+ * Keep the same sanitize implementation used earlier
+ */
+function sanitizeHtml(dirty) {
+  if (!dirty) return "";
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(dirty, "text/html");
+
+  const whitelist = {
+    P: [],
+    BR: [],
+    STRONG: [],
+    B: [],
+    EM: [],
+    I: [],
+    U: [],
+    UL: [],
+    OL: [],
+    LI: [],
+    A: ["href"],
+  };
+
+  function cleanNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return document.createTextNode(node.textContent);
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return null;
+    }
+    const tag = node.tagName.toUpperCase();
+    if (!whitelist[tag]) {
+      const frag = document.createDocumentFragment();
+      node.childNodes.forEach((child) => {
+        const cleaned = cleanNode(child);
+        if (cleaned) frag.appendChild(cleaned);
+      });
+      return frag;
+    }
+    const el = document.createElement(tag.toLowerCase());
+
+    if (tag === "A") {
+      const href = node.getAttribute("href");
+      if (href && /^(https?:|mailto:|tel:)/i.test(href)) {
+        el.setAttribute("href", href);
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer");
+      }
+    }
+
+    node.childNodes.forEach((child) => {
+      const cleaned = cleanNode(child);
+      if (cleaned) el.appendChild(cleaned);
+    });
+    return el;
+  }
+
+  const frag = document.createDocumentFragment();
+  doc.body.childNodes.forEach((child) => {
+    const c = cleanNode(child);
+    if (c) frag.appendChild(c);
+  });
+  const container = document.createElement("div");
+  container.appendChild(frag);
+  return container.innerHTML;
+}
+
 const JobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -79,6 +146,32 @@ const JobDetails = () => {
       localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
       setSaved(true);
     }
+  };
+
+  // Helper to decide how to render description
+  const renderDescription = () => {
+    if (!job.description) {
+      return <p className="text-sm text-gray-500">No job description provided.</p>;
+    }
+    if (Array.isArray(job.description)) {
+      return (
+        <div className="text-gray-600 leading-relaxed">
+          <ul className="list-disc list-inside space-y-2">
+            {job.description.map((d, idx) => (
+              <li key={idx}>{d}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    // string (HTML) -> sanitize then dangerouslySetInnerHTML
+    const cleaned = sanitizeHtml(job.description);
+    return (
+      <div
+        className="prose prose-sm max-w-none text-gray-600 leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: cleaned }}
+      />
+    );
   };
 
   return (
@@ -165,13 +258,7 @@ const JobDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Job Info */}
           <div className="lg:col-span-2 space-y-6">
-            <Section title="Job Description">
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                {Array.isArray(job.description)
-                  ? job.description.join(" ")
-                  : job.description}
-              </p>
-            </Section>
+            <Section title="Job Description">{renderDescription()}</Section>
 
             {job.responsibilities?.length > 0 && (
               <Section title="Responsibilities">

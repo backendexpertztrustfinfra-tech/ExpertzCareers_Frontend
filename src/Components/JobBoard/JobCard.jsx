@@ -50,7 +50,8 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
       job.jobCategory ||
       (job.skills ? job.skills.join(", ") : job.jobSkills),
     experience: job.experience || job.totalExperience || job.relevantExperience,
-    postedDate: job.postedDate || job.createdAt || (job.raw && job.raw.createdAt),
+    postedDate:
+      job.postedDate || job.createdAt || (job.raw && job.raw.createdAt),
     applicants:
       job.applicants ||
       (job.candidatesApplied
@@ -87,7 +88,9 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
   const handleSave = (e) => {
     e?.stopPropagation();
     const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    if (!savedJobs.some((s) => s.id === normalized.id || s._id === normalized.id)) {
+    if (
+      !savedJobs.some((s) => s.id === normalized.id || s._id === normalized.id)
+    ) {
       savedJobs.push(normalized);
       localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
       setSaved(true);
@@ -121,7 +124,9 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
       const data = await resp.json();
       if (!resp.ok)
         throw new Error(data.message || `Apply failed: ${resp.status}`);
-      const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
+      const appliedJobs = JSON.parse(
+        localStorage.getItem("appliedJobs") || "[]"
+      );
       appliedJobs.push({ ...normalized, appliedAt: new Date().toISOString() });
       localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
       setApplied(true);
@@ -194,16 +199,24 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
       <div className="grid grid-cols-2 gap-2 mb-3 text-xs sm:text-sm">
         <Detail icon={<MapPin size={13} />} text={normalized.location} />
         <Detail icon={<Briefcase size={13} />} text={normalized.type} />
-        <Detail icon={<GraduationCap size={13} />} text={normalized.qualification} />
+        <Detail
+          icon={<GraduationCap size={13} />}
+          text={normalized.qualification}
+        />
         <Detail icon={<IndianRupee size={13} />} text={normalized.salary} />
       </div>
 
       {/* Description */}
-      <div className="mb-3 p-2 rounded-lg bg-orange-50 border border-orange-200 text-xs sm:text-sm text-gray-700 line-clamp-2">
-        {Array.isArray(normalized.description)
-          ? normalized.description.join(" ")
-          : normalized.description}
-      </div>
+      {normalized.description && (
+        <div
+          className="mb-3 p-2 rounded-lg bg-orange-50 border border-orange-200 text-xs sm:text-sm text-gray-700 line-clamp-2 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{
+            __html: Array.isArray(normalized.description)
+              ? normalized.description.join(" ")
+              : normalized.description,
+          }}
+        />
+      )}
 
       {/* Skills / Category */}
       {normalized.category && (

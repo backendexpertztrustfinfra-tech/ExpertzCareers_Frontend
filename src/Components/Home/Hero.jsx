@@ -88,9 +88,9 @@ const Hero = forwardRef(({ onlogin }, ref) => {
               : "/"
           );
         }, 2000);
-      }console.log("token:",token
+      }
 
-      )
+      // console.log("token:", token);
     } catch (err) {
       alert(err.message || "Login error");
     } finally {

@@ -6,6 +6,7 @@ import {
   FaDatabase,
   FaCreditCard,
   FaFileInvoice,
+  FaUser,
   FaEllipsisH,
   FaSignOutAlt,
 } from "react-icons/fa";
@@ -34,7 +35,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [setCollapsed]);
 
-  // ✅ Fetch user profile (non-blocking)
+  // Fetch user profile 
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
@@ -49,7 +50,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
     loadUser();
   }, [token]);
 
-  // ✅ Close when clicking outside (only on mobile / collapsed = false)
+  //  Close when clicking outside 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -83,10 +84,11 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   const tabs = [
     { icon: <FaHome />, label: "Home" },
     { icon: <FaBriefcase />, label: "Job" },
+    { icon: <FaUser />, label: "Candidate" },
     { icon: <FaDatabase />, label: "Database" },
     { icon: <FaCreditCard />, label: "Credits" },
     { icon: <FaFileInvoice />, label: "Billing" },
-    { icon: <FaEllipsisH />, label: "More" },
+    { icon: <FaEllipsisH />, label: "Profile" },
   ];
 
   return (
@@ -98,12 +100,13 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
 
       <div
         ref={sidebarRef}
-        className={`fixed top-[64px] left-0 h-[calc(100vh-64px)] bg-white shadow-lg z-40
-          flex flex-col justify-between
-          transition-all duration-300 ease-in-out
-          ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
-        `}
+        className={`fixed top-[100px] left-0 h-[calc(100vh-100px)] bg-white shadow-lg z-40
+    flex flex-col justify-between
+    transition-all duration-300 ease-in-out
+    ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
+  `}
       >
+
         {/* Profile */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-100">
           <img
@@ -161,10 +164,9 @@ const SidebarTab = ({ icon, label, activeTab, onClick, collapsed }) => (
     onClick={onClick}
     title={collapsed ? label : ""}
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
-      ${
-        activeTab === label
-          ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
-          : "text-gray-700 hover:bg-yellow-100 hover:text-yellow-700"
+      ${activeTab === label
+        ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
+        : "text-gray-700 hover:bg-yellow-100 hover:text-yellow-700"
       }`}
   >
     <span className="text-lg">{icon}</span>
