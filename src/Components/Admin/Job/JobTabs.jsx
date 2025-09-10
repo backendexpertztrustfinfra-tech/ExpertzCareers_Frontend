@@ -18,8 +18,9 @@ const statusTabs = ["All", "Live Jobs", "Pending Jobs", "Closed Jobs"];
 const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   const [jobs, setJobs] = useState([]);
   const [activeStatus, setActiveStatus] = useState("All");
-  const [showForm, setShowForm] = useState(false); // ✅ added
+  const [showForm, setShowForm] = useState(false);
   const [selectedJobEdit, setSelectedJobEdit] = useState(null);
+  const [loading, setLoading] = useState(false); // ✅ Hero-style loading
 
   const token = Cookies.get("userToken");
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   const fetchJobsFromAPI = async (status = "All") => {
     if (!token) return setJobs([]);
 
+    setLoading(true);
     try {
       let data, list;
 
@@ -62,7 +64,10 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
             const count = res?.candidatesApplied?.length ?? 0;
             return { ...job, appliedCount: count };
           } catch (err) {
-            console.error(`Error fetching applied count for job ${job.id}`, err);
+            console.error(
+              `Error fetching applied count for job ${job.id}`,
+              err
+            );
             return job;
           }
         })
@@ -72,6 +77,8 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
     } catch (err) {
       console.error("Fetch jobs error:", err);
       alert("Error fetching jobs: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,7 +118,6 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
     setActiveTab("Candidate");
   };
 
-  // ✅ restored
   const handleFormSubmit = (updatedJob) => {
     if (updatedJob?.id) {
       setJobs((prev) =>
@@ -124,7 +130,18 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 relative">
+      {/* ✅ Fullscreen Loader Overlay (same as Hero) */}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">
+          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-xl">
+            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-3 text-gray-700 font-medium">Loading jobs...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs + Post Button */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
           {statusTabs.map((tab) => (
@@ -151,7 +168,23 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
           ))}
         </div>
 
-        {/* Post Job Button (Desktop) */}
+        {/* Post Job Button (Mobile Floating Button) */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() =>
+            navigate("/post-job", {
+              state: { returnTo: { tab: "Job", refresh: true } },
+            })
+          }
+          className="sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg 
+          bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 
+          text-white w-16 h-16 flex items-center justify-center text-3xl"
+        >
+          +
+        </motion.button>
+
+        {/* Post Job Button */}
         <div className="hidden sm:block ml-auto">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -169,51 +202,35 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
         </div>
       </div>
 
-      {/* Post Job Button (Mobile Floating Button) */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() =>
-          navigate("/post-job", {
-            state: { returnTo: { tab: "Job", refresh: true } },
-          })
-        }
-        className="sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg 
-          bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 
-          text-white w-16 h-16 flex items-center justify-center text-3xl"
-      >
-        +
-      </motion.button>
-
       {/* Job Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <AnimatePresence>
-          {jobs.length > 0 ? (
-            jobs.map((job, index) => (
-              <motion.div
-                key={job.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <DashboardJobCard
-                  job={job}
-                  onDelete={handleDelete}
-                  onEditClick={handleEditClick}
-                  onJobClick={() => handleJobClick(job)}
-                />
-              </motion.div>
-            ))
-          ) : (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-gray-500 py-10 bg-white rounded-xl shadow border border-gray-200 col-span-full"
-            >
-              No jobs found
-            </motion.p>
-          )}
+          {jobs.length > 0
+            ? jobs.map((job, index) => (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <DashboardJobCard
+                    job={job}
+                    onDelete={handleDelete}
+                    onEditClick={handleEditClick}
+                    onJobClick={() => handleJobClick(job)}
+                  />
+                </motion.div>
+              ))
+            : !loading && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-gray-500 py-10 bg-white rounded-xl shadow border border-gray-200 col-span-full"
+                >
+                  No jobs found
+                </motion.p>
+              )}
         </AnimatePresence>
       </div>
 

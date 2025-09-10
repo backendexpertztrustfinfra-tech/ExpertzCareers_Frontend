@@ -5,7 +5,7 @@ const JobMainCard = ({ job, setApplicationStatus }) => {
   const { user } = useContext(AuthContext);
   const [isApplied, setIsApplied] = useState(false);
 
-  // Check if already applied
+
   useEffect(() => {
     if (!user) return;
     const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs")) || [];
@@ -45,7 +45,7 @@ const JobMainCard = ({ job, setApplicationStatus }) => {
 
     // ✅ Update both UI states
     setIsApplied(true);
-    setApplicationStatus("Pending"); // ✅ Real-time tracker update
+    setApplicationStatus("Pending");
 
     alert("✅ You have successfully applied!");
   };

@@ -10,7 +10,6 @@ import {
   Clock,
   Users,
   TrendingUp,
-  Sparkles,
   BookmarkIcon,
   Share2,
 } from "lucide-react";
@@ -23,6 +22,7 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
   const [loading, setLoading] = useState(false);
   const token = Cookies.get("userToken");
 
+  // ✅ Normalize job object
   const normalized = {
     id: job.id || job._id || job.raw?._id || job.jobId,
     title:
@@ -73,23 +73,25 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
     raw: job.raw || job,
   };
 
+  // ✅ Check saved & applied status on mount
   useEffect(() => {
     const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
     setSaved(
-      savedJobs.some((s) => s.id === normalized.id || s._id === normalized.id)
+      savedJobs.some((s) => String(s.id || s._id) === String(normalized.id))
     );
 
     const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
     setApplied(
-      appliedJobs.some((a) => a.id === normalized.id || a._id === normalized.id)
+      appliedJobs.some((a) => String(a.id || a._id) === String(normalized.id))
     );
   }, [normalized.id]);
 
+  // ✅ Save Job
   const handleSave = (e) => {
     e?.stopPropagation();
     const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
     if (
-      !savedJobs.some((s) => s.id === normalized.id || s._id === normalized.id)
+      !savedJobs.some((s) => String(s.id || s._id) === String(normalized.id))
     ) {
       savedJobs.push(normalized);
       localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
@@ -97,10 +99,11 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
     }
   };
 
+  // ✅ Apply Job
   const handleApply = async (e) => {
     e.stopPropagation();
     if (applied) {
-      alert("✅ You've already applied");
+      alert("✅ You've already applied for this job.");
       return;
     }
     setLoading(true);
@@ -110,6 +113,7 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
         setLoading(false);
         return;
       }
+
       const resp = await fetch(
         `https://expertzcareers-backend.onrender.com/jobseeker/applyforjob/${normalized.id}`,
         {
@@ -121,14 +125,24 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
           body: JSON.stringify({}),
         }
       );
+
       const data = await resp.json();
       if (!resp.ok)
         throw new Error(data.message || `Apply failed: ${resp.status}`);
-      const appliedJobs = JSON.parse(
-        localStorage.getItem("appliedJobs") || "[]"
-      );
-      appliedJobs.push({ ...normalized, appliedAt: new Date().toISOString() });
-      localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
+
+      let appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
+      if (
+        !appliedJobs.some(
+          (a) => String(a.id || a._id) === String(normalized.id)
+        )
+      ) {
+        appliedJobs.push({
+          ...normalized,
+          appliedAt: new Date().toISOString(),
+        });
+        localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
+      }
+
       setApplied(true);
       alert("✅ Application submitted!");
     } catch (err) {
@@ -139,6 +153,7 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
     }
   };
 
+  // ✅ View Details
   const handleViewDetails = (e) => {
     e?.stopPropagation();
     if (typeof onJobClick === "function") {
@@ -256,7 +271,7 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
               disabled={loading || applied}
               className={`px-4 py-2 rounded-lg font-medium text-xs sm:text-sm w-full sm:w-auto ${
                 applied
-                  ? "bg-green-500 text-white"
+                  ? "bg-green-500 text-white cursor-not-allowed"
                   : "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
               }`}
             >

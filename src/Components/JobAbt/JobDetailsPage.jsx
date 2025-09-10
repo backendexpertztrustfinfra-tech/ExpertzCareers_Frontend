@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   MapPin,
@@ -17,7 +17,7 @@ import {
 import Cookies from "js-cookie";
 
 /**
- * Keep the same sanitize implementation used earlier
+ * Sanitize job description HTML
  */
 function sanitizeHtml(dirty) {
   if (!dirty) return "";
@@ -40,12 +40,10 @@ function sanitizeHtml(dirty) {
   };
 
   function cleanNode(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
+    if (node.nodeType === Node.TEXT_NODE)
       return document.createTextNode(node.textContent);
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-      return null;
-    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
+
     const tag = node.tagName.toUpperCase();
     if (!whitelist[tag]) {
       const frag = document.createDocumentFragment();
@@ -55,8 +53,8 @@ function sanitizeHtml(dirty) {
       });
       return frag;
     }
-    const el = document.createElement(tag.toLowerCase());
 
+    const el = document.createElement(tag.toLowerCase());
     if (tag === "A") {
       const href = node.getAttribute("href");
       if (href && /^(https?:|mailto:|tel:)/i.test(href)) {
@@ -65,7 +63,6 @@ function sanitizeHtml(dirty) {
         el.setAttribute("rel", "noopener noreferrer");
       }
     }
-
     node.childNodes.forEach((child) => {
       const cleaned = cleanNode(child);
       if (cleaned) el.appendChild(cleaned);
@@ -78,6 +75,7 @@ function sanitizeHtml(dirty) {
     const c = cleanNode(child);
     if (c) frag.appendChild(c);
   });
+
   const container = document.createElement("div");
   container.appendChild(frag);
   return container.innerHTML;
@@ -92,6 +90,17 @@ const JobDetails = () => {
   const [saved, setSaved] = useState(false);
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // ✅ Check if job already saved/applied on mount
+  useEffect(() => {
+    if (!job) return;
+
+    const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
+    setSaved(savedJobs.some((s) => s.id === job.id || s._id === job.id));
+
+    const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
+    setApplied(appliedJobs.some((a) => a.id === job.id || a._id === job.id));
+  }, [job]);
 
   if (!job) {
     return (
@@ -129,6 +138,13 @@ const JobDetails = () => {
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.message || "Failed");
 
+      // ✅ Save applied job in localStorage
+      const appliedJobs = JSON.parse(
+        localStorage.getItem("appliedJobs") || "[]"
+      );
+      appliedJobs.push({ ...job, appliedAt: new Date().toISOString() });
+      localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
+
       setApplied(true);
       alert("✅ Application submitted!");
     } catch (err) {
@@ -148,23 +164,22 @@ const JobDetails = () => {
     }
   };
 
-  // Helper to decide how to render description
+  // Helper to render description
   const renderDescription = () => {
     if (!job.description) {
-      return <p className="text-sm text-gray-500">No job description provided.</p>;
+      return (
+        <p className="text-sm text-gray-500">No job description provided.</p>
+      );
     }
     if (Array.isArray(job.description)) {
       return (
-        <div className="text-gray-600 leading-relaxed">
-          <ul className="list-disc list-inside space-y-2">
-            {job.description.map((d, idx) => (
-              <li key={idx}>{d}</li>
-            ))}
-          </ul>
-        </div>
+        <ul className="list-disc list-inside space-y-2 text-gray-600">
+          {job.description.map((d, idx) => (
+            <li key={idx}>{d}</li>
+          ))}
+        </ul>
       );
     }
-    // string (HTML) -> sanitize then dangerouslySetInnerHTML
     const cleaned = sanitizeHtml(job.description);
     return (
       <div
@@ -237,7 +252,10 @@ const JobDetails = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mt-6 text-sm">
             <Detail icon={<MapPin size={16} />} text={job.location} />
             <Detail icon={<Briefcase size={16} />} text={job.type} />
-            <Detail icon={<GraduationCap size={16} />} text={job.qualification} />
+            <Detail
+              icon={<GraduationCap size={16} />}
+              text={job.qualification}
+            />
             <Detail icon={<IndianRupee size={16} />} text={job.salary} />
             <Detail
               icon={<Users size={16} />}
@@ -259,47 +277,6 @@ const JobDetails = () => {
           {/* Left: Job Info */}
           <div className="lg:col-span-2 space-y-6">
             <Section title="Job Description">{renderDescription()}</Section>
-
-            {job.responsibilities?.length > 0 && (
-              <Section title="Responsibilities">
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  {job.responsibilities.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-              </Section>
-            )}
-
-            {job.skills?.length > 0 && (
-              <Section title="Skills Required">
-                <div className="flex flex-wrap gap-2">
-                  {job.skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 text-xs font-medium bg-orange-100 rounded-full text-gray-700 hover:bg-orange-200 transition"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {job.benefits?.length > 0 && (
-              <Section title="Benefits">
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {job.benefits.map((b, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 p-3 bg-green-50 rounded-xl text-sm text-gray-700 hover:bg-green-100 transition"
-                    >
-                      <CheckCircle2 className="text-green-500" size={18} />
-                      {b}
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
           </div>
 
           {/* Right: Company Info */}

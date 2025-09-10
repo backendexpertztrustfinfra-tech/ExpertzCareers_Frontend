@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import { BASE_URL } from "../config";
 
 export const SubscriptionContext = createContext();
 
@@ -16,7 +17,7 @@ export const SubscriptionProvider = ({ children }) => {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/recruiter/getActiveSubscription`, {
+      const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
