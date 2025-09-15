@@ -14,15 +14,25 @@ import {
   Share2,
 } from "lucide-react";
 import Cookies from "js-cookie";
+import { motion } from "framer-motion";
+import { BASE_URL } from "../../config";
 
-const JobCard = ({ job, showActions = true, onJobClick }) => {
+const JobCard = ({
+  job,
+  showActions = true,
+  onJobClick,
+  isSaved: isSavedFromParent = false,
+  isApplied: isAppliedFromParent = false,
+  onUpdate,
+}) => {
   const navigate = useNavigate();
-  const [saved, setSaved] = useState(false);
-  const [applied, setApplied] = useState(false);
+  const [saved, setSaved] = useState(Boolean(isSavedFromParent));
+  const [applied, setApplied] = useState(Boolean(isAppliedFromParent));
   const [loading, setLoading] = useState(false);
   const token = Cookies.get("userToken");
+  const [saveFeedback, setSaveFeedback] = useState("");
 
-  // ✅ Normalize job object
+  // Normalize job fields
   const normalized = {
     id: job.id || job._id || job.raw?._id || job.jobId,
     title:
@@ -73,77 +83,156 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
     raw: job.raw || job,
   };
 
-  // ✅ Check saved & applied status on mount
+  // 🔥 Reset cache instantly when user changes (login/logout)
   useEffect(() => {
-    const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    setSaved(
-      savedJobs.some((s) => String(s.id || s._id) === String(normalized.id))
-    );
+    const resetCache = () => {
+      window.__SAVED_IDS = {};
+      window.__APPLIED_IDS = {};
+      setSaved(false);
+      setApplied(false);
+    };
 
-    const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
-    setApplied(
-      appliedJobs.some((a) => String(a.id || a._id) === String(normalized.id))
-    );
-  }, [normalized.id]);
+    window.addEventListener("userChanged", resetCache);
 
-  // ✅ Save Job
-  const handleSave = (e) => {
+    return () => {
+      window.removeEventListener("userChanged", resetCache);
+    };
+  }, []);
+
+  // Fetch saved/applied jobs for current user
+  useEffect(() => {
+    const fetchStatusListsIfNeeded = async () => {
+      if (!token) return;
+      if (isSavedFromParent || isAppliedFromParent) return;
+
+      const userKey = `user_${token}`;
+
+      try {
+        if (!window.__SAVED_IDS) window.__SAVED_IDS = {};
+        if (!window.__APPLIED_IDS) window.__APPLIED_IDS = {};
+
+        if (!window.__SAVED_IDS[userKey]) {
+          const resp = await fetch(`${BASE_URL}/jobseeker/getsavedJobs`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (resp.ok) {
+            const d = await resp.json();
+            window.__SAVED_IDS[userKey] = (d.savedJobs || []).map(
+              (j) => j._id || j.id
+            );
+          } else {
+            window.__SAVED_IDS[userKey] = [];
+          }
+        }
+
+        if (!window.__APPLIED_IDS[userKey]) {
+          const resp2 = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (resp2.ok) {
+            const d2 = await resp2.json();
+            window.__APPLIED_IDS[userKey] = (d2.appliedJobs || []).map(
+              (j) => j._id || j.id
+            );
+          } else {
+            window.__APPLIED_IDS[userKey] = [];
+          }
+        }
+
+        setSaved(
+          Boolean(window.__SAVED_IDS[userKey]?.includes(normalized.id))
+        );
+        setApplied(
+          Boolean(window.__APPLIED_IDS[userKey]?.includes(normalized.id))
+        );
+      } catch (err) {
+        console.error("JobCard status fetch error:", err);
+      }
+    };
+
+    fetchStatusListsIfNeeded();
+  }, [normalized.id, token, isSavedFromParent, isAppliedFromParent]);
+
+  // Save / Unsave
+  const handleSave = async (e) => {
     e?.stopPropagation();
-    const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    if (
-      !savedJobs.some((s) => String(s.id || s._id) === String(normalized.id))
-    ) {
-      savedJobs.push(normalized);
-      localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
-      setSaved(true);
+    if (!token) return alert("❌ Please log in to save jobs.");
+
+    const userKey = `user_${token}`;
+
+    try {
+      if (!saved) {
+        const resp = await fetch(
+          `${BASE_URL}/jobseeker/savejob/${normalized.id}`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to save job");
+
+        window.__SAVED_IDS[userKey] = window.__SAVED_IDS[userKey] || [];
+        if (!window.__SAVED_IDS[userKey].includes(normalized.id))
+          window.__SAVED_IDS[userKey].push(normalized.id);
+        setSaved(true);
+      } else {
+        const resp = await fetch(
+          `${BASE_URL}/jobseeker/removesavedjob/${normalized.id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to remove job");
+
+        window.__SAVED_IDS[userKey] = (window.__SAVED_IDS[userKey] || []).filter(
+          (id) => id !== normalized.id
+        );
+        setSaved(false);
+      }
+
+      if (typeof onUpdate === "function") onUpdate();
+      window.dispatchEvent(new Event("savedJobsUpdated"));
+    } catch (err) {
+      console.error("save/unsave error:", err);
+      alert("❌ " + (err.message || "Failed to update saved jobs"));
     }
   };
 
-  // ✅ Apply Job
+  // Apply
   const handleApply = async (e) => {
-    e.stopPropagation();
-    if (applied) {
-      alert("✅ You've already applied for this job.");
-      return;
-    }
-    setLoading(true);
-    try {
-      if (!token) {
-        alert("❌ Please log in to apply for jobs.");
-        setLoading(false);
-        return;
-      }
+    e?.stopPropagation();
+    if (applied) return alert("✅ You've already applied for this job.");
+    if (!token) return alert("❌ Please log in to apply for jobs.");
 
+    const userKey = `user_${token}`;
+    setLoading(true);
+
+    try {
       const resp = await fetch(
-        `https://expertzcareers-backend.onrender.com/jobseeker/applyforjob/${normalized.id}`,
+        `${BASE_URL}/jobseeker/applyforjob/${normalized.id}`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({}),
         }
       );
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.message || "Apply failed");
 
-      const data = await resp.json();
-      if (!resp.ok)
-        throw new Error(data.message || `Apply failed: ${resp.status}`);
-
-      let appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
-      if (
-        !appliedJobs.some(
-          (a) => String(a.id || a._id) === String(normalized.id)
-        )
-      ) {
-        appliedJobs.push({
-          ...normalized,
-          appliedAt: new Date().toISOString(),
-        });
-        localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
-      }
+      window.__APPLIED_IDS[userKey] = window.__APPLIED_IDS[userKey] || [];
+      if (!window.__APPLIED_IDS[userKey].includes(normalized.id))
+        window.__APPLIED_IDS[userKey].push(normalized.id);
 
       setApplied(true);
+
+      if (typeof onUpdate === "function") onUpdate();
+      window.dispatchEvent(new Event("appliedJobsUpdated"));
       alert("✅ Application submitted!");
     } catch (err) {
       console.error("apply error:", err);
@@ -153,7 +242,6 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
     }
   };
 
-  // ✅ View Details
   const handleViewDetails = (e) => {
     e?.stopPropagation();
     if (typeof onJobClick === "function") {
@@ -188,25 +276,32 @@ const JobCard = ({ job, showActions = true, onJobClick }) => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
+        <div className="flex gap-2 relative">
+          {/* <button
             onClick={(e) => e.stopPropagation()}
             className="p-1.5 rounded-lg"
           >
             <Share2 size={16} className="text-gray-500" />
-          </button>
-          <button
+          </button> */}
+
+          {/* Save button with animation */}
+          <motion.button
             onClick={(e) => {
               e.stopPropagation();
               handleSave(e);
             }}
-            className="p-1.5 rounded-lg"
+            whileTap={{ scale: 0.8 }}
+            animate={{ scale: saved ? [1, 1.3, 1] : 1 }}
+            transition={{ duration: 0.3 }}
+            className="p-1.5 rounded-lg relative"
           >
             <BookmarkIcon
-              size={16}
-              className={saved ? "text-orange-500" : "text-gray-500"}
+              size={18}
+              className={
+                saved ? "text-orange-500 fill-orange-500" : "text-gray-500"
+              }
             />
-          </button>
+          </motion.button>
         </div>
       </div>
 

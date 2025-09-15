@@ -169,6 +169,7 @@ export const AuthProvider = ({ children }) => {
     Cookies.remove("usertype");
     setUser(null);
     setUserToken(null);
+    window.dispatchEvent(new Event("tokenChange"));
   };
 
   return (

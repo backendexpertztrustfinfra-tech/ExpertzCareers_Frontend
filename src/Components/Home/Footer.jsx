@@ -137,7 +137,7 @@ const Footer = () => {
       </div>
 
       {/* Social Icons & Copyright */}
-      <div className="relative z-10 bg-orange-100 py-4 sm:py-6">
+      {/* <div className="relative z-10 bg-orange-100 py-4 sm:py-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6">
           <div className="flex space-x-2 sm:space-x-3">
             {[FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaYoutube].map(
@@ -157,7 +157,57 @@ const Footer = () => {
             reserved.
           </p>
         </div>
-      </div>
+      </div> */}
+      {/* Social Icons & Copyright */}
+<div className="relative z-10 bg-orange-100 py-4 sm:py-6">
+  <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6">
+    <div className="flex space-x-2 sm:space-x-3">
+      <a
+        href="https://www.facebook.com/profile.php?id=61575748576224"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
+      >
+        <FaFacebookF className="text-xs sm:text-sm" />
+      </a>
+      <a
+        href="https://www.instagram.com/expertz_digital_it_solution/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
+      >
+        <FaInstagram className="text-xs sm:text-sm" />
+      </a>
+      <a
+        href="https://x.com/home"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
+      >
+        <FaTwitter className="text-xs sm:text-sm" />
+      </a>
+      <a
+        href="https://www.youtube.com/@ExpertzTrustFinfra"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
+      >
+        <FaYoutube className="text-xs sm:text-sm" />
+      </a>
+      {/* LinkedIn is not provided, you can remove or add your LinkedIn link */}
+      <a
+        href="https://www.linkedin.com"
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
+      >
+        <FaLinkedinIn className="text-xs sm:text-sm" />
+      </a>
+    </div>
+    <p className="text-xs text-gray-500 text-center sm:text-right">
+      &copy; {new Date().getFullYear()} Expertz Trust Finfra. All rights reserved.
+    </p>
+  </div>
+</div>
+
 
       {/* Tagline */}
       <div className="relative z-10 bg-orange-50 py-2 sm:py-4 text-center">

@@ -36,8 +36,17 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   });
 
   useEffect(() => {
-    const token = Cookies.get("userToken");
-    setTokenChecked(!!token);
+    const checkToken = () => {
+      const token = Cookies.get("userToken");
+      setTokenChecked(!!token);
+    };
+
+    checkToken();
+    window.addEventListener("tokenChange", checkToken);
+
+    return () => {
+      window.removeEventListener("tokenChange", checkToken);
+    };
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -139,14 +148,22 @@ const Hero = forwardRef(({ onlogin }, ref) => {
       });
 
       if (!res.ok) throw new Error("Google login failed");
-      const { token } = await res.json();
+
+      // Expect backend to return { token, usertype? }
+      const { token, usertype } = await res.json();
 
       if (token) {
-        saveTokenInCookie(token);
+        saveTokenInCookie(token, usertype);
         login(token);
-        alert(`Welcome ${user.displayName}`);
         onlogin?.();
-        navigate("/signup-choice");
+
+        if (usertype === "jobseeker") {
+          navigate("/jobs");
+        } else if (usertype === "recruter") {
+          navigate("/admin");
+        } else {
+          navigate("/signup-choice");
+        }
       }
     } catch (err) {
       alert(err.message);
@@ -179,7 +196,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
         </div>
       )}
 
-         <div className="absolute inset-0 -z-10 pointer-events-none">
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-yellow-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
         <div
           className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-pink-400/20 rounded-full blur-3xl animate-float"
@@ -191,67 +208,68 @@ const Hero = forwardRef(({ onlogin }, ref) => {
       <div className="relative  flex flex-col lg:flex-row items-center justify-between px-8 py-12 max-w-7xl mx-auto">
         {/* Left Content */}
         <div className="flex-1 lg:pr-12 mb-12 lg:mb-0">
-      <div className="space-y-6">
-        <div className="inline-flex items-center px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 text-sm font-medium text-gray-700">
-          <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-          10,000+ Active Job Listings
-        </div>
+          <div className="space-y-6">
+            <div className="inline-flex items-center px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 text-sm font-medium text-gray-700">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+              10,000+ Active Job Listings
+            </div>
 
-        <h1 className="text-5xl lg:text-7xl font-heading font-black leading-tight">
-          <span className="text-gray-800">Discover Your</span>
-          <br />
-          <span className="text-gradient">Next Opportunity</span>
-        </h1>
+            <h1 className="text-5xl lg:text-7xl font-heading font-black leading-tight">
+              <span className="text-gray-800">Discover Your</span>
+              <br />
+              <span className="text-gradient">Next Opportunity</span>
+            </h1>
 
-        <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
-          Connect with top companies, explore exciting roles, and take the next
-          step in your career journey. Your dream job is just one click away.
-        </p>
+            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+              Connect with top companies, explore exciting roles, and take the
+              next step in your career journey. Your dream job is just one click
+              away.
+            </p>
 
-        {/* 🚀 Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button
-            onClick={() => navigate("/jobs")}
-            className="group px-8 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-indigo-500/25 transform hover:scale-105 transition-all duration-300"
-          >
-            <span className="flex items-center justify-center">
-              Start Your Journey
-              <svg
-                className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* 🚀 Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                onClick={() => navigate("/companies")}
+                className="group px-8 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-indigo-500/25 transform hover:scale-105 transition-all duration-300"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </span>
-          </button>
+                <span className="flex items-center justify-center">
+                  Start Your Journey
+                  <svg
+                    className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </span>
+              </button>
 
-          <button
-            onClick={() => navigate("/jobs")}
-            className="px-12 py-4 bg-white/80 backdrop-blur-sm text-gray-700 rounded-xl font-semibold text-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
-          >
-            Explore Jobs
-            <svg
-              className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </button>
-        </div>
+              <button
+                onClick={() => navigate("/jobs")}
+                className="px-12 py-4 bg-white/80 backdrop-blur-sm text-gray-700 rounded-xl font-semibold text-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+              >
+                Explore Jobs
+                <svg
+                  className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </button>
+            </div>
 
             <div className="flex items-center space-x-8 pt-8">
               <div className="text-center">
@@ -369,7 +387,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                       onClick={() => setIsSignup(false)}
                       className="text-orange-600 font-semibold hover:text-orange-700 transition-colors"
                     >
-                      Sign In
+                      Login
                     </button>
                   </p>
                 </form>
@@ -411,7 +429,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                     type="submit"
                     className="w-full py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-indigo-500/25 transform hover:scale-[1.02] transition-all duration-300"
                   >
-                    Sign In
+                    Login
                   </button>
 
                   <div className="relative my-6">

@@ -23,6 +23,10 @@ import Companies from "./Pages/Companies";
 import CompanyPage from "./Pages/CompanyPage";
 import Services from "./Pages/Services";
 import PostJobPage from "./Components/Admin/Job/PostJobPage";
+import Mission from "./Pages/Mission";
+import Vision from "./Pages/Vision.jsx";
+import Terms from "./Pages/Terms.jsx";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
 
 function App() {
   return (
@@ -44,6 +48,10 @@ function App() {
                 <Route path="/companies/:id" element={<CompanyPage />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/post-job" element={<PostJobPage />} />
+                <Route path="/mission" element={<Mission />} />
+                <Route path="/vision" element={<Vision />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
                 <Route
                   path="/my-jobs"

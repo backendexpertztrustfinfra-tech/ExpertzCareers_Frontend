@@ -1,5 +1,4 @@
-"use client";
-
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -208,9 +207,11 @@ const FaqSection = () => {
             <p className="text-sm sm:text-base text-yellow-100 mb-4">
               Our support team is here to help you 24/7
             </p>
+            <Link to="/contact">
             <button className="w-full sm:w-auto bg-white text-yellow-500 px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:bg-yellow-50 transition-colors duration-300 shadow-lg hover:shadow-xl">
               Contact Support
             </button>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

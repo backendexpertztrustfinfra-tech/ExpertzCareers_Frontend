@@ -22,4 +22,3 @@ googleProvider.setCustomParameters({
 const db = getFirestore(app);
 
 export { auth, googleProvider, db };
-

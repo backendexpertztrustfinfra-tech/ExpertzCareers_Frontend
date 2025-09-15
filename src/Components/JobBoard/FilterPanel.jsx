@@ -39,6 +39,7 @@ export default function FilterPanel({
     location: "",
     company: "",
     industry: "",
+    experience: "",
   });
 
   const [salary, setSalary] = useState(filters?.salary || { min: 0, max: 50 });
@@ -86,19 +87,39 @@ export default function FilterPanel({
   const sections = [
     { key: "type", title: "Job Type", icon: Briefcase },
     { key: "qualification", title: "Qualification", icon: GraduationCap },
-    { key: "experience", title: "Experience", icon: Clock },
+    {
+      key: "experience",
+      title: "Experience",
+      icon: Clock,
+      searchable: true,
+      custom: true,
+    },
     {
       key: "location",
       title: "City / Location",
       icon: MapPin,
       searchable: true,
+      custom: true,
     },
-    { key: "company", title: "Company", icon: Building, searchable: true },
-    { key: "industry", title: "Industry", icon: Briefcase, searchable: true },
+    {
+      key: "company",
+      title: "Company",
+      icon: Building,
+      searchable: true,
+      custom: true,
+    },
+    {
+      key: "industry",
+      title: "Industry",
+      icon: Briefcase,
+      searchable: true,
+      custom: true,
+    },
     { key: "workMode", title: "Work Mode", icon: Laptop },
     { key: "datePosted", title: "Date Posted", icon: Calendar },
   ];
 
+  // ✅ Toggle filter values
   const toggleValue = (key, value) => {
     setFilters((prev) => {
       const current = new Set(prev[key] || []);
@@ -129,7 +150,7 @@ export default function FilterPanel({
       salary: { min: 0, max: 50 },
     });
     setSalary({ min: 0, max: 50 });
-    setSearch({ location: "", company: "", industry: "" });
+    setSearch({ location: "", company: "", industry: "", experience: "" });
   };
 
   const setMin = (val) => {
@@ -146,6 +167,17 @@ export default function FilterPanel({
   const applyNow = () => {
     onApply?.(filters);
     setOpenMobile(false);
+  };
+
+  // ✅ Add custom value
+  const addCustomValue = (key, value) => {
+    if (!value.trim()) return;
+    setFilters((prev) => {
+      const current = new Set(prev[key] || []);
+      current.add(value.trim());
+      return { ...prev, [key]: Array.from(current) };
+    });
+    setSearch((s) => ({ ...s, [key]: "" }));
   };
 
   const PanelBody = (
@@ -169,7 +201,7 @@ export default function FilterPanel({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
             <IndianRupee size={16} className="text-orange-500" />
-            Salary (LPA)
+            Salary
           </div>
           <button
             onClick={() => clearSection("salary")}
@@ -198,20 +230,22 @@ export default function FilterPanel({
             />
           </div>
           <p className="mt-2 text-xs text-gray-600">
-            Range: ₹{salary.min} – ₹{salary.max} LPA
+            Range: ₹{salary.min} – ₹{salary.max}
           </p>
         </div>
       </div>
 
-      {/* Sections */}
-      {sections.map(({ key, title, icon: Icon, searchable }) => {
+      {/* Dynamic Sections */}
+      {sections.map(({ key, title, icon: Icon, searchable, custom }) => {
         const values = filters[key] || [];
         const count = values.length;
         const q = search[key] ?? "";
         const pool = OPTIONS[key] || [];
-        const list = searchable
-          ? pool.filter((p) => p.toLowerCase().includes(q.toLowerCase()))
-          : pool;
+
+        // ✅ Merge predefined + custom (so custom chips show up too)
+        const list = [...new Set([...pool, ...(filters[key] || [])])].filter(
+          (p) => (searchable ? p.toLowerCase().includes(q.toLowerCase()) : true)
+        );
 
         return (
           <div key={key} className={SECTION_CLASSES}>
@@ -240,22 +274,39 @@ export default function FilterPanel({
             {openSection === key && (
               <div className="mt-3 space-y-3">
                 {searchable && (
-                  <div className="relative">
-                    <Search
-                      size={14}
-                      className="absolute left-2 top-2.5 text-gray-400"
-                    />
-                    <input
-                      placeholder={`Search ${title}`}
-                      value={q}
-                      onChange={(e) =>
-                        setSearch((s) => ({ ...s, [key]: e.target.value }))
-                      }
-                      className="w-full border rounded-md pl-7 pr-2 py-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
-                    />
+                  <div className="relative flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search
+                        size={14}
+                        className="absolute left-2 top-2.5 text-gray-400"
+                      />
+                      <input
+                        placeholder={`Search or Add ${title}`}
+                        value={q}
+                        onChange={(e) =>
+                          setSearch((s) => ({ ...s, [key]: e.target.value }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCustomValue(key, search[key]);
+                          }
+                        }}
+                        className="w-full border rounded-md pl-7 pr-2 py-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+                      />
+                    </div>
+                    {custom && (
+                      <button
+                        onClick={() => addCustomValue(key, search[key])}
+                        className="px-3 py-1.5 text-xs font-medium text-orange-600 border border-orange-300 rounded-md hover:bg-orange-50"
+                      >
+                        Add
+                      </button>
+                    )}
                   </div>
                 )}
 
+                {/* ✅ Chips now include custom values */}
                 <div className="flex flex-wrap gap-2">
                   {list.map((opt) => {
                     const active = values.includes(opt);

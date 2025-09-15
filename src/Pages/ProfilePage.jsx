@@ -1,5 +1,5 @@
 "use client";
-
+import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import {
@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
 } from "../Components/ui/card";
-
 import { Button } from "../Components/ui/button";
 import { Badge } from "../Components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../Components/ui/avatar";
@@ -116,12 +115,14 @@ const EditableField = ({
 
   return (
     <span
-      className={`cursor-pointer hover:text-orange-600 transition-colors ${className}`}
+      className={`cursor-pointer hover:text-orange-600 transition-colors ${!value ? "text-gray-400" : "text-gray-900"
+        } ${className}`}
       onClick={() => onEdit(field, value)}
     >
-      {value || "Click to add..."}
+      {value || `Enter your ${field}`}
     </span>
   );
+
 };
 
 // ✅ ----------------- Reusable Component for Stat Cards -----------------
@@ -138,6 +139,9 @@ const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
 
 // ✅ ----------------- Main Profile Page Component -----------------
 const ProfilePage = () => {
+
+
+
   const [profile, setProfile] = useState({
     name: "",
     location: "",
@@ -146,7 +150,7 @@ const ProfilePage = () => {
     experience: "",
     availability: "",
     image: "",
-    headline: "",
+    designation: "",
     bio: "",
     profileViews: 0,
     profileStrength: 0,
@@ -171,6 +175,10 @@ const ProfilePage = () => {
     recruterIndustry: "",
   });
 
+  const nevigate = useNavigate();
+  const goToServices = () => {
+    nevigate("/services");
+  }
   const [aiRecommendations, setAiRecommendations] = useState([
     { type: "Skill", title: "Learn TypeScript", priority: "high", match: 95 },
     {
@@ -258,6 +266,28 @@ const ProfilePage = () => {
     }
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // ------------------------------------------------------------------------------
   const handleAddSkill = async () => {
     const name = window.prompt("Enter new Skill name:");
     if (!name) return;
@@ -280,6 +310,7 @@ const ProfilePage = () => {
       setShowModal(true);
     }
   };
+
 
   const handleEditSkill = async (index) => {
     const current = SkillAssessments[index];
@@ -326,7 +357,7 @@ const ProfilePage = () => {
     name: "username",
     email: "useremail",
     phone: "phonenumber",
-    headline: "designation",
+    designation: "designation",
     location: "location",
     image: "profilphoto",
     videoIntro: "introvideo",
@@ -394,7 +425,7 @@ const ProfilePage = () => {
           name: u.username || "",
           email: u.useremail || "",
           phone: u.phonenumber || "",
-          headline: u.designation || "",
+          designation: u.designation || "",
           location: u.location || "",
           image: u.profilphoto || "",
           videoIntro: u.introvideo || "",
@@ -532,7 +563,7 @@ const ProfilePage = () => {
           name: u.username || "",
           email: u.useremail || "",
           phone: u.phonenumber || "",
-          headline: u.designation || "",
+          designation: u.designation || "",
           location: u.location || "",
           experience: u.yearsofExperience || "",
           availability: u.availability || "",
@@ -769,13 +800,6 @@ const ProfilePage = () => {
       bg: "bg-yellow-100 yellow:bg-yellow-900/30",
     },
     {
-      label: "Offers",
-      value: jobStats.offers,
-      icon: Trophy,
-      color: "text-amber-500",
-      bg: "bg-amber-100 yellow:bg-amber-900/30",
-    },
-    {
       label: "Saved",
       value: jobStats.saved,
       icon: Heart,
@@ -880,9 +904,9 @@ const ProfilePage = () => {
 
                   <p className="text-base sm:text-xl text-gray-600 yellow:text-gray-300 mt-1 sm:mt-2">
                     <EditableField
-                      field="headline"
-                      value={profile.headline}
-                      isEditing={editingField === "headline"}
+                      field="designation"
+                      value={profile.designation}
+                      isEditing={editingField === "designation"}
                       tempValue={tempValue}
                       onEdit={handleEdit}
                       onSave={handleSave}
@@ -916,7 +940,7 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+                {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
                   <div className="text-center p-6 bg-gradient-to-br from-orange-100 to-orange-200 yellow:from-orange-900/30 yellow:to-orange-800/30 rounded-xl border border-orange-200/50 yellow:border-orange-700/50 hover:scale-105 transition-transform duration-300">
                     <div className="text-2xl sm:text-3xl font-bold text-orange-600 yellow:text-orange-400">
                       {profile.profileStrength}%
@@ -963,7 +987,7 @@ const ProfilePage = () => {
                       </span>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </CardContent>
@@ -1024,7 +1048,7 @@ const ProfilePage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {jobStatsData.map((stat) => (
                         <StatCard key={stat.label} {...stat} />
                       ))}
@@ -1034,8 +1058,8 @@ const ProfilePage = () => {
               </div>
 
               {/* Career Recommendations (now on the side) */}
-              <div className="lg:col-span-1">
-                <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 yellow:from-orange-950/20 yellow:to-yellow-950/20 border border-orange-200/50 yellow:border-orange-800/50 h-full">
+              <div className="lg:col-span- *1">
+                <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 yellow:from-orange-950/20 yellow:to-yellow-950/20 border border-orange-200/50 yellow:border-orange-800/50 flex flex-col justify-center h-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-lg">
                       <Bot className="w-5 h-5 mr-2 text-orange-500" />
@@ -1047,7 +1071,7 @@ const ProfilePage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {aiRecommendations.slice(0, 2).map((rec, index) => (
+                      {/* {aiRecommendations.slice(0, 2).map((rec, index) => (
                         <div
                           key={index}
                           className="flex items-center justify-between p-3 bg-white/60 yellow:bg-gray-800/60 rounded-lg border border-orange-100/50 yellow:border-orange-800/50"
@@ -1070,8 +1094,9 @@ const ProfilePage = () => {
                             {rec.match}% match
                           </Badge>
                         </div>
-                      ))}
+                      ))} */}
                       <Button
+                        onClick={goToServices}
                         size="sm"
                         variant="outline"
                         className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent"
@@ -1079,6 +1104,7 @@ const ProfilePage = () => {
                         <Compass className="w-4 h-4 mr-2" />
                         View All Recommendations
                       </Button>
+
                     </div>
                   </CardContent>
                 </Card>
@@ -1142,29 +1168,7 @@ const ProfilePage = () => {
                       value={Skill.level}
                       className="h-3 bg-orange-100 yellow:bg-orange-900"
                     />
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center space-x-1 text-sm text-gray-500 yellow:text-gray-400">
-                        <Users className="w-4 h-4" />
-                        <span>{Skill.endorsements} endorsements</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-orange-300 text-orange-600 hover:bg-orange-50 yellow:border-orange-700 yellow:text-orange-400 yellow:hover:bg-orange-900/20 bg-transparent"
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          Take Test
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Learn
-                        </Button>
-                      </div>
-                    </div>
+                    
                   </CardContent>
                 </Card>
               ))}
@@ -1187,6 +1191,7 @@ const ProfilePage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
 
           <TabsContent value="experience" className="space-y-6">
             {[
@@ -1465,7 +1470,7 @@ const ProfilePage = () => {
 
       {/* Custom Alert Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4">
           <div className="bg-white yellow:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm relative border-2 border-orange-400">
             <button
               onClick={() => setShowModal(false)}

@@ -546,3 +546,91 @@ export const getDbPointUser = async () => {
     throw err;
   }
 };
+
+
+// ------------------------------------------------------------ JOBSEEKER JOBS -----------------------------------------------------------
+
+// ⭐ Save a job
+export const saveJob = async (token, jobId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/jobseeker/savejob/${jobId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to save job");
+    return data; // { message, savedJobs }
+  } catch (err) {
+    console.error("❌ Save Job Error:", err.message);
+    throw err;
+  }
+};
+
+// ❌ Remove saved job
+export const removeSavedJob = async (token, jobId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${jobId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to remove saved job");
+    return data; // { message, savedJobs }
+  } catch (err) {
+    console.error("❌ Remove Saved Job Error:", err.message);
+    throw err;
+  }
+};
+
+// 📂 Get saved jobs
+export const getSavedJobs = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/jobseeker/getSavedJobs`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to fetch saved jobs");
+    return data;
+  } catch (err) {
+    console.error("❌ Get Saved Jobs Error:", err.message);
+    throw err;
+  }
+};
+
+// 📂 Get applied jobs
+export const getAppliedJobs = async (token) => {
+  try {
+    const res = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to fetch applied jobs");
+    return data;
+  } catch (err) {
+    console.error("❌ Get Applied Jobs Error:", err.message);
+    throw err;
+  }
+};
+
+// 📝 Apply for a job
+export const applyForJob = async (token, jobId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/jobseeker/applyforjob/${jobId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to apply for job");
+    return data;
+  } catch (err) {
+    console.error("❌ Apply Job Error:", err.message);
+    throw err;
+  }
+};

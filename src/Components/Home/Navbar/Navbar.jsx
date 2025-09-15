@@ -158,7 +158,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
                 {["Jobs", "Companies", "Services"].includes(item.label) &&
                   menuOpen === item.label && (
-                    <div className="absolute left-0 mt-3 w-[700px] bg-white shadow-xl rounded-xl p-6 grid grid-cols-3 gap-6 border border-gray-100 animate-fadeIn z-50">
+                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-3 w-[700px] bg-white shadow-xl rounded-xl p-6 grid grid-cols-3 gap-6 border border-gray-100 animate-fadeIn z-50">
                       {megaMenuData[item.label].map((col, i) => (
                         <div key={i}>
                           <h4 className="font-semibold text-gray-800 mb-2 text-sm">
@@ -199,76 +199,74 @@ const Navbar = ({ onToggleSidebar }) => {
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          {user && (
+          {/* Show only for Jobseeker (not for admin) */}
+          {!isAdminRoute && (
             <>
-              <button
-                type="button"
-                className="relative text-gray-600 hover:text-yellow-600 transition"
-                onClick={() => navigate("/notifications")}
-              >
-                <BellRing size={22} />
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  5
-                </span>
-              </button>
-              <button
-                type="button"
-                className="text-gray-600 hover:text-yellow-600 transition"
-                onClick={() => navigate("/my-jobs?tab=saved")}
-              >
-                <BookmarkCheck size={22} />
-              </button>
-            </>
-          )}
+              {user && (
+                <>
+                  <button
+                    title="saved jobs"
+                    type="button"
+                    className="text-gray-600 hover:text-yellow-600 transition"
+                    onClick={() => navigate("/my-jobs?tab=saved")}
+                  >
+                    <BookmarkCheck size={22} />
+                  </button>
+                </>
+              )}
 
-          {!user ? (
-            <button
-              type="button"
-              onClick={() => navigate("/?login=true")}
-              className="hidden sm:inline bg-gradient-to-r from-yellow-500 to-pink-500 text-white px-5 py-2 rounded-full hover:opacity-90 transition font-medium shadow"
-            >
-              Login
-            </button>
-          ) : (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-yellow-100 to-pink-100 text-yellow-700 hover:scale-105 transition"
-              >
-                <UserRound size={20} />
-              </button>
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-3 w-52 bg-white shadow-lg border rounded-xl overflow-hidden z-50">
-                  <ul className="text-gray-700">
-                    <li
-                      onClick={() => {
-                        navigate("/profile");
-                        setDropdownOpen(false);
-                      }}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Profile
-                    </li>
-                    <li
-                      onClick={() => {
-                        navigate("/my-jobs?tab=applied");
-                        setDropdownOpen(false);
-                      }}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Applied Jobs
-                    </li>
-                    <li
-                      onClick={handleLogout}
-                      className="px-4 py-2 hover:bg-red-100 text-red-600 cursor-pointer"
-                    >
-                      Logout
-                    </li>
-                  </ul>
+              {!user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.reload();
+                  }}
+                  className="hidden sm:inline bg-gradient-to-r from-yellow-500 to-pink-500 text-white px-5 py-2 rounded-full hover:opacity-90 transition font-medium shadow"
+                >
+                  Login
+                </button>
+              ) : (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-yellow-100 to-pink-100 text-yellow-700 hover:scale-105 transition"
+                  >
+                    <UserRound size={20} />
+                  </button>
+                  {dropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-52 bg-white shadow-lg border rounded-xl overflow-hidden z-50">
+                      <ul className="text-gray-700">
+                        <li
+                          onClick={() => {
+                            navigate("/profile");
+                            setDropdownOpen(false);
+                          }}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          Profile
+                        </li>
+                        <li
+                          onClick={() => {
+                            navigate("/my-jobs?tab=applied");
+                            setDropdownOpen(false);
+                          }}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          Applied Jobs
+                        </li>
+                        <li
+                          onClick={handleLogout}
+                          className="px-4 py-2 hover:bg-red-100 text-red-600 cursor-pointer"
+                        >
+                          Logout
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
 
           {/* Hamburger */}
@@ -342,15 +340,21 @@ const Navbar = ({ onToggleSidebar }) => {
                                 onClick={() => {
                                   if (item.label === "Jobs") {
                                     navigate(
-                                      `/jobs?category=${encodeURIComponent(sub)}`
+                                      `/jobs?category=${encodeURIComponent(
+                                        sub
+                                      )}`
                                     );
                                   } else if (item.label === "Companies") {
                                     navigate(
-                                      `/companies?type=${encodeURIComponent(sub)}`
+                                      `/companies?type=${encodeURIComponent(
+                                        sub
+                                      )}`
                                     );
                                   } else if (item.label === "Services") {
                                     navigate(
-                                      `/services?name=${encodeURIComponent(sub)}`
+                                      `/services?name=${encodeURIComponent(
+                                        sub
+                                      )}`
                                     );
                                   }
                                   setMobileOpen(false);

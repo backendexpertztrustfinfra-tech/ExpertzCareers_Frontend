@@ -12,9 +12,9 @@ import {
   Bookmark,
   Building2,
   ArrowLeft,
-  CheckCircle2,
 } from "lucide-react";
 import Cookies from "js-cookie";
+import { BASE_URL } from "../../config";
 
 /**
  * Sanitize job description HTML
@@ -93,14 +93,45 @@ const JobDetails = () => {
 
   // ✅ Check if job already saved/applied on mount
   useEffect(() => {
-    if (!job) return;
+    if (!job || !token) return;
 
-    const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    setSaved(savedJobs.some((s) => s.id === job.id || s._id === job.id));
+    const fetchStatus = async () => {
+      try {
+        // saved
+        const savedResp = await fetch(`${BASE_URL}/jobseeker/getsavedJobs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (savedResp.ok) {
+          const d = await savedResp.json();
+          const ids = (d.savedJobs || []).map((j) => j._id || j.id);
+          setSaved(ids.includes(job.id));
+          // cache
+          window.__SAVED_IDS = ids;
+        } else {
+          setSaved(false);
+          window.__SAVED_IDS = window.__SAVED_IDS || [];
+        }
 
-    const appliedJobs = JSON.parse(localStorage.getItem("appliedJobs") || "[]");
-    setApplied(appliedJobs.some((a) => a.id === job.id || a._id === job.id));
-  }, [job]);
+        // applied
+        const appliedResp = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (appliedResp.ok) {
+          const d2 = await appliedResp.json();
+          const ids2 = (d2.appliedJobs || []).map((j) => j._id || j.id);
+          setApplied(ids2.includes(job.id));
+          window.__APPLIED_IDS = ids2;
+        } else {
+          setApplied(false);
+          window.__APPLIED_IDS = window.__APPLIED_IDS || [];
+        }
+      } catch (err) {
+        console.error("fetchStatus:", err);
+      }
+    };
+
+    fetchStatus();
+  }, [job, token]);
 
   if (!job) {
     return (
@@ -124,53 +155,67 @@ const JobDetails = () => {
     }
     setLoading(true);
     try {
-      const resp = await fetch(
-        `https://expertzcareers-backend.onrender.com/jobseeker/applyforjob/${job.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({}),
-        }
-      );
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.message || "Failed");
+      const resp = await fetch(`${BASE_URL}/jobseeker/applyforjob/${job.id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.message || "Failed to apply");
 
-      // ✅ Save applied job in localStorage
-      const appliedJobs = JSON.parse(
-        localStorage.getItem("appliedJobs") || "[]"
-      );
-      appliedJobs.push({ ...job, appliedAt: new Date().toISOString() });
-      localStorage.setItem("appliedJobs", JSON.stringify(appliedJobs));
-
+      // Update cache & state (no localStorage)
+      window.__APPLIED_IDS = window.__APPLIED_IDS || [];
+      if (!window.__APPLIED_IDS.includes(job.id)) window.__APPLIED_IDS.push(job.id);
       setApplied(true);
+
+      window.dispatchEvent(new Event("appliedJobsUpdated"));
       alert("✅ Application submitted!");
     } catch (err) {
       console.error(err);
-      alert("❌ " + err.message);
+      alert("❌ " + (err.message || "Failed"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = () => {
-    const savedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    if (!saved) {
-      savedJobs.push(job);
-      localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
-      setSaved(true);
+  const handleSave = async () => {
+    if (!token) {
+      alert("❌ Please log in to save jobs.");
+      return;
+    }
+    try {
+      if (!saved) {
+        const resp = await fetch(`${BASE_URL}/jobseeker/savejob/${job.id}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to save");
+        window.__SAVED_IDS = window.__SAVED_IDS || [];
+        if (!window.__SAVED_IDS.includes(job.id)) window.__SAVED_IDS.push(job.id);
+        setSaved(true);
+        window.dispatchEvent(new Event("savedJobsUpdated"));
+        alert("⭐ Job saved!");
+      } else {
+        const resp = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${job.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to unsave");
+        window.__SAVED_IDS = (window.__SAVED_IDS || []).filter((id) => id !== job.id);
+        setSaved(false);
+        window.dispatchEvent(new Event("savedJobsUpdated"));
+        alert("❌ Removed from saved jobs");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ " + (err.message || "Failed"));
     }
   };
 
-  // Helper to render description
   const renderDescription = () => {
-    if (!job.description) {
-      return (
-        <p className="text-sm text-gray-500">No job description provided.</p>
-      );
-    }
+    if (!job.description) return <p className="text-sm text-gray-500">No job description provided.</p>;
     if (Array.isArray(job.description)) {
       return (
         <ul className="list-disc list-inside space-y-2 text-gray-600">
@@ -181,18 +226,11 @@ const JobDetails = () => {
       );
     }
     const cleaned = sanitizeHtml(job.description);
-    return (
-      <div
-        className="prose prose-sm max-w-none text-gray-600 leading-relaxed"
-        dangerouslySetInnerHTML={{ __html: cleaned }}
-      />
-    );
+    return <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: cleaned }} />;
   };
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Top Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => navigate(-1)}

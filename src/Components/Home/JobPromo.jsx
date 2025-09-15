@@ -56,9 +56,11 @@ const JobPromo = () => {
               className="bg-transparent w-full outline-none text-gray-700 text-sm sm:text-base"
             />
           </div>
+          <Link to="/jobs">
           <button className="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-md text-sm sm:text-base w-full sm:w-auto">
             <Search size={18} /> Search
           </button>
+          </Link>
         </div>
 
         {/* Feature Cards */}
@@ -90,7 +92,7 @@ const JobPromo = () => {
             Browse Jobs
           </Link>
           <Link
-            to="/industries"
+            to="/companies"
             className="w-full sm:w-auto border border-yellow-600 text-yellow-700 hover:bg-yellow-50 px-8 py-4 rounded-xl font-medium transition transform hover:scale-105 text-center text-sm sm:text-base"
           >
             Explore Industries

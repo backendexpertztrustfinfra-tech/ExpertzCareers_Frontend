@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import SavedJobsTab from "../Components/MyJobsTabs/SavedJobsTab";
 import AppliedJobsTab from "../Components/MyJobsTabs/AppliedJobsTab";
 import InterviewInvitesTab from "../Components/MyJobsTabs/InterviewInvitesTab";
 
 const MyJobsDashboard = () => {
-  const [activeTab, setActiveTab] = useState("saved");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get("tab") || "saved";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tabFromUrl = queryParams.get("tab") || "saved"; 
+    setActiveTab(tabFromUrl);
+  }, [location.search]);
 
   const renderTabContent = () => {
     switch (activeTab) {
