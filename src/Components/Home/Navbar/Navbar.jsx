@@ -216,15 +216,7 @@ const Navbar = ({ onToggleSidebar }) => {
               )}
 
               {!user ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.reload();
-                  }}
-                  className="hidden sm:inline bg-gradient-to-r from-yellow-500 to-pink-500 text-white px-5 py-2 rounded-full hover:opacity-90 transition font-medium shadow"
-                >
-                  Login
-                </button>
+               <span></span>
               ) : (
                 <div className="relative">
                   <button

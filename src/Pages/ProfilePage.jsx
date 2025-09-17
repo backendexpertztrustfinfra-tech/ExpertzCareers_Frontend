@@ -61,6 +61,7 @@ import {
 } from "lucide-react";
 import generateResumeHtml from "../Components/UserProfile/generateResume";
 import ShareMenu from "../Components/UserProfile/ShareMenu";
+import { BASE_URL } from "../config";
 
 // ✅ ----------------- Reusable Component for Editable Fields -----------------
 const EditableField = ({
@@ -115,14 +116,14 @@ const EditableField = ({
 
   return (
     <span
-      className={`cursor-pointer hover:text-orange-600 transition-colors ${!value ? "text-gray-400" : "text-gray-900"
-        } ${className}`}
+      className={`cursor-pointer hover:text-orange-600 transition-colors ${
+        !value ? "text-gray-400" : "text-gray-900"
+      } ${className}`}
       onClick={() => onEdit(field, value)}
     >
       {value || `Enter your ${field}`}
     </span>
   );
-
 };
 
 // ✅ ----------------- Reusable Component for Stat Cards -----------------
@@ -139,9 +140,6 @@ const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
 
 // ✅ ----------------- Main Profile Page Component -----------------
 const ProfilePage = () => {
-
-
-
   const [profile, setProfile] = useState({
     name: "",
     location: "",
@@ -178,33 +176,61 @@ const ProfilePage = () => {
   const nevigate = useNavigate();
   const goToServices = () => {
     nevigate("/services");
-  }
-  const [aiRecommendations, setAiRecommendations] = useState([
-    { type: "Skill", title: "Learn TypeScript", priority: "high", match: 95 },
-    {
-      type: "job",
-      title: "Senior React Developer at TechCorp",
-      priority: "medium",
-      match: 88,
-    },
-    {
-      type: "course",
-      title: "Advanced Node.js Patterns",
-      priority: "low",
-      match: 76,
-    },
-  ]);
+  };
 
   const [jobStats, setJobStats] = useState({
-    applied: 23,
-    pending: 8,
-    saved: 45,
-    rejected: 3,
-    interviews: 12,
-    offers: 2,
-    profileViews: 1247,
-    searchAppearances: 3421,
+    applied: 0,
+    saved: 0,
+    // interviews: 0,
   });
+
+  const fetchJobStats = async () => {
+    const token = Cookies.get("userToken");
+    if (!token) return;
+
+    try {
+      // Fetch applied jobs
+      const appliedRes = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const appliedData = appliedRes.ok
+        ? await appliedRes.json()
+        : { appliedJobs: [] };
+
+      // Fetch saved jobs
+      const savedRes = await fetch(`${BASE_URL}/jobseeker/getsavedJobs`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const savedData = savedRes.ok ? await savedRes.json() : { savedJobs: [] };
+
+      // Update counts
+      setJobStats({
+        applied: appliedData.appliedJobs?.length || 0,
+        saved: savedData.savedJobs?.length || 0,
+        // interviews: 0,
+      });
+    } catch (err) {
+      console.error("fetchJobStats error:", err);
+      setJobStats({ applied: 0, saved: 0 });
+    }
+  };
+
+  useEffect(() => {
+    fetchJobStats();
+    
+    // Add event listeners to update job stats
+    const updateStatsHandler = () => {
+      fetchJobStats();
+    };
+
+    window.addEventListener("savedJobsUpdated", updateStatsHandler);
+    window.addEventListener("appliedJobsUpdated", updateStatsHandler);
+
+    return () => {
+      window.removeEventListener("savedJobsUpdated", updateStatsHandler);
+      window.removeEventListener("appliedJobsUpdated", updateStatsHandler);
+    };
+  }, []);
 
   const [SkillAssessments, setSkillAssessments] = useState([]);
   const [editingField, setEditingField] = useState("");
@@ -212,6 +238,14 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+
+  // New state variables for on-page input fields
+  const [newSkillName, setNewSkillName] = useState("");
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [newPortfolioLink, setNewPortfolioLink] = useState("");
+  const [isAddingPortfolio, setIsAddingPortfolio] = useState(false);
+  const [newCertLink, setNewCertLink] = useState("");
+  const [isAddingCert, setIsAddingCert] = useState(false);
 
   // ----------------- SKILLS HELPERS & HANDLERS ----------------- //
   function parseSkillsStringToAssessments(SkillString) {
@@ -266,33 +300,15 @@ const ProfilePage = () => {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ------------------------------------------------------------------------------
+  // UPDATED: Use on-page input instead of prompt
   const handleAddSkill = async () => {
-    const name = window.prompt("Enter new Skill name:");
-    if (!name) return;
+    if (!newSkillName) {
+      setModalMessage("Skill name cannot be empty.");
+      setShowModal(true);
+      return;
+    }
     const newSkill = {
-      Skill: name.trim(),
+      Skill: newSkillName.trim(),
       level: 60,
       verified: false,
       trending: false,
@@ -305,20 +321,20 @@ const ProfilePage = () => {
       await saveSkillsToBackend(next);
       setModalMessage("Skill added and saved!");
       setShowModal(true);
+      setNewSkillName(""); // Clear the input field
+      setIsAddingSkill(false); // Hide the input
     } catch {
       setModalMessage("Failed to save new Skill.");
       setShowModal(true);
     }
   };
 
-
+  // UPDATED: Uses the new on-page EditableField component
   const handleEditSkill = async (index) => {
     const current = SkillAssessments[index];
     if (!current) return;
-    const name = window.prompt("Edit Skill name:", current.Skill);
-    if (name === null) return;
     const next = SkillAssessments.map((s, i) =>
-      i === index ? { ...s, Skill: name.trim() } : s
+      i === index ? { ...s, Skill: tempValue.trim() } : s
     );
     setSkillAssessments(next);
     syncProfileSkillsFromAssessments(next);
@@ -326,15 +342,19 @@ const ProfilePage = () => {
       await saveSkillsToBackend(next);
       setModalMessage("Skill updated!");
       setShowModal(true);
+      setEditingField("");
+      setTempValue("");
     } catch {
       setModalMessage("Failed to update Skill.");
       setShowModal(true);
     }
   };
 
+  // UPDATED: Uses on-page confirm logic (can be a simple modal later)
   const handleRemoveSkill = async (index) => {
-    const ok = window.confirm("Remove this Skill?");
-    if (!ok) return;
+    if (!window.confirm("Are you sure you want to remove this skill?")) {
+      return;
+    }
     const next = SkillAssessments.filter((_, i) => i !== index);
     setSkillAssessments(next);
     syncProfileSkillsFromAssessments(next);
@@ -428,7 +448,7 @@ const ProfilePage = () => {
           designation: u.designation || "",
           location: u.location || "",
           image: u.profilphoto || "",
-          videoIntro: u.introvideo || "",
+          videoIntro: u.introvideo || null,
           experience: u.yearsofExperience || "",
           currentSalary: u.previousSalary || "",
           expectedSalary: u.salaryExpectation || "",
@@ -578,7 +598,7 @@ const ProfilePage = () => {
           qualification: u.qualification || "",
           certificationlink: u.certificationlink || "",
           image: u.profilphoto || "",
-          videoIntro: u.introvideo || "",
+          videoIntro: u.introvideo || null,
           summary: u.qualification || "",
           previousCompany: u.previousCompany || "",
           portfioliolink: u.portfioliolink || "",
@@ -609,11 +629,11 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onload = () =>
         setProfile((prev) => ({ ...prev, image: reader.result }));
-      reader.readAsDataURL(file);
-      // TODO: Implement API call to upload image and save image URL to backend 'image' field
+
     }
   };
 
+  //  UPDATED: Function to upload video to backend
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -625,16 +645,58 @@ const ProfilePage = () => {
     }
   };
 
+  // ✅ UPDATED: Function to delete video from backend
+  const handleVideoDelete = async () => {
+    try {
+      const token = Cookies.get("userToken");
+      if (!token) throw new Error("No auth token");
+
+      const formData = new FormData();
+      formData.append("introvideo", "");
+
+      const response = await fetch(
+        "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete video.");
+      }
+
+      // Update local state to reflect the deletion
+      setProfile((prev) => ({
+        ...prev,
+        videoIntro: null,
+      }));
+
+      setModalMessage("Intro video deleted successfully!");
+      setShowModal(true);
+    } catch (err) {
+      console.error("Video deletion error:", err);
+      setModalMessage(err.message || "Failed to delete video.");
+      setShowModal(true);
+    }
+  };
+
+  // UPDATED: No longer uses
   const handleCertificateSave = async () => {
-    const link = window.prompt("Enter your certification link:");
-    if (!link) return;
+    if (!newCertLink) {
+      setModalMessage("Certification link cannot be empty.");
+      setShowModal(true);
+      return;
+    }
 
     try {
       const token = Cookies.get("userToken");
       if (!token) throw new Error("No auth token");
 
       const formData = new FormData();
-      formData.append("certificationlink", link);
+      formData.append("certificationlink", newCertLink);
 
       const res = await fetch(
         "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
@@ -651,10 +713,12 @@ const ProfilePage = () => {
 
       setProfile((prev) => ({
         ...prev,
-        certificationlink: data.user?.certificationlink || link,
+        certificationlink: data.user?.certificationlink || newCertLink,
       }));
       setModalMessage("Certificate link saved!");
       setShowModal(true);
+      setNewCertLink("");
+      setIsAddingCert(false);
     } catch (err) {
       console.error("Certificate save error:", err);
       setModalMessage("Failed to save certificate link");
@@ -711,18 +775,20 @@ const ProfilePage = () => {
     }
   };
 
+  // UPDATED: No longer uses window.prompt
   const handlePortfolioSave = async () => {
-    const link = window.prompt(
-      "Enter your portfolio link (GitHub, Behance, etc.):"
-    );
-    if (!link) return;
+    if (!newPortfolioLink) {
+      setModalMessage("Portfolio link cannot be empty.");
+      setShowModal(true);
+      return;
+    }
 
     try {
       const token = Cookies.get("userToken");
       if (!token) throw new Error("No auth token");
 
       const formData = new FormData();
-      formData.append("portfioliolink", link);
+      formData.append("portfioliolink", newPortfolioLink);
 
       const res = await fetch(
         "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
@@ -739,10 +805,12 @@ const ProfilePage = () => {
 
       setProfile((prev) => ({
         ...prev,
-        portfioliolink: data.user?.portfioliolink || link,
+        portfioliolink: data.user?.portfioliolink || newPortfolioLink,
       }));
       setModalMessage("Portfolio link saved!");
       setShowModal(true);
+      setNewPortfolioLink("");
+      setIsAddingPortfolio(false);
     } catch (err) {
       console.error("Portfolio save error:", err);
       setModalMessage("Failed to save portfolio link");
@@ -792,13 +860,13 @@ const ProfilePage = () => {
       color: "text-orange-500",
       bg: "bg-orange-100 yellow:bg-orange-900/30",
     },
-    {
-      label: "Interviews",
-      value: jobStats.interviews,
-      icon: Users,
-      color: "text-yellow-500",
-      bg: "bg-yellow-100 yellow:bg-yellow-900/30",
-    },
+    // {
+    //  label: "Interviews",
+    //  value: jobStats.interviews,
+    //  icon: Users,
+    //  color: "text-yellow-500",
+    //  bg: "bg-yellow-100 yellow:bg-yellow-900/30",
+    // },
     {
       label: "Saved",
       value: jobStats.saved,
@@ -857,13 +925,21 @@ const ProfilePage = () => {
                         <Video className="w-3 h-3 mr-1" />
                         Intro
                       </Badge>
+
+                      {/* ❌ Delete Button */}
+                      <button
+                        onClick={handleVideoDelete}
+                        className="absolute bottom-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded-md shadow hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
                     </div>
                   ) : (
                     <div className="relative group w-full max-w-xs mx-auto">
-                      <div className="w-full h-24 bg-gradient-to-br from-orange-100 to-yellow-100 yellow:from-orange-900/30 yellow:to-yellow-900/30 rounded-xl border-2 border-dashed border-orange-300/50 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-yellow-200 yellow:hover:from-orange-800/50 yellow:hover:to-yellow-800/50 transition-all duration-300 group-hover:scale-105">
+                      <div className="w-full h-24 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-xl border-2 border-dashed border-orange-300/50 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-yellow-200 transition-all duration-300 group-hover:scale-105">
                         <div className="text-center">
                           <Video className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                          <p className="text-xs text-orange-600 yellow:text-orange-400 font-medium">
+                          <p className="text-xs text-orange-600 font-medium">
                             Add Video Intro
                           </p>
                           <p className="text-xs text-gray-500">
@@ -1037,7 +1113,7 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Job Activity Dashboard */}
               <div className="lg:col-span-2">
-                <Card className="border-orange-200/50 yellow:border-orange-800/50 h-full">
+                <Card className="border-orange-200/50 dark:border-orange-800/50 h-full">
                   <CardHeader>
                     <CardTitle className="flex items-center text-lg sm:text-2xl">
                       <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-orange-500" />
@@ -1058,7 +1134,7 @@ const ProfilePage = () => {
               </div>
 
               {/* Career Recommendations (now on the side) */}
-              <div className="lg:col-span- *1">
+              <div className="lg:col-span-1">
                 <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 yellow:from-orange-950/20 yellow:to-yellow-950/20 border border-orange-200/50 yellow:border-orange-800/50 flex flex-col justify-center h-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-lg">
@@ -1104,7 +1180,6 @@ const ProfilePage = () => {
                         <Compass className="w-4 h-4 mr-2" />
                         View All Recommendations
                       </Button>
-
                     </div>
                   </CardContent>
                 </Card>
@@ -1114,16 +1189,32 @@ const ProfilePage = () => {
 
           <TabsContent value="Skills" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {SkillAssessments.map((Skill, index) => (
+              {SkillAssessments.map((skill, index) => (
                 <Card
                   key={index}
                   className="hover:shadow-lg transition-shadow border-orange-200/50 yellow:border-orange-800/50"
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{Skill.Skill}</CardTitle>
+                      {editingField === `skill-${index}` ? (
+                        <div className="flex-grow">
+                          <EditableField
+                            field={`skill-${index}`}
+                            value={skill.Skill}
+                            isEditing={true}
+                            tempValue={tempValue}
+                            onEdit={handleEdit}
+                            onSave={() => handleEditSkill(index)}
+                            onCancel={handleCancel}
+                            onTempChange={setTempValue}
+                            className="w-full text-lg"
+                          />
+                        </div>
+                      ) : (
+                        <CardTitle className="text-lg">{skill.Skill}</CardTitle>
+                      )}
                       <div className="flex items-center space-x-2">
-                        {Skill.verified && (
+                        {skill.verified && (
                           <Badge
                             variant="secondary"
                             className="bg-orange-100 text-orange-800 yellow:bg-orange-900 yellow:text-orange-200"
@@ -1132,21 +1223,25 @@ const ProfilePage = () => {
                             Verified
                           </Badge>
                         )}
-                        {Skill.trending && (
+                        {skill.trending && (
                           <Badge className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             Trending
                           </Badge>
                         )}
 
-                        <button
-                          type="button"
-                          onClick={() => handleEditSkill(index)}
-                          className="p-1 rounded-md hover:bg-orange-50"
-                          title="Edit Skill"
-                        >
-                          <Edit3 className="w-4 h-4 text-orange-600" />
-                        </button>
+                        {editingField !== `skill-${index}` && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEdit(`skill-${index}`, skill.Skill)
+                            }
+                            className="p-1 rounded-md hover:bg-orange-50"
+                            title="Edit Skill"
+                          >
+                            <Edit3 className="w-4 h-4 text-orange-600" />
+                          </button>
+                        )}
 
                         <button
                           type="button"
@@ -1159,48 +1254,68 @@ const ProfilePage = () => {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Proficiency Level</span>
-                      <span className="font-bold">{Skill.level}%</span>
-                    </div>
-                    <Progress
-                      value={Skill.level}
-                      className="h-3 bg-orange-100 yellow:bg-orange-900"
-                    />
-                    
-                  </CardContent>
                 </Card>
               ))}
             </div>
 
             <Card className="border-2 border-dashed border-orange-300/50 hover:border-orange-500 transition-colors yellow:border-orange-700/50 yellow:hover:border-orange-400">
               <CardContent className="p-8 text-center">
-                <Target className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Add New Skill</h3>
-                <p className="text-gray-500 yellow:text-gray-400 mb-4">
-                  Showcase more of your expertise
-                </p>
-                <Button
-                  onClick={handleAddSkill}
-                  className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Add Skill
-                </Button>
+                {isAddingSkill ? (
+                  <div className="flex flex-col items-center">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Enter new Skill name
+                    </h3>
+                    <input
+                      type="text"
+                      value={newSkillName}
+                      onChange={(e) => setNewSkillName(e.target.value)}
+                      placeholder="e.g., React, Node.js"
+                      className="w-full max-w-sm p-2 border rounded-md mb-4 text-gray-900"
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={handleAddSkill}
+                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Save Skill
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsAddingSkill(false);
+                          setNewSkillName("");
+                        }}
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Target className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      Add New Skill
+                    </h3>
+                    <p className="text-gray-500 yellow:text-gray-400 mb-4">
+                      Showcase more of your expertise
+                    </p>
+                    <Button
+                      onClick={() => setIsAddingSkill(true)}
+                      className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                    >
+                      <Zap className="w-4 h-4 mr-2" />
+                      Add Skill
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-
           <TabsContent value="experience" className="space-y-6">
             {[
-              {
-                key: "summary",
-                title: "Professional Summary",
-                icon: FileText,
-                description: "Brief overview of your professional background",
-              },
               {
                 key: "currentSalary",
                 title: "Current Salary",
@@ -1212,12 +1327,6 @@ const ProfilePage = () => {
                 title: "Expected Salary",
                 icon: TrendingUp,
                 description: "Your compensation expectations for new roles",
-              },
-              {
-                key: "preferredLocation",
-                title: "Preferred Locations",
-                icon: MapPin,
-                description: "Cities or regions where you want to work",
               },
               {
                 key: "previousCompany",
@@ -1327,21 +1436,68 @@ const ProfilePage = () => {
                     />
                   </div>
 
-                  {/* Portfolio Links */}
+                  {/* UPDATED: Portfolio Links */}
                   <div className="text-center p-8 border-2 border-dashed border-yellow-300/50 rounded-lg hover:border-yellow-500 transition-colors cursor-pointer yellow:border-yellow-700/50 yellow:hover:border-yellow-400">
-                    <Lightbulb className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Portfolio Links</h3>
-                    <p className="text-sm text-gray-500 yellow:text-gray-400 mb-4">
-                      GitHub, Behance, Personal Website
-                    </p>
-                    <Button
-                      variant="secondary"
-                      onClick={handlePortfolioSave}
-                      className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Add Links
-                    </Button>
+                    {isAddingPortfolio ? (
+                      <div className="flex flex-col items-center">
+                        <h3 className="font-semibold mb-2">
+                          Add Portfolio Link
+                        </h3>
+                        <input
+                          type="text"
+                          value={newPortfolioLink}
+                          onChange={(e) => setNewPortfolioLink(e.target.value)}
+                          placeholder="e.g., https://github.com/my-portfolio"
+                          className="w-full max-w-sm p-2 border rounded-md mb-4 text-gray-900"
+                        />
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={handlePortfolioSave}
+                            className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Save Link
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsAddingPortfolio(false);
+                              setNewPortfolioLink("");
+                            }}
+                            className="border-yellow-300 text-yellow-600 hover:bg-yellow-50"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Lightbulb className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                        <h3 className="font-semibold mb-2">Portfolio Links</h3>
+                        <p className="text-sm text-gray-500 yellow:text-gray-400 mb-4">
+                          GitHub, Behance, Personal Website
+                        </p>
+                        {profile.portfioliolink && (
+                          <a
+                            href={profile.portfioliolink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block mb-4 text-orange-500 hover:underline"
+                          >
+                            <ExternalLink className="w-4 h-4 inline-block mr-2" />
+                            View Portfolio
+                          </a>
+                        )}
+                        <Button
+                          variant="secondary"
+                          onClick={() => setIsAddingPortfolio(true)}
+                          className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          {profile.portfioliolink ? "Edit Link" : "Add Links"}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -1349,12 +1505,6 @@ const ProfilePage = () => {
 
             {/* Other Sections */}
             {[
-              {
-                key: "projects",
-                title: "Featured Projects",
-                icon: Lightbulb,
-                description: "Showcase your best work and achievements",
-              },
               {
                 key: "qualification",
                 title: "Qualification",
@@ -1380,7 +1530,39 @@ const ProfilePage = () => {
                   <CardDescription>{field.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {editingField === field.key ? (
+                  {field.key === "certificationlink" && isAddingCert ? (
+                    <div className="flex flex-col items-center">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Add Certificate Link
+                      </h3>
+                      <input
+                        type="text"
+                        value={newCertLink}
+                        onChange={(e) => setNewCertLink(e.target.value)}
+                        placeholder="e.g., https://coursera.org/certificate/..."
+                        className="w-full max-w-sm p-2 border rounded-md mb-4 text-gray-900"
+                      />
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={handleCertificateSave}
+                          className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Save Link
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddingCert(false);
+                            setNewCertLink("");
+                          }}
+                          className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : editingField === field.key ? (
                     <EditableField
                       field={field.key}
                       value={profile[field.key]}
@@ -1420,11 +1602,13 @@ const ProfilePage = () => {
                         {field.description}
                       </p>
                       <Button
-                        onClick={() =>
-                          field.key === "certificationlink"
-                            ? handleCertificateSave()
-                            : handleEdit(field.key, "")
-                        }
+                        onClick={() => {
+                          if (field.key === "certificationlink") {
+                            setIsAddingCert(true);
+                          } else {
+                            handleEdit(field.key, "");
+                          }
+                        }}
                         className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
                       >
                         <ChevronRight className="w-4 h-4 mr-2" />

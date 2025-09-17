@@ -88,6 +88,8 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
   const [salaryAmount, setSalaryAmount] = useState("");
   const [incentiveAmount, setIncentiveAmount] = useState("");
   const [totalSalary, setTotalSalary] = useState("");
+  const [skills, setSkills] = useState(initialData?.skills || []);
+  const [input, setInput] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -162,35 +164,65 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
   const [otherDocument, setOtherDocument] = useState("");
 
   // Normalize data when editing job
-  const normalizeJobData = (job) => ({
-    title: job.jobTitle || job.title || "",
-    category: job.jobCategory || job.category || "",
-    description: job.description || "",
-    openings: job.noofOpening || job.opening || "",
-    type: job.jobType || job.type || "",
-    location: job.location || "",
-    address: job.address || "",
-    gender: job.gender || "",
-    qualification: job.Qualification || job.qualification || "",
-    totalExp: job.totalExperience || job.totalExp || "",
-    relevantExp: job.relevantExperience || job.relevantExp || "",
-    salary: job.SalaryIncentive || job.salary || "",
-    salaryType: job.salaryType || "salary",
-    benefits: job.jobBenefits ? job.jobBenefits.split(",") : [],
-    skills: job.jobSkills ? job.jobSkills.split(",") : [],
-    documents: job.documentRequired ? job.documentRequired.split(",") : [],
-    timing: job.timing || "",
-    shift: job.shift || "",
-    workingDaysFrom: job.workingDaysFrom || "",
-    workingDaysTo: job.workingDaysTo || "",
-    weekend: job.weekend || "",
-    startTime: job.startTime || "",
-    endTime: job.endTime || "",
-  });
+  const normalizeJobData = (job) => {
+    // Split salary and incentives if they exist
+    let initialSalary = job.SalaryIncentive || job.salary || "";
+    let initialSalaryType = job.salaryType || "salary";
+    let initialSalaryAmount = "";
+    let initialIncentiveAmount = "";
+
+    if (initialSalaryType === "salary+incentives" && initialSalary) {
+      const parts = initialSalary.split('+').map(s => s.trim());
+      initialSalaryAmount = parts[0] || "";
+      initialIncentiveAmount = parts[1] || "";
+    } else {
+      initialSalaryAmount = initialSalary;
+    }
+
+    // Split timing
+    const [startTime, endTime] = (job.timing || "").split(' - ').map(t => t.trim());
+
+    // Split working days
+    const [workingDaysFrom, workingDaysTo] = (job.workingDays || "").split(' - ').map(d => d.trim());
+
+    return {
+      title: job.jobTitle || job.title || "",
+      category: job.jobCategory || job.category || "",
+      description: job.description || "",
+      openings: job.noofOpening || job.opening || "",
+      type: job.jobType || job.type || "",
+      location: job.location || "",
+      address: job.address || "",
+      gender: job.gender || "",
+      qualification: job.Qualification || job.qualification || "",
+      totalExp: job.totalExperience || job.totalExp || "",
+      relevantExp: job.relevantExperience || job.relevantExp || "",
+      salary: initialSalary,
+      salaryType: initialSalaryType,
+      benefits: job.jobBenefits ? job.jobBenefits.split(",").map(b => b.trim()) : [],
+      skills: job.jobSkills ? job.jobSkills.split(",").map(s => s.trim()) : [],
+      documents: job.documentRequired ? job.documentRequired.split(",").map(d => d.trim()) : [],
+      shift: job.shift || "",
+      workingDaysFrom: workingDaysFrom,
+      workingDaysTo: workingDaysTo,
+      weekend: job.weekend || "",
+      startTime: startTime,
+      endTime: endTime,
+    };
+  };
 
   useEffect(() => {
     if (initialData) {
-      setFormData(normalizeJobData(initialData));
+      const normalized = normalizeJobData(initialData);
+      setFormData(normalized);
+      if (normalized.salaryType === 'salary+incentives') {
+        const parts = normalized.salary.split('+').map(s => s.trim());
+        setSalaryAmount(parts[0] || '');
+        setIncentiveAmount(parts[1] || '');
+      } else {
+        setSalaryAmount(normalized.salary);
+      }
+      setTotalSalary(normalized.salary);
     }
   }, [initialData]);
 
@@ -204,31 +236,46 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
   const handleSkillKeyDown = (e) => {
     if (e.key === "Enter" && skillInput.trim()) {
       e.preventDefault();
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...prev.skills, skillInput.trim()],
-      }));
-      setSkillInput("");
+      // Check if the skill already exists (case-insensitive)
+      if (!formData.skills.some(s => s.toLowerCase() === skillInput.trim().toLowerCase())) {
+        setFormData((prev) => ({
+          ...prev,
+          skills: [...prev.skills, skillInput.trim()],
+        }));
+        setSkillInput("");
+      } else {
+        toast.warn("Skill already exists!");
+      }
     }
   };
   const handleBenefitKeyDown = (e) => {
     if (e.key === "Enter" && benefitInput.trim()) {
       e.preventDefault();
-      setFormData((prev) => ({
-        ...prev,
-        benefits: [...prev.benefits, benefitInput.trim()],
-      }));
-      setBenefitInput("");
+      // Check if the benefit already exists (case-insensitive)
+      if (!formData.benefits.some(b => b.toLowerCase() === benefitInput.trim().toLowerCase())) {
+        setFormData((prev) => ({
+          ...prev,
+          benefits: [...prev.benefits, benefitInput.trim()],
+        }));
+        setBenefitInput("");
+      } else {
+        toast.warn("Benefit already exists!");
+      }
     }
   };
   const handleDocKeyDown = (e) => {
     if (e.key === "Enter" && docInput.trim()) {
       e.preventDefault();
-      setFormData((prev) => ({
-        ...prev,
-        documents: [...prev.documents, docInput.trim()],
-      }));
-      setDocInput("");
+      // Check if the document already exists (case-insensitive)
+      if (!formData.documents.some(d => d.toLowerCase() === docInput.trim().toLowerCase())) {
+        setFormData((prev) => ({
+          ...prev,
+          documents: [...prev.documents, docInput.trim()],
+        }));
+        setDocInput("");
+      } else {
+        toast.warn("Document already exists!");
+      }
     }
   };
 
@@ -336,6 +383,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
     setLoading(true);
 
+    const salaryValue = formData.salaryType === 'salary+incentives'
+      ? `${salaryAmount} + ${incentiveAmount}`
+      : salaryAmount;
+
     const payload = {
       jobTitle: formData.title,
       jobCategory: otherCategory || formData.category,
@@ -348,16 +399,13 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       Qualification: formData.qualification,
       totalExperience: formData.totalExp,
       relevantExperience: formData.relevantExp,
-      SalaryIncentive: formData.salary,
+      SalaryIncentive: salaryValue,
       salaryType: formData.salaryType,
       jobBenefits: formData.benefits.join(","),
       jobSkills: formData.skills.join(","),
-      documentRequired: [...formData.documents, otherDocument]
-        .filter(Boolean)
-        .join(","),
+      documentRequired: formData.documents.join(","),
       workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
       weekend: formData.weekend,
-      // ensure timing reflects start/end times
       timing: `${formData.startTime} - ${formData.endTime}`,
       shift: formData.shift,
       status: formData.status,
@@ -1000,7 +1048,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                         setFormData((prev) => ({
                           ...prev,
                           startTime: e.target.value,
-                          timing: `${e.target.value} - ${prev.endTime || ""}`,
                         }))
                       }
                       className={inputClass}
@@ -1014,7 +1061,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                         setFormData((prev) => ({
                           ...prev,
                           endTime: e.target.value,
-                          timing: `${prev.startTime || ""} - ${e.target.value}`,
                         }))
                       }
                       className={inputClass}

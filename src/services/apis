@@ -38,7 +38,7 @@ export const fetchUserProfile = async (token) => {
   }
 };
 
-//udate user
+// udate user
 export const updateUserProfile = async (token, formData, login) => {
   if (!token) return null;
 
@@ -114,7 +114,7 @@ export const getDashboardStats = async (token) => {
   }
 };
 
-// -------------------------------------------------------------------  new api USER -----------------------------------------------
+// -------------------------------------------------------------------  new api USER -----------------------------------------------
 
 // Get recuiter profile
 export const getRecruiterProfile = async () => {
@@ -143,17 +143,17 @@ export const getRecruiterProfile = async () => {
   }
 };
 
-export const updateRecruiterProfile = async (token, formData, login) => {
+// ✅ CORRECTED: updateRecruiterProfile function to handle FormData
+export const updateRecruiterProfile = async (token, formData) => {
   if (!token) return null;
 
   try {
     const res = await fetch(`${BASE_URL}/recruiter/updateRecruiterProfile`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(formData),
+      body: formData, // ✅ Directly send the FormData object
     });
     console.log("send data: ", formData);
     if (!res.ok) {
@@ -163,10 +163,7 @@ export const updateRecruiterProfile = async (token, formData, login) => {
 
     const data = await res.json();
 
-    if (data.token && login) {
-      login(data.token);
-    }
-
+    // The login context logic is likely in a separate file, so we'll just return the data here.
     return data;
   } catch (err) {
     console.error("Update Profile Error:", err.message);
@@ -245,7 +242,7 @@ export const getAppliedUser = async (token, jobId) => {
     }
 
     // const result = await res.json();
-    //   console.log("Applied candidate result:", result);
+    //   console.log("Applied candidate result:", result);
 
     return await res.json(); // will contain { candidatesApplied, count }
   } catch (error) {
@@ -285,7 +282,7 @@ export const postJob = async (token, jobData) => {
   }
 };
 
-//update  job
+//update  job
 export const updateJob = async (token, jobId, formData) => {
   if (!token) return null;
 

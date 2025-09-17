@@ -5,30 +5,46 @@ import {
   FaMapMarkerAlt,
   FaLanguage,
   FaPhoneAlt,
+  FaBriefcase,
+  FaLink,
 } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import { MdPersonAdd } from "react-icons/md";
+import { FaPlayCircle, FaFilePdf, FaExternalLinkAlt } from "react-icons/fa";
+import { MdOutlineWorkOutline } from "react-icons/md";
 
-const CandidateCard = ({ candidate }) => {
+const CandidateCard = ({ candidate, onSave, isSaved }) => {
   const [showphonenumber, setShowphonenumber] = useState(false);
 
   const {
+    _id,
     username,
+    useremail,
+    designation,
     qualification,
-    Skill,
-    salaryExpectation,
-    yearsofExperience,
-    previousCompany,
+    skills,
+    location,
+    expectedSalary,
+    lastActive,
+    experience,
     phonenumber,
+    previousCompany,
+    introvideo,
+    resume,
+    portfioliolink,
+    certificationlink,
+    profilePhoto,
+    appliedDate,
   } = candidate || {};
 
-  const inviteMessage = `Hello ${username}, this side Expertz Trust Finfra Pvt Ltd. You are selected for the interview. Please contact us for further details.`;
+  const recruiterCompany = "Expertz Trust Finfra Pvt Ltd";
+  const inviteMessage = `Hello ${username}, this side ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`;
 
   const handleCall = () => {
     if (phonenumber) {
       window.open(`tel:${phonenumber}`, "_self");
     } else {
-      alert("Candidate phonenumber is not available");
+      alert("Candidate phone number is not available");
     }
   };
 
@@ -39,7 +55,7 @@ const CandidateCard = ({ candidate }) => {
         "_self"
       );
     } else {
-      alert("Candidate phonenumber is not available");
+      alert("Candidate phone number is not available");
     }
   };
 
@@ -51,111 +67,199 @@ const CandidateCard = ({ candidate }) => {
         "_blank"
       );
     } else {
-      alert("Candidate phonenumber is not available");
+      alert("Candidate phone number is not available");
     }
   };
 
+  const handleSaveClick = (e) => {
+    e.stopPropagation();
+    onSave(_id);
+  };
 
+  const isAppliedToday = (appliedDate) => {
+    if (!appliedDate) return false;
+    const today = new Date();
+    const date = new Date(appliedDate);
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const appliedToday = isAppliedToday(appliedDate);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5 sm:p-8 w-full max-w-5xl mx-auto transition-transform hover:scale-[1.01]">
-      {/* Top Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
-        {/* Left - Avatar + Details */}
         <div className="flex items-start gap-4 w-full">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/219/219969.png"
-            alt="avatar"
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border shadow-sm"
+            src={profilePhoto || "https://cdn-icons-png.flaticon.com/512/219/219969.png"}
+            alt={`${username}'s avatar`}
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border shadow-sm object-cover"
           />
           <div className="flex-1">
-            {/* Name + NEW Badge */}
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
                 {username || "Unknown"}
               </h2>
-              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                NEW
-              </span>
+              {appliedToday && (
+                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  NEW
+                </span>
+              )}
+              {isSaved && (
+                <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  Saved
+                </span>
+              )}
             </div>
-            {/* Salary, Graduate, Language, Location */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-gray-600 text-sm">
               <span className="flex items-center gap-1">
-                <FaRupeeSign /> {salaryExpectation || "N/A"}
+                <FaRupeeSign /> {expectedSalary || "N/A"}
               </span>
               <span className="flex items-center gap-1">
                 <FaGraduationCap /> {qualification || "Not Provided"}
               </span>
               <span className="flex items-center gap-1">
-                <FaLanguage /> Speaks Hindi
+                <FaMapMarkerAlt /> {location || "Not Provided"}
               </span>
-              <span className="flex items-center gap-1">
-                <FaMapMarkerAlt /> {previousCompany || "Not Provided"}
-              </span>
+              {/* Note: I've removed the hardcoded languages and FaLanguage icon as it's not present in your data */}
             </div>
           </div>
         </div>
 
-        {/* Right - Applied Today */}
-        <div>
+        <div className="flex flex-col items-end gap-3">
           <span className="bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 text-xs sm:text-sm font-medium px-3 py-1 rounded-full">
-            Applied Today
+            Applied: {lastActive || "Recently"}
           </span>
+          {!isSaved && (
+            <button
+              onClick={handleSaveClick}
+              className="text-gray-500 text-sm hover:text-blue-500 transition flex items-center gap-1"
+            >
+              <MdPersonAdd /> Save Candidate
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Middle Section - Skills, Assets, Docs, Exp */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-6 text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 text-sm">
         {/* Skills */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2">Skills</h3>
-          <p className="text-gray-700">{Skill || "Not Provided"}</p>
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <FaBriefcase className="text-gray-500" />
+            Skills
+          </h3>
+          <div className="flex-1">
+            <p className="text-gray-700">
+              {Array.isArray(skills) && skills.length > 0
+                ? skills.join(", ")
+                : "Not Provided"}
+            </p>
+          </div>
         </div>
 
-        {/* Assets */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2">Assets</h3>
-          <p className="text-gray-700">Smartphone</p>
-          <p className="text-gray-700">Internet Connection</p>
+        {/* Experience */}
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <MdOutlineWorkOutline className="text-gray-500" />
+            Work Experience
+          </h3>
+          <div className="flex-1">
+            <p className="text-gray-700">
+              {experience ? `${experience} years` : "Not Provided"}
+            </p>
+            {previousCompany && (
+              <p className="text-gray-500 mt-1">at {previousCompany}</p>
+            )}
+          </div>
         </div>
 
         {/* Documents */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2">Documents</h3>
-          <p className="text-gray-700">Bank Account</p>
-          <p className="text-gray-700">Aadhar Card</p>
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <FaFilePdf className="text-gray-500" />
+            Documents
+          </h3>
+          <div className="flex flex-col space-y-2 flex-1">
+            {resume ? (
+              <a
+                href={resume}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:underline"
+              >
+                <FaExternalLinkAlt className="w-3 h-3" /> Resume
+              </a>
+            ) : (
+              <p className="text-gray-500">Resume Not Provided</p>
+            )}
+            {certificationlink ? (
+              <a
+                href={certificationlink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:underline"
+              >
+                <FaExternalLinkAlt className="w-3 h-3" /> Certificates
+              </a>
+            ) : (
+              <p className="text-gray-500">Certificates Not Provided</p>
+            )}
+          </div>
         </div>
 
-        {/* Work Experience */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2">Work Experience</h3>
-          <p className="text-gray-700">
-            • <span className="font-semibold">{yearsofExperience || "0"}</span>{" "}
-            yrs
-            <br />
-            at {previousCompany || "Not Provided"}
-          </p>
+        {/* Portfolio */}
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <FaLink className="text-gray-500" />
+            Portfolio
+          </h3>
+          <div className="flex-1">
+            {portfioliolink ? (
+              <a
+                href={portfioliolink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:underline"
+              >
+                <FaExternalLinkAlt className="w-3 h-3" /> View Portfolio
+              </a>
+            ) : (
+              <p className="text-gray-500">Not Provided</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Buttons */}
+      {introvideo && (
+        <div className="mt-6 flex flex-col items-center">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <FaPlayCircle className="text-red-500" />
+            Video Intro
+          </h3>
+          <video
+            src={introvideo}
+            className="w-full max-w-md rounded-lg shadow-lg border-2 border-orange-300"
+            controls
+          >
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 w-full">
-        {/* View phonenumber / Call */}
         <button
           onClick={() => {
-            if (phonenumber) {
-              setShowphonenumber(true);
-              handleCall();
-            } else {
-              alert("Candidate phonenumber is not available");
-            }
+            setShowphonenumber(true);
+            handleCall();
           }}
           className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-xl shadow transition w-full sm:w-auto"
         >
-          <FaPhoneAlt /> {showphonenumber ? phonenumber : "View phonenumber"}
+          <FaPhoneAlt /> {showphonenumber ? phonenumber : "View phone number"}
         </button>
 
-        {/* Send SMS */}
         <button
           onClick={handleSMS}
           className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm px-5 py-2.5 rounded-xl shadow transition w-full sm:w-auto"
@@ -163,19 +267,11 @@ const CandidateCard = ({ candidate }) => {
           <IoMdSend /> Send SMS
         </button>
 
-        {/* WhatsApp Invite */}
         <button
           onClick={handleWhatsAppInvite}
           className="flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 text-sm px-5 py-2.5 rounded-xl border shadow transition w-full sm:w-auto"
         >
           <MdPersonAdd /> Invite for Interview
-        </button>
-      </div>
-
-      {/* Remove Option */}
-      <div className="flex justify-end mt-5">
-        <button className="text-gray-500 text-sm hover:text-red-500 transition">
-          🗑 Remove
         </button>
       </div>
     </div>

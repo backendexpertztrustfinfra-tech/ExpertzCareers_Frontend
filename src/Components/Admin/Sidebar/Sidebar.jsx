@@ -120,11 +120,11 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
       >
         {/* Profile */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-100">
-          <img
+          {/* <img
             src={userProfile?.user?.recruterLogo || "/default-logo.png"}
             alt="Logo"
             className="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover"
-          />
+          /> */}
           {!collapsed && (
             <div className="truncate">
               <h2 className="font-bold text-gray-800 truncate">

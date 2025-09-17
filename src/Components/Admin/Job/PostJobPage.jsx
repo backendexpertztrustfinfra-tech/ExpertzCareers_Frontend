@@ -1,4 +1,3 @@
-// src/Pages/PostJobPage.jsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PostJobForm from "../Job/PostJobForm";
@@ -7,6 +6,7 @@ const PostJobPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = location.state?.returnTo || "/my-jobs";
+  const initialData = location.state?.initialData || null;
 
   const handleSubmitted = (job) => {
     try {
@@ -63,6 +63,7 @@ const PostJobPage = () => {
                 ? navigate(returnTo)
                 : navigate("/admin", { state: returnTo })
             }
+            initialData={initialData}
           />
         </div>
       </div>

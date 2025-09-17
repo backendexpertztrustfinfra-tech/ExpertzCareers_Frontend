@@ -40,7 +40,7 @@ export const getDbPointUser = async () => {
 
     if (!res.ok) throw new Error(data.message || "Failed to fetch DB points");
 
-    // 🔥 Fix: return data.users if present
+    //  Fix: return data.users if present
     if (Array.isArray(data.users)) return data.users;
     if (Array.isArray(data.details)) return data.details;
     if (Array.isArray(data)) return data;
