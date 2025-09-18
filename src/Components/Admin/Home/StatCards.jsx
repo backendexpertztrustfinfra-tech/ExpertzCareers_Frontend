@@ -147,17 +147,17 @@ const StatCards = ({ setActiveTab }) => {
         </div>
 
         {/* ✅ Desktop button */}
-        <button
+        {/* <button
           onClick={handlePostJobClick}
           className="hidden sm:inline-block w-full sm:w-auto px-5 py-3 rounded-xl font-semibold 
             bg-gradient-to-r from-amber-400 to-orange-500 text-white 
             shadow-md hover:shadow-lg hover:scale-105 transition"
         >
           + Post New Job
-        </button>
+        </button> */}
 
         {/* ✅ Mobile floating button */}
-        <motion.button
+        {/* <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={handlePostJobClick}
@@ -166,7 +166,7 @@ const StatCards = ({ setActiveTab }) => {
             text-white w-16 h-16 flex items-center justify-center text-3xl"
         >
           +
-        </motion.button>
+        </motion.button> */}
       </div>
 
       {/* ✅ Stat cards */}
