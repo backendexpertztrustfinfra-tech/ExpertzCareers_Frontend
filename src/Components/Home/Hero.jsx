@@ -14,6 +14,8 @@ import { signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase-config";
 import { AuthContext } from "../../context/AuthContext";
 import SuccessfullyLogin from "../../assets/animation/succesfulllogin";
+import { GoogleAuthProvider } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 const Hero = forwardRef(({ onlogin }, ref) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -134,51 +136,140 @@ const Hero = forwardRef(({ onlogin }, ref) => {
     }
   };
 
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope("email");
+  googleProvider.addScope("profile");
+
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
+      // 1️⃣ Firebase popup
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      const idToken = await user.getIdToken();
 
-      const res = await fetch(`${BASE_URL}/user/google-login`, {
+      // 2️⃣ Ensure email exists
+      const email =
+        user?.email ||
+        user?.providerData?.[0]?.email ||
+        result?._tokenResponse?.email;
+
+      if (!email) {
+        alert(
+          "⚠️ Unable to retrieve your Google email. Please try another account."
+        );
+        await auth.signOut();
+        return;
+      }
+
+      const googlePassword = `${user.uid}_google`;
+
+      // 3️⃣ Try backend login
+      let loginRes = await fetch(`${BASE_URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({
+          useremail: email,
+          password: googlePassword,
+        }),
       });
 
-      if (!res.ok) throw new Error("Google login failed");
-
-      // Expect backend to return { token, usertype? }
-      const { token, usertype } = await res.json();
-
-      if (token) {
+      if (loginRes.ok) {
+        const { token, usertype } = await loginRes.json();
         saveTokenInCookie(token, usertype);
         login(token);
-        onlogin?.();
 
-        if (usertype === "jobseeker") {
-          navigate("/jobs");
-        } else if (usertype === "recruter") {
-          navigate("/admin");
+        if (!usertype) {
+          // User exists but no type → redirect to /signup
+          navigate("/signup");
         } else {
-          navigate("/signup-choice");
+          navigate(usertype === "jobseeker" ? "/jobs" : "/admin");
+        }
+        return;
+      }
+
+      // 4️⃣ If login failed with 401 → try to see if user exists in backend (without usertype)
+      if (loginRes.status === 401 || loginRes.status === 404) {
+        // Check if user exists
+        const checkUserRes = await fetch(
+          `${BASE_URL}/user/getByEmail?email=${encodeURIComponent(email)}`
+        );
+        if (checkUserRes.ok) {
+          const existingUser = await checkUserRes.json();
+          // Auto-login using Google uid + _google
+          const autoLoginRes = await fetch(`${BASE_URL}/user/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              useremail: email,
+              password: googlePassword,
+            }),
+          });
+
+          if (autoLoginRes.ok) {
+            const { token } = await autoLoginRes.json();
+            saveTokenInCookie(token, null);
+            login(token);
+            // Redirect to signup to complete profile/usertype
+            navigate("/signup");
+            return;
+          }
+        } else {
+          // 5️⃣ User truly doesn't exist → Signup automatically
+          const signupRes = await fetch(`${BASE_URL}/user/signup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: user.displayName || "New User",
+              useremail: email,
+              password: googlePassword,
+            }),
+          });
+
+          if (signupRes.ok) {
+            const { token } = await signupRes.json();
+            saveTokenInCookie(token, null);
+            login(token);
+            navigate("/signup");
+            return;
+          } else {
+            const errData = await signupRes.json().catch(() => ({}));
+            throw new Error(
+              errData.message || "Signup failed. Please try again."
+            );
+          }
         }
       }
+
+      // Any other error
+      const errData = await loginRes.json().catch(() => ({}));
+      throw new Error(
+        errData.message || "Google login failed. Please try again."
+      );
     } catch (err) {
-      alert(err.message);
+      console.error("Google login error:", err);
+      if (err.code === "auth/popup-closed-by-user") {
+        alert("Google login was cancelled. Please try again.");
+      } else if (err.code === "auth/cancelled-popup-request") {
+        alert("Please complete the existing Google login popup.");
+      } else {
+        alert(err.message || "Google login failed. Please try another method.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email) return alert("Please enter your email.");
+    if (!email) return alert("Please enter your email to reset password.");
+    setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      alert("Reset email sent!");
+      alert(`Password reset email sent to ${email}. Check your inbox.`);
     } catch (err) {
-      alert("Reset failed: " + err.message);
+      console.error("Password reset error:", err);
+      alert("Failed to send reset email: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,9 +1,10 @@
+// src/components/RecSign.jsx
 import React, { useState, useContext } from "react";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { AuthContext } from "../context/AuthContext";
-import { updateRecruiterProfile } from "../../src/services/apis";
+import { updateRecruiterProfile } from "../services/apis";
 import { Download, UploadCloud, XCircle } from "lucide-react";
 
 const RecSign = () => {
@@ -22,7 +23,6 @@ const RecSign = () => {
     recruterCompanyAddress: "",
     recruterGstIn: "",
     recruterIndustry: "",
-    recruterCompanyDoc: "",
   });
 
   const companyTypes = [
@@ -47,32 +47,11 @@ const RecSign = () => {
     "Shop & Establishment Certificate",
   ];
 
-  const customStyles = {
-    control: (base) => ({
-      ...base,
-      backgroundColor: "white",
-      borderColor: "#D4AF37",
-      padding: "2px",
-      borderRadius: "0.5rem",
-      boxShadow: "none",
-      "&:hover": { borderColor: "#D4AF37" },
-    }),
-    option: (styles, { isFocused }) => ({
-      ...styles,
-      backgroundColor: isFocused ? "#FDF8F0" : "white",
-      color: "#000",
-      cursor: "pointer",
-    }),
-    singleValue: (base) => ({ ...base, color: "#000" }),
-    placeholder: (base) => ({ ...base, color: "#888" }),
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) =>
+    setFormData((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   const handleFileChange = (e) => {
-    setDocumentFile(e.target.files[0]);
+    setDocumentFile(e.target.files?.[0] || null);
   };
 
   const removeFile = () => {
@@ -82,7 +61,7 @@ const RecSign = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
+    // Basic validation
     if (
       !formData.name ||
       !formData.email ||
@@ -94,17 +73,14 @@ const RecSign = () => {
       alert("Please fill all required fields.");
       return;
     }
-
     if (!companyType) {
       alert("Please select company type.");
       return;
     }
-
     if (!verificationType) {
       alert("Please select verification type.");
       return;
     }
-
     if (verificationType.value === "gst") {
       if (!formData.recruterGstIn || formData.recruterGstIn.length !== 15) {
         alert("Please enter a valid 15-digit GSTIN.");
@@ -115,7 +91,6 @@ const RecSign = () => {
         return;
       }
     }
-
     if (verificationType.value === "document") {
       if (!selectedDocType) {
         alert("Please select a document type.");
@@ -128,38 +103,48 @@ const RecSign = () => {
     }
 
     const token = Cookies.get("userToken");
-
-    const payload = {
-      ...formData,
-      recruterCompanyType: companyType.value,
-      verificationType: verificationType.value,
-      selectedDocType,
-    };
-
-    const formDataToSend = new FormData();
-    if (documentFile) {
-      formDataToSend.append("recruterCompanyDoc", documentFile);
+    if (!token) {
+      alert("Not authenticated");
+      return;
     }
-    formDataToSend.append("data", JSON.stringify(payload));
+
+    // Build FormData (append each field individually)
+    const fd = new FormData();
+    if (documentFile) fd.append("recruterCompanyDoc", documentFile);
+
+    // map UI values to backend fields:
+    fd.append("username", formData.name); // backend expects 'username'
+    fd.append("useremail", formData.email); // backend expects 'useremail'
+    fd.append("recruterPhone", formData.recruterPhone);
+    fd.append("recruterCompany", formData.recruterCompany);
+    fd.append("recruterCompanyAddress", formData.recruterCompanyAddress);
+    fd.append("recruterGstIn", formData.recruterGstIn || "");
+    fd.append("recruterIndustry", formData.recruterIndustry);
+    fd.append("recruterCompanyType", companyType.value);
+    fd.append("verificationType", verificationType.value);
+    fd.append("selectedDocType", selectedDocType || "");
 
     try {
-      const response = await updateRecruiterProfile(
-        token,
-        formDataToSend,
-        login
-      );
+      const response = await updateRecruiterProfile(token, fd);
 
-      if (response.msg === "User Update Succssfully") {
-        if (response.ObjectUpdatedData) {
-          await login(response.ObjectUpdatedData);
+      if (response?.msg === "User Update Succssfully") {
+        // If backend returned a token, update AuthContext & cookie
+        if (response.token && login) {
+          login(response.token);
+          Cookies.set("userToken", response.token);
         }
+
+        // Optional: if backend returns ObjectUpdatedData, you can pass it to login or store it locally
+        // e.g. if backend returns updated user object in response.user, you may want to store it.
+
+        alert("Profile updated successfully");
         navigate("/admin", { replace: true });
       } else {
-        alert(response.msg || "Failed to update profile.");
+        alert(response?.msg || "Failed to update profile.");
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Something went wrong. Please try again.");
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      alert("Something went wrong. Try again.");
     }
   };
 
@@ -171,7 +156,7 @@ const RecSign = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-8 text-black">
-          {/* --- Personal Info --- */}
+          {/* Personal Info */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
             <div className="grid md:grid-cols-2 gap-4">
@@ -214,7 +199,7 @@ const RecSign = () => {
             </div>
           </div>
 
-          {/* --- Company Info --- */}
+          {/* Company Info */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Company Information</h3>
             <div className="space-y-4">
@@ -222,10 +207,8 @@ const RecSign = () => {
                 options={companyTypes}
                 value={companyType}
                 onChange={setCompanyType}
-                styles={customStyles}
                 placeholder="Select Company Type"
                 isSearchable={false}
-                required
               />
 
               <textarea
@@ -250,20 +233,17 @@ const RecSign = () => {
             </div>
           </div>
 
-          {/* --- Verification --- */}
+          {/* Verification */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Verification</h3>
             <Select
               options={verificationOptions}
               value={verificationType}
               onChange={setVerificationType}
-              styles={customStyles}
               placeholder="Select Verification Type"
               isSearchable={false}
-              required
             />
 
-            {/* GST CASE */}
             {verificationType?.value === "gst" && (
               <div className="mt-6 space-y-4">
                 <input
@@ -274,7 +254,6 @@ const RecSign = () => {
                   onChange={handleChange}
                   maxLength={15}
                   className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
-                  required
                 />
 
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#D4AF37] transition">
@@ -284,7 +263,6 @@ const RecSign = () => {
                     onChange={handleFileChange}
                     className="hidden"
                     id="gstFile"
-                    required
                   />
                   <label
                     htmlFor="gstFile"
@@ -297,7 +275,6 @@ const RecSign = () => {
                   </label>
                 </div>
 
-                {/* Preview + Remove */}
                 {documentFile && (
                   <div className="mt-3 flex items-center gap-3">
                     {documentFile.type === "application/pdf" ? (
@@ -328,7 +305,6 @@ const RecSign = () => {
               </div>
             )}
 
-            {/* COMPANY DOC CASE */}
             {verificationType?.value === "document" && (
               <div className="mt-6 space-y-4">
                 <p className="font-medium">Select a document type</p>
@@ -357,7 +333,6 @@ const RecSign = () => {
                         onChange={handleFileChange}
                         className="hidden"
                         id="companyDoc"
-                        required
                       />
                       <label
                         htmlFor="companyDoc"
@@ -370,7 +345,6 @@ const RecSign = () => {
                       </label>
                     </div>
 
-                    {/* Preview + Remove */}
                     {documentFile && (
                       <div className="mt-3 flex items-center gap-3">
                         {documentFile.type === "application/pdf" ? (

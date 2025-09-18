@@ -475,9 +475,37 @@ export const verifyPayment = async (paymentResponse) => {
 };
 
 // ✅ Get active subscription (for gating job posting, etc.)
+// export const getActiveSubscription = async () => {
+//   try {
+//     const token = Cookies.get("userToken");
+//     const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     const data = await res.json();
+//     if (!res.ok)
+//       throw new Error(data.message || "Failed to fetch active subscription");
+//     // return data;
+//     return {
+//       planName: data?.planName || null,
+//       remainingJobs: data?.remainingJobs ?? 0,
+//     };
+//   } catch (err) {
+//     console.error("❌ getActiveSubscription API Error:", err.message);
+//     // throw err;
+//     return { planName: null, remainingJobs: 0 };
+//   }
+// };
+
 export const getActiveSubscription = async () => {
   try {
     const token = Cookies.get("userToken");
+    if (!token) throw new Error("Authentication token not found.");
+
     const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
       method: "GET",
       headers: {
@@ -487,17 +515,15 @@ export const getActiveSubscription = async () => {
     });
 
     const data = await res.json();
+
     if (!res.ok)
       throw new Error(data.message || "Failed to fetch active subscription");
-    // return data;
-    return {
-      planName: data?.planName || null,
-      remainingJobs: data?.remainingJobs ?? 0,
-    };
+
+    // ✅ Return the full subscription object
+    return data.subscription || null;
   } catch (err) {
     console.error("❌ getActiveSubscription API Error:", err.message);
-    // throw err;
-    return { planName: null, remainingJobs: 0 };
+    return null;
   }
 };
 
@@ -543,7 +569,6 @@ export const getDbPointUser = async () => {
     throw err;
   }
 };
-
 
 // ------------------------------------------------------------ JOBSEEKER JOBS -----------------------------------------------------------
 
@@ -607,7 +632,8 @@ export const getAppliedJobs = async (token) => {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch applied jobs");
+    if (!res.ok)
+      throw new Error(data.message || "Failed to fetch applied jobs");
     return data;
   } catch (err) {
     console.error("❌ Get Applied Jobs Error:", err.message);
