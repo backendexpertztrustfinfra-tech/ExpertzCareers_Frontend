@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-// Simple Button component. I've added a 'glass' variant to make it more reusable.
 const Button = ({
   children,
   size = "default",
@@ -338,6 +338,7 @@ const AboutPage = () => {
 
             {/* CTA buttons are now more responsive on small screens */}
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
+              <Link to="/profile">
               <Button
                 size="lg"
                 className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-white pulse-glow"
@@ -345,6 +346,7 @@ const AboutPage = () => {
               >
                 Start Your Journey <Icon name="arrowRight" size={24} className="ml-2" />
               </Button>
+              </Link>
               <Button
                 size="lg"
                 variant="outline"
@@ -713,6 +715,7 @@ const AboutPage = () => {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
+            <Link to="/jobs">
             <Button
               size="lg"
               className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-xl hover:shadow-2xl hover:scale-105 hover:brightness-110 bg-gradient-to-r from-orange-400 via-pink-400 to-yellow-500 transition-all rounded-2xl"
@@ -721,7 +724,9 @@ const AboutPage = () => {
               Find Your Dream Job
               <Icon name="arrowRight" size={24} className="ml-2" />
             </Button>
+            </Link>
 
+            <Link to="/contact">
             <Button
               size="lg"
               variant="glass" 
@@ -731,6 +736,7 @@ const AboutPage = () => {
               Partner With Us
               <Icon name="network" size={24} className="ml-2" />
             </Button>
+            </Link> 
           </div>
         </div>
       </section>

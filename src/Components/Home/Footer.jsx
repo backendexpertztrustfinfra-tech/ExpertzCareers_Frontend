@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { href, Link } from "react-router-dom";
 import {
   FaFacebookF,
   FaInstagram,
@@ -87,12 +87,12 @@ const Footer = () => {
           </h3>
           <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
             {[
-              { name: "Expertz Digital And IT Solution", route: "/" },
-              { name: "Expertz DigiFinra Reality", route: "/" },
-              { name: "Expertz DigiShop", route: "/" },
+              { name: "Expertz Digital And IT Solution", route: "https://expertzdigitalsolution.com" },
+              { name: "Expertz DigiFinra Reality", route: "https://expertztrustfinfra.com/" },
+              { name: "Expertz DigiShop", route: "https://expertzdigishop.com/" },
               { name: "Expertz Insta Services", route: "/" },
               { name: "Expertz Q-Mart", route: "/terms" },
-              { name: "Expertz Fine Dine RestroCafe", route: "/" },
+              { name: "Expertz Fine Dine RestroCafe", route: "https://expertzfinedinerestrocafe.com/" },
               { name: "Expertz Hotels", route: "/" },
 
             
@@ -222,9 +222,9 @@ const Footer = () => {
       >
         <FaYoutube className="text-xs sm:text-sm" />
       </a>
-      {/* LinkedIn is not provided, you can remove or add your LinkedIn link */}
       <a
         href="https://www.linkedin.com"
+        target="_blank"
         className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
       >
         <FaLinkedinIn className="text-xs sm:text-sm" />
