@@ -9,7 +9,12 @@ import {
 import Cookies from "js-cookie";
 import { deleteJob } from "../../../services/apis";
 
-const DashboardJobCard = ({ job, onDeleteSuccess, onEditClick, onJobClick }) => {
+const DashboardJobCard = ({
+  job,
+  onDeleteSuccess,
+  onEditClick,
+  onJobClick,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const menuRef = useRef(null);
@@ -115,16 +120,16 @@ const DashboardJobCard = ({ job, onDeleteSuccess, onEditClick, onJobClick }) => 
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-6 w-32 bg-white border rounded-md shadow-lg z-50 text-sm">
-             <button
-  onClick={(e) => {
-    e.stopPropagation();
-    onEditClick(job);
-    setMenuOpen(false);
-  }}
-  className="block w-full text-left px-3 py-2 text-blue-600 hover:bg-blue-50"
->
-  ✏️ Edit
-</button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditClick(job);
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-blue-600 hover:bg-blue-50"
+              >
+                ✏️ Edit
+              </button>
               <button
                 onClick={handleDelete}
                 disabled={loading}
@@ -144,7 +149,8 @@ const DashboardJobCard = ({ job, onDeleteSuccess, onEditClick, onJobClick }) => 
           {job.jobType || "N/A"}
         </div>
         <div className="flex items-center gap-1 text-gray-700">
-          <FaUsers className="text-orange-500" size={12} /> {job.noofOpening || 0} Openings
+          <FaUsers className="text-orange-500" size={12} />{" "}
+          {job.noofOpening || 0} Openings
         </div>
         <div className="flex items-center gap-1 text-gray-700">
           <FaRupeeSign className="text-orange-500" size={12} />{" "}

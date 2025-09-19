@@ -1,66 +1,105 @@
-import React, { useEffect, useState } from "react";
-import { getCreatedJobs } from "../../../services/apis";
-import Cookies from "js-cookie";
-import DashboardJobCard from "../Job/dashboardJobCard";
+"use client"
 
-const JobListCard = ({ setActiveTab }) => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const token = Cookies.get("userToken");
+import { useEffect, useState } from "react"
+import { getCreatedJobs, getAppliedUser } from "../../../services/apis"
+import Cookies from "js-cookie"
+import DashboardJobCard from "../Job/dashboardJobCard"
+
+const JobListCard = ({ setActiveTab, setSelectedJob }) => {
+  const [jobs, setJobs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const token = Cookies.get("userToken")
 
   useEffect(() => {
     const loadJobs = async () => {
       if (!token) {
-        setLoading(false);
-        return;
+        setLoading(false)
+        return
       }
 
       try {
-        const createdJobs = await getCreatedJobs(token);
-        setJobs(createdJobs || []);
-      } catch (err) {
-        console.error("Error fetching jobs:", err);
-        setJobs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+        const createdJobs = await getCreatedJobs(token)
+        const jobsArray = createdJobs || []
 
-    loadJobs();
-  }, [token]);
+        const jobsWithCounts = await Promise.all(
+          jobsArray.map(async (job) => {
+            try {
+              const res = await getAppliedUser(token, job._id)
+              const appliedCount = res?.candidatesApplied?.length || 0
+              return {
+                ...job,
+                id: job._id,
+                jobTitle: job.jobTitle || job.title || "",
+                company: job.companyName || job.company || "No Company",
+                appliedCount,
+              }
+            } catch (err) {
+              console.error(`Error fetching applied count for job ${job._id}`, err)
+              return {
+                ...job,
+                id: job._id,
+                jobTitle: job.jobTitle || job.title || "",
+                company: job.companyName || job.company || "No Company",
+                appliedCount: 0,
+              }
+            }
+          }),
+        )
+
+        setJobs(jobsWithCounts)
+      } catch (err) {
+        console.error("Error fetching jobs:", err)
+        setJobs([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadJobs()
+  }, [token])
 
   const handleDelete = async (_id) => {
     try {
-      setJobs((prev) => prev.filter((job) => job._id !== _id));
-      return true;
+      setJobs((prev) => prev.filter((job) => job._id !== _id))
+      return true
     } catch (err) {
-      console.error("Error deleting job:", err);
-      return false;
+      console.error("Error deleting job:", err)
+      return false
     }
-  };
+  }
 
   const handleEditClick = (job) => {
-    alert("Edit job: " + job.jobTitle);
-    setActiveTab("Job");
-  };
+    setActiveTab("Job")
+  }
 
   const handleJobClick = (job) => {
-    alert("Job clicked: " + job.jobTitle);
-  };
+    const jobForCandidateView = {
+      ...job,
+      id: job._id || job.id, // Ensure consistent ID field
+      _id: job._id || job.id, // Keep both for compatibility
+      jobTitle: job.jobTitle || job.title || "",
+      company: job.companyName || job.company || "No Company",
+    }
+
+    console.log("[v0] JobListCard - Original job:", job)
+    console.log("[v0] JobListCard - Normalized job for candidate view:", jobForCandidateView)
+
+    if (setSelectedJob) {
+      setSelectedJob(jobForCandidateView)
+      setActiveTab("Candidate")
+    } else {
+      console.error("[v0] JobListCard - setSelectedJob function not available")
+      setActiveTab("Job")
+    }
+  }
 
   return (
     <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-lg border border-gray-200 w-full relative">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <div>
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-            Job Listings
-          </h3>
-          {!loading && (
-            <p className="text-sm text-gray-500">
-              Total Jobs: {jobs.length}
-            </p>
-          )}
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Job Listings</h3>
+          {!loading && <p className="text-sm text-gray-500">Total Jobs: {jobs.length}</p>}
         </div>
         <button
           onClick={() => setActiveTab("Job")}
@@ -77,10 +116,7 @@ const JobListCard = ({ setActiveTab }) => {
       {loading ? (
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="animate-pulse bg-gray-100 h-24 rounded-xl"
-            ></div>
+            <div key={i} className="animate-pulse bg-gray-100 h-24 rounded-xl"></div>
           ))}
         </div>
       ) : jobs.length === 0 ? (
@@ -102,7 +138,7 @@ const JobListCard = ({ setActiveTab }) => {
               job={job}
               onDelete={handleDelete}
               onEditClick={handleEditClick}
-              onJobClick={handleJobClick}
+              onJobClick={() => handleJobClick(job)}
             />
           ))}
         </div>
@@ -113,7 +149,7 @@ const JobListCard = ({ setActiveTab }) => {
         <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-b-2xl"></div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default JobListCard;
+export default JobListCard

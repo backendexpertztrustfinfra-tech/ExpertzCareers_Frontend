@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const jobTypes = [
   {
@@ -27,31 +29,15 @@ const jobTypes = [
     vacancies: "45,000+ Vacancies",
     icon: "https://cdn-icons-png.flaticon.com/512/14959/14959782.png",
   },
-];
-
-const jobsByType = {
-  "Work from Home": [{ id: 1, title: "Remote Developer" }],
-  "Work from Office": [{ id: 2, title: "HR Executive" }],
-  "Part Time": [],
-  "Freelancer": [{ id: 3, title: "Freelance Designer" }],
-  "Contractual / Temporary": [],
-};
+]
 
 const JobTypeCards = () => {
-  const navigate = useNavigate();
-  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
+  const navigate = useNavigate()
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false)
 
   const handleTypeClick = (type) => {
-    const jobs = jobsByType[type] || [];
-    // console.log("[JobTypeCards] Clicked:", type, "Jobs found:", jobs.length);
-
-    if (jobs.length > 0) {
-      navigate(`/jobs?type=${encodeURIComponent(type)}`);
-    } else {
-      setShowNoJobsMsg(true);
-      setTimeout(() => setShowNoJobsMsg(false), 3000);
-    }
-  };
+    navigate(`/jobs?type=${encodeURIComponent(type)}`)
+  }
 
   return (
     <div className="py-16 px-6 max-w-7xl mx-auto relative">
@@ -75,22 +61,16 @@ const JobTypeCards = () => {
                        transition-all duration-300 hover:shadow-xl hover:-translate-y-1 p-6 flex flex-col items-center text-center"
           >
             <div className="w-16 h-16 flex items-center justify-center rounded-full bg-yellow-100 mb-4">
-              <img
-                src={job.icon}
-                alt={job.title}
-                className="w-10 h-10 object-contain"
-              />
+              <img src={job.icon || "/placeholder.svg"} alt={job.title} className="w-10 h-10 object-contain" />
             </div>
 
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">
-              {job.title}
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">{job.title}</h3>
             <p className="text-sm text-gray-500">{job.vacancies}</p>
           </div>
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default JobTypeCards;
+export default JobTypeCards

@@ -14,6 +14,7 @@ import { signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../../../firebase-config";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { getRecruiterProfile } from "../../../services/apis";
 
 const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
@@ -115,29 +116,48 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
         className={`fixed top-[100px] left-0 h-[calc(100vh-100px)] bg-white shadow-lg z-40
           flex flex-col justify-between
           transition-all duration-300 ease-in-out
-          ${collapsed ? "-translate-x-full md:translate-x-0 w-20" : "translate-x-0 w-64"}
+          ${
+            collapsed
+              ? "-translate-x-full md:translate-x-0 w-20"
+              : "translate-x-0 w-64"
+          }
         `}
       >
         {/* Profile */}
-        <div className="flex items-center gap-3 p-4 border-b border-gray-100">
-          {/* <img
-            src={userProfile?.user?.recruterLogo || "/default-logo.png"}
-            alt="Logo"
-            className="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover"
-          /> */}
-          {!collapsed && (
-            <div className="truncate">
-              <h2 className="font-bold text-gray-800 truncate">
-                {userProfile?.user?.username || "Recruiter"}
-              </h2>
-              <p className="text-xs text-gray-600 truncate">
-                {userProfile?.user?.useremail || "No Email"}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                {userProfile?.user?.recruterPhone || "No Phone"}
-              </p>
-            </div>
-          )}
+        <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md hover:shadow-lg transition p-5">
+          <div className="flex items-center gap-4">
+            {/* Profile Image (optional) */}
+            {/* <img
+      src={userProfile?.user?.recruterLogo || "/default-logo.png"}
+      alt="Logo"
+      className="w-16 h-16 rounded-full border border-orange-300 object-cover shadow-sm"
+    /> */}
+
+            {!collapsed && (
+              <div className="flex flex-col w-full min-w-0">
+                {/* Name */}
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug truncate">
+                  {userProfile?.user?.username || "Recruiter"}
+                </h2>
+
+                {/* Email */}
+                <div className="flex items-center gap-2 text-sm sm:text-base text-gray-700 truncate mt-1">
+                  <HiOutlineMail className="text-orange-500 w-5 h-5 flex-shrink-0" />
+                  <span className="truncate">
+                    {userProfile?.user?.useremail || "No Email"}
+                  </span>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-center gap-2 text-sm sm:text-base text-gray-600 truncate mt-0.5">
+                  <HiOutlinePhone className="text-orange-400 w-5 h-5 flex-shrink-0" />
+                  <span className="truncate">
+                    {userProfile?.user?.recruterPhone || "No Phone"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Navigation */}

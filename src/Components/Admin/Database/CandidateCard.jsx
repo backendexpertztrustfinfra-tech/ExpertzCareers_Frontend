@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client"
+
+import { useState } from "react"
 import {
   FaRupeeSign,
   FaGraduationCap,
@@ -9,12 +11,12 @@ import {
   FaPlayCircle,
   FaFilePdf,
   FaExternalLinkAlt,
-} from "react-icons/fa";
-import { IoMdSend } from "react-icons/io";
-import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md";
+} from "react-icons/fa"
+import { IoMdSend } from "react-icons/io"
+import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md"
 
 const CandidateCard = ({ candidate, onSave, isSaved }) => {
-  const [showPhone, setShowPhone] = useState(false);
+  const [showPhone, setShowPhone] = useState(false)
 
   const {
     _id,
@@ -33,50 +35,47 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
     certificationlink,
     profilePhoto,
     appliedDate,
-  } = candidate || {};
+  } = candidate || {}
 
-  const recruiterCompany = "Expertz Trust Finfra Pvt Ltd";
-  const inviteMessage = `Hello ${username}, this side ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`;
+  const recruiterCompany = "Expertz Trust Finfra Pvt Ltd"
+  const inviteMessage = `Hello ${username}, this side ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`
 
   const handleCall = () => {
     if (phonenumber) {
-      window.open(`tel:${phonenumber}`, "_self");
+      window.open(`tel:${phonenumber}`, "_self")
     }
-  };
+  }
 
   const handleSMS = () => {
     if (phonenumber) {
-      window.open(
-        `sms:${phonenumber}?body=Hello ${username}, you are shortlisted for the interview.`,
-        "_self"
-      );
+      window.open(`sms:${phonenumber}?body=Hello ${username}, you are shortlisted for the interview.`, "_self")
     }
-  };
+  }
 
   const handleWhatsAppInvite = () => {
     if (phonenumber) {
-      const encodedMessage = encodeURIComponent(inviteMessage);
-      window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`);
+      const encodedMessage = encodeURIComponent(inviteMessage)
+      window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
     }
-  };
+  }
 
   const handleSaveClick = (e) => {
-    e.stopPropagation();
-    onSave(_id);
-  };
+    e.stopPropagation()
+    onSave(_id)
+  }
 
   const isAppliedToday = (dateStr) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    const date = new Date(dateStr);
+    if (!dateStr) return false
+    const today = new Date()
+    const date = new Date(dateStr)
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear()
-    );
-  };
+    )
+  }
 
-  const appliedToday = isAppliedToday(appliedDate);
+  const appliedToday = isAppliedToday(appliedDate)
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 w-full max-w-5xl mx-auto hover:shadow-lg transition">
@@ -84,27 +83,18 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
         <div className="flex items-start gap-4 w-full">
           <img
-            src={
-              profilePhoto ||
-              "https://cdn-icons-png.flaticon.com/512/219/219969.png"
-            }
+            src={profilePhoto || "https://cdn-icons-png.flaticon.com/512/219/219969.png"}
             alt={`${username || "Candidate"}'s avatar`}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border object-cover"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                {username || "Unknown"}
-              </h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{username || "Unknown"}</h2>
               {appliedToday && (
-                <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                  NEW
-                </span>
+                <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">NEW</span>
               )}
               {isSaved && (
-                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                  Saved
-                </span>
+                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Saved</span>
               )}
             </div>
             <div className="flex flex-wrap gap-4 mt-2 text-gray-600 text-sm">
@@ -126,10 +116,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             Applied: {lastActive || "Recently"}
           </span>
           {!isSaved && (
-            <button
-              onClick={handleSaveClick}
-              className="text-blue-600 text-sm hover:underline flex items-center gap-1"
-            >
+            <button onClick={handleSaveClick} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
               <MdPersonAdd /> Save
             </button>
           )}
@@ -145,9 +132,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             Skills
           </h3>
           <p className="text-gray-600">
-            {Array.isArray(skills) && skills.length > 0
-              ? skills.join(", ")
-              : "Not Provided"}
+            {Array.isArray(skills) && skills.length > 0 ? skills.join(", ") : "Not Provided"}
           </p>
         </div>
 
@@ -157,12 +142,8 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             <MdOutlineWorkOutline className="text-gray-500" />
             Experience
           </h3>
-          <p className="text-gray-600">
-            {experience ? `${experience} years` : "Not Provided"}
-          </p>
-          {previousCompany && (
-            <p className="text-gray-500 text-xs mt-1">at {previousCompany}</p>
-          )}
+          <p className="text-gray-600">{experience ? `${experience} years` : "Not Provided"}</p>
+          {previousCompany && <p className="text-gray-500 text-xs mt-1">at {previousCompany}</p>}
         </div>
 
         {/* Documents */}
@@ -227,11 +208,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             <FaPlayCircle className="text-red-500" />
             Video Intro
           </h3>
-          <video
-            src={introvideo}
-            className="w-full max-w-lg rounded-lg shadow-sm border"
-            controls
-          />
+          <video src={introvideo} className="w-full max-w-lg rounded-lg shadow-sm border" controls />
         </div>
       )}
 
@@ -239,8 +216,8 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
       <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
         <button
           onClick={() => {
-            setShowPhone(true);
-            handleCall();
+            setShowPhone(true)
+            handleCall()
           }}
           className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
         >
@@ -262,7 +239,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CandidateCard;
+export default CandidateCard

@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Cookies from "js-cookie";
-import { postJob, updateJob } from "../../../services/apis";
-import { indianStates } from "../../Admin/Location/locations";
-import { toast } from "react-toastify";
+import { useEffect, useMemo, useRef, useState } from "react"
+import Cookies from "js-cookie"
+import { postJob, updateJob } from "../../../services/apis"
+import { indianStates } from "../../Admin/Location/locations"
+import { toast } from "react-toastify"
 
 function RichTextEditor({
   label = "Description",
@@ -15,48 +15,42 @@ function RichTextEditor({
   name = "description",
   id = "description",
 }) {
-  const editorRef = useRef(null);
-  const [isFocused, setIsFocused] = useState(false);
+  const editorRef = useRef(null)
+  const [isFocused, setIsFocused] = useState(false)
   useEffect(() => {
     if (editorRef.current && value !== editorRef.current.innerHTML) {
-      editorRef.current.innerHTML = value || "";
+      editorRef.current.innerHTML = value || ""
     }
-  }, [value]);
+  }, [value])
 
   const exec = (cmd) => {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    document.execCommand(cmd, false, null);
-    onChange(editorRef.current.innerHTML);
-  };
+    if (!editorRef.current) return
+    editorRef.current.focus()
+    document.execCommand(cmd, false, null)
+    onChange(editorRef.current.innerHTML)
+  }
 
   const plainText = (html) => {
-    if (!html) return "";
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    return (el.textContent || "").trim();
-  };
-  const invalid = required && !plainText(value);
+    if (!html) return ""
+    const el = document.createElement("div")
+    el.innerHTML = html
+    return (el.textContent || "").trim()
+  }
+  const invalid = required && !plainText(value)
 
   return (
     <div className="w-full">
       <label className="block mb-1 font-medium text-gray-800" htmlFor={id}>
         {label} {required && <span className="text-red-600">*</span>}
       </label>
-      <div
-        className={`rounded-xl border overflow-hidden bg-white ${
-          invalid ? "border-red-400" : "border-gray-300"
-        }`}
-      >
+      <div className={`rounded-xl border overflow-hidden bg-white ${invalid ? "border-red-400" : "border-gray-300"}`}>
         {/* toolbar */}
         {/* (keep your toolbar buttons same) */}
 
         {/* editor area */}
         <div className="relative">
           {!value && !isFocused && (
-            <div className="pointer-events-none absolute left-3 top-3 text-gray-400 text-sm pr-3">
-              {placeholder}
-            </div>
+            <div className="pointer-events-none absolute left-3 top-3 text-gray-400 text-sm pr-3">{placeholder}</div>
           )}
           <div
             id={id}
@@ -75,21 +69,19 @@ function RichTextEditor({
           />
         </div>
       </div>
-      {invalid && (
-        <p className="mt-1 text-sm text-red-600">This field is required.</p>
-      )}
+      {invalid && <p className="mt-1 text-sm text-red-600">This field is required.</p>}
     </div>
-  );
+  )
 }
 
 const PostJobForm = ({ onClose, onSubmit, initialData }) => {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [salaryAmount, setSalaryAmount] = useState("");
-  const [incentiveAmount, setIncentiveAmount] = useState("");
-  const [totalSalary, setTotalSalary] = useState("");
-  const [skills, setSkills] = useState(initialData?.skills || []);
-  const [input, setInput] = useState("");
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [salaryAmount, setSalaryAmount] = useState("")
+  const [incentiveAmount, setIncentiveAmount] = useState("")
+  const [totalSalary, setTotalSalary] = useState("")
+  const [skills, setSkills] = useState(initialData?.skills || [])
+  const [input, setInput] = useState("")
 
   const [formData, setFormData] = useState({
     title: "",
@@ -117,12 +109,12 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
     closedDate: "",
     startTime: "",
     endTime: "",
-  });
+  })
 
   // Inputs for chips
-  const [skillInput, setSkillInput] = useState("");
-  const [benefitInput, setBenefitInput] = useState("");
-  const [docInput, setDocInput] = useState("");
+  const [skillInput, setSkillInput] = useState("")
+  const [benefitInput, setBenefitInput] = useState("")
+  const [docInput, setDocInput] = useState("")
 
   // --- Predefined suggestions ---
   const defaultSkills = useMemo(
@@ -134,56 +126,41 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       "Time Management",
       "Leadership",
     ],
-    []
-  );
+    [],
+  )
 
-  const defaultDocuments = useMemo(
-    () => [
-      "Aadhar Card",
-      "PAN Card",
-      "Bank Account",
-      "Driving License",
-      "Passport",
-    ],
-    []
-  );
+  const defaultDocuments = useMemo(() => ["Aadhar Card", "PAN Card", "Bank Account", "Driving License", "Passport"], [])
 
   const defaultBenefits = useMemo(
-    () => [
-      "Health Insurance",
-      "PF / ESI",
-      "Work From Home",
-      "Paid Leaves",
-      "Performance Bonus",
-    ],
-    []
-  );
+    () => ["Health Insurance", "PF / ESI", "Work From Home", "Paid Leaves", "Performance Bonus"],
+    [],
+  )
 
   // For custom category & document
-  const [otherCategory, setOtherCategory] = useState("");
-  const [otherDocument, setOtherDocument] = useState("");
+  const [otherCategory, setOtherCategory] = useState("")
+  const [otherDocument, setOtherDocument] = useState("")
 
   // Normalize data when editing job
   const normalizeJobData = (job) => {
     // Split salary and incentives if they exist
-    let initialSalary = job.SalaryIncentive || job.salary || "";
-    let initialSalaryType = job.salaryType || "salary";
-    let initialSalaryAmount = "";
-    let initialIncentiveAmount = "";
+    const initialSalary = job.SalaryIncentive || job.salary || ""
+    const initialSalaryType = job.salaryType || "salary"
+    let initialSalaryAmount = ""
+    let initialIncentiveAmount = ""
 
     if (initialSalaryType === "salary+incentives" && initialSalary) {
-      const parts = initialSalary.split('+').map(s => s.trim());
-      initialSalaryAmount = parts[0] || "";
-      initialIncentiveAmount = parts[1] || "";
+      const parts = initialSalary.split("+").map((s) => s.trim())
+      initialSalaryAmount = parts[0] || ""
+      initialIncentiveAmount = parts[1] || ""
     } else {
-      initialSalaryAmount = initialSalary;
+      initialSalaryAmount = initialSalary
     }
 
     // Split timing
-    const [startTime, endTime] = (job.timing || "").split(' - ').map(t => t.trim());
+    const [startTime, endTime] = (job.timing || "").split(" - ").map((t) => t.trim())
 
     // Split working days
-    const [workingDaysFrom, workingDaysTo] = (job.workingDays || "").split(' - ').map(d => d.trim());
+    const [workingDaysFrom, workingDaysTo] = (job.workingDays || "").split(" - ").map((d) => d.trim())
 
     return {
       title: job.jobTitle || job.title || "",
@@ -199,193 +176,178 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       relevantExp: job.relevantExperience || job.relevantExp || "",
       salary: initialSalary,
       salaryType: initialSalaryType,
-      benefits: job.jobBenefits ? job.jobBenefits.split(",").map(b => b.trim()) : [],
-      skills: job.jobSkills ? job.jobSkills.split(",").map(s => s.trim()) : [],
-      documents: job.documentRequired ? job.documentRequired.split(",").map(d => d.trim()) : [],
+      benefits: job.jobBenefits ? job.jobBenefits.split(",").map((b) => b.trim()) : [],
+      skills: job.jobSkills ? job.jobSkills.split(",").map((s) => s.trim()) : [],
+      documents: job.documentRequired ? job.documentRequired.split(",").map((d) => d.trim()) : [],
       shift: job.shift || "",
       workingDaysFrom: workingDaysFrom,
       workingDaysTo: workingDaysTo,
       weekend: job.weekend || "",
       startTime: startTime,
       endTime: endTime,
-    };
-  };
+    }
+  }
 
   useEffect(() => {
     if (initialData) {
-      const normalized = normalizeJobData(initialData);
-      setFormData(normalized);
-      if (normalized.salaryType === 'salary+incentives') {
-        const parts = normalized.salary.split('+').map(s => s.trim());
-        setSalaryAmount(parts[0] || '');
-        setIncentiveAmount(parts[1] || '');
+      const normalized = normalizeJobData(initialData)
+      setFormData(normalized)
+      if (normalized.salaryType === "salary+incentives") {
+        const parts = normalized.salary.split("+").map((s) => s.trim())
+        setSalaryAmount(parts[0] || "")
+        setIncentiveAmount(parts[1] || "")
       } else {
-        setSalaryAmount(normalized.salary);
+        setSalaryAmount(normalized.salary)
       }
-      setTotalSalary(normalized.salary);
+      setTotalSalary(normalized.salary)
     }
-  }, [initialData]);
+  }, [initialData])
 
   // Generic input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   // ---- Tag handlers ----
   const handleSkillKeyDown = (e) => {
     if (e.key === "Enter" && skillInput.trim()) {
-      e.preventDefault();
+      e.preventDefault()
       // Check if the skill already exists (case-insensitive)
-      if (!formData.skills.some(s => s.toLowerCase() === skillInput.trim().toLowerCase())) {
+      if (!formData.skills.some((s) => s.toLowerCase() === skillInput.trim().toLowerCase())) {
         setFormData((prev) => ({
           ...prev,
           skills: [...prev.skills, skillInput.trim()],
-        }));
-        setSkillInput("");
+        }))
+        setSkillInput("")
       } else {
-        toast.warn("Skill already exists!");
+        toast.warn("Skill already exists!")
       }
     }
-  };
+  }
   const handleBenefitKeyDown = (e) => {
     if (e.key === "Enter" && benefitInput.trim()) {
-      e.preventDefault();
+      e.preventDefault()
       // Check if the benefit already exists (case-insensitive)
-      if (!formData.benefits.some(b => b.toLowerCase() === benefitInput.trim().toLowerCase())) {
+      if (!formData.benefits.some((b) => b.toLowerCase() === benefitInput.trim().toLowerCase())) {
         setFormData((prev) => ({
           ...prev,
           benefits: [...prev.benefits, benefitInput.trim()],
-        }));
-        setBenefitInput("");
+        }))
+        setBenefitInput("")
       } else {
-        toast.warn("Benefit already exists!");
+        toast.warn("Benefit already exists!")
       }
     }
-  };
+  }
   const handleDocKeyDown = (e) => {
     if (e.key === "Enter" && docInput.trim()) {
-      e.preventDefault();
+      e.preventDefault()
       // Check if the document already exists (case-insensitive)
-      if (!formData.documents.some(d => d.toLowerCase() === docInput.trim().toLowerCase())) {
+      if (!formData.documents.some((d) => d.toLowerCase() === docInput.trim().toLowerCase())) {
         setFormData((prev) => ({
           ...prev,
           documents: [...prev.documents, docInput.trim()],
-        }));
-        setDocInput("");
+        }))
+        setDocInput("")
       } else {
-        toast.warn("Document already exists!");
+        toast.warn("Document already exists!")
       }
     }
-  };
+  }
 
   // Salary calculation
   useEffect(() => {
     if (formData.salaryType === "salary+incentives") {
-      const total =
-        (Number.parseFloat(salaryAmount) || 0) +
-        (Number.parseFloat(incentiveAmount) || 0);
-      setTotalSalary(total ? total.toString() : "");
+      const total = (Number.parseFloat(salaryAmount) || 0) + (Number.parseFloat(incentiveAmount) || 0)
+      setTotalSalary(total ? total.toString() : "")
       setFormData((prev) => ({
         ...prev,
         salary: total ? total.toString() : "",
-      }));
+      }))
     } else {
-      setFormData((prev) => ({ ...prev, salary: salaryAmount }));
-      setTotalSalary("");
+      setFormData((prev) => ({ ...prev, salary: salaryAmount }))
+      setTotalSalary("")
     }
-  }, [salaryAmount, incentiveAmount, formData.salaryType]);
+  }, [salaryAmount, incentiveAmount, formData.salaryType])
 
   const scrollToField = (selector) => {
-    const el =
-      typeof selector === "string"
-        ? document.querySelector(selector)
-        : selector;
-    if (el && "scrollIntoView" in el)
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
+    const el = typeof selector === "string" ? document.querySelector(selector) : selector
+    if (el && "scrollIntoView" in el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
   const getDescriptionText = () => {
-    const div = document.createElement("div");
-    div.innerHTML = formData.description || "";
-    return (div.textContent || "").trim();
-  };
+    const div = document.createElement("div")
+    div.innerHTML = formData.description || ""
+    return (div.textContent || "").trim()
+  }
 
   const handleNextStep = () => {
-    const missing = [];
-    if (!formData.title) missing.push("Job Title");
-    if (!formData.category) missing.push("Category");
-    if (formData.category === "Other" && !otherCategory.trim())
-      missing.push("Custom Category");
-    if (!formData.openings) missing.push("No. of Openings");
-    if (!formData.type) missing.push("Job Type");
-    if (!formData.location) missing.push("Location");
-    if (!formData.address) missing.push("Address");
-    if (!formData.qualification) missing.push("Qualification");
-    if (!getDescriptionText()) missing.push("Job Description");
+    const missing = []
+    if (!formData.title) missing.push("Job Title")
+    if (!formData.category) missing.push("Category")
+    if (formData.category === "Other" && !otherCategory.trim()) missing.push("Custom Category")
+    if (!formData.openings) missing.push("No. of Openings")
+    if (!formData.type) missing.push("Job Type")
+    if (!formData.location) missing.push("Location")
+    if (!formData.address) missing.push("Address")
+    if (!formData.qualification) missing.push("Qualification")
+    if (!getDescriptionText()) missing.push("Job Description")
 
     if (missing.length) {
-      toast.error(`Please fill: ${missing.join(", ")}`);
-      if (!formData.title) return scrollToField("[name='title']");
-      if (!formData.category) return scrollToField("[name='category']");
-      if (formData.category === "Other" && !otherCategory.trim())
-        return scrollToField("#otherCategory");
-      if (!formData.openings) return scrollToField("[name='openings']");
-      if (!formData.type) return scrollToField("[name='type']");
-      if (!formData.location) return scrollToField("[name='location']");
-      if (!formData.address) return scrollToField("[name='address']");
-      if (!formData.qualification)
-        return scrollToField("[name='qualification']");
-      return;
+      toast.error(`Please fill: ${missing.join(", ")}`)
+      if (!formData.title) return scrollToField("[name='title']")
+      if (!formData.category) return scrollToField("[name='category']")
+      if (formData.category === "Other" && !otherCategory.trim()) return scrollToField("#otherCategory")
+      if (!formData.openings) return scrollToField("[name='openings']")
+      if (!formData.type) return scrollToField("[name='type']")
+      if (!formData.location) return scrollToField("[name='location']")
+      if (!formData.address) return scrollToField("[name='address']")
+      if (!formData.qualification) return scrollToField("[name='qualification']")
+      return
     }
-    setStep(2);
-  };
+    setStep(2)
+  }
 
   // ---- Submit ----
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const formEl = e.currentTarget;
+    const formEl = e.currentTarget
     if (formEl && !formEl.checkValidity()) {
-      formEl.reportValidity();
-      return;
+      formEl.reportValidity()
+      return
     }
 
-    const descText = getDescriptionText();
+    const descText = getDescriptionText()
     if (!descText) {
-      toast.error("Job Description is required.");
-      return scrollToField("#description");
+      toast.error("Job Description is required.")
+      return scrollToField("#description")
     }
     if (formData.category === "Other" && !otherCategory.trim()) {
-      toast.error("Please enter a custom category.");
-      return scrollToField("#otherCategory");
+      toast.error("Please enter a custom category.")
+      return scrollToField("#otherCategory")
     }
     if (formData.salaryType === "salary" && !salaryAmount) {
-      toast.error("Please enter Salary amount.");
-      return;
+      toast.error("Please enter Salary amount.")
+      return
     }
-    if (
-      formData.salaryType === "salary+incentives" &&
-      (!salaryAmount || !incentiveAmount || !totalSalary)
-    ) {
-      toast.error(
-        "Please enter Salary, Incentives and ensure Total is calculated."
-      );
-      return;
+    if (formData.salaryType === "salary+incentives" && (!salaryAmount || !incentiveAmount || !totalSalary)) {
+      toast.error("Please enter Salary, Incentives and ensure Total is calculated.")
+      return
     }
     if (!formData.workingDaysFrom || !formData.workingDaysTo) {
-      toast.error("Please select Working Days range.");
-      return;
+      toast.error("Please select Working Days range.")
+      return
     }
     if (!formData.startTime || !formData.endTime) {
-      toast.error("Please set Timing (start and end).");
-      return;
+      toast.error("Please set Timing (start and end).")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
-    const salaryValue = formData.salaryType === 'salary+incentives'
-      ? `${salaryAmount} + ${incentiveAmount}`
-      : salaryAmount;
+    const salaryValue =
+      formData.salaryType === "salary+incentives" ? `${salaryAmount} + ${incentiveAmount}` : salaryAmount
 
     const payload = {
       jobTitle: formData.title,
@@ -410,60 +372,49 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       shift: formData.shift,
       status: formData.status,
       ClosedDate: formData.closedDate,
-    };
+    }
 
     try {
-      const token = Cookies.get("userToken");
-      const userId = Cookies.get("userId");
+      const token = Cookies.get("userToken")
+      const userId = Cookies.get("userId")
 
-      let data;
+      let data
       if (initialData) {
-        data = await updateJob(token, initialData.id, payload);
-        if (!data) throw new Error("Failed to update job");
-        toast.success("✅ Job Updated Successfully");
-        if (onSubmit) onSubmit(data.UpdatedData);
+        data = await updateJob(token, initialData.id, payload)
+        if (!data) throw new Error("Failed to update job")
+        toast.success("✅ Job Updated Successfully")
+        if (onSubmit) onSubmit(data.UpdatedData)
       } else {
-        data = await postJob(token, payload, userId);
-        if (!data) throw new Error("Failed to post job");
-        toast.success("Job Posted Successfully");
-        if (onSubmit) onSubmit(data.job);
+        data = await postJob(token, payload, userId)
+        if (!data) throw new Error("Failed to post job")
+        toast.success("Job Posted Successfully")
+        if (onSubmit) onSubmit(data.job)
       }
-      onClose && onClose();
+      onClose && onClose()
     } catch (err) {
-      console.error("❌ Error saving job:", err);
-      alert(err.message || "Something went wrong while saving the job.");
+      console.error("❌ Error saving job:", err)
+      alert(err.message || "Something went wrong while saving the job.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const inputClass =
-    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white";
+    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6 px-3 md:py-10 md:px-6 overflow-y-auto bg-transparent">
       <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 w-full max-w-4xl">
         {/* Header */}
         <div className="px-6 md:px-8 pt-6 pb-4 border-b">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">
-            {initialData ? "Edit Job" : "Post a Job"}
-          </h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{initialData ? "Edit Job" : "Post a Job"}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Fill the details below. Fields marked with * are required. Mobile
-            responsive and accessible.
+            Fill the details below. Fields marked with * are required. Mobile responsive and accessible.
           </p>
 
           <div className="mt-4 flex items-center gap-3" aria-hidden="true">
-            <div
-              className={`h-2 flex-1 rounded-full ${
-                step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"
-              }`}
-            />
-            <div
-              className={`h-2 flex-1 rounded-full ${
-                step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"
-              }`}
-            />
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
           </div>
           <div className="mt-2 flex justify-between text-xs text-gray-500">
             <span>Job Details</span>
@@ -479,10 +430,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Job Title */}
                 <div className="md:col-span-2">
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="title"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="title">
                     Job Title <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -498,10 +446,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Category */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="category"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="category">
                     Category <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -533,10 +478,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Openings */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="openings"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="openings">
                     No. of Openings <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -558,10 +500,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Job Type */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="type"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="type">
                     Job Type <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -582,10 +521,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Location */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="location"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="location">
                     Location <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -607,10 +543,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Address */}
                 <div className="md:col-span-2">
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="address"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="address">
                     Address <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -627,9 +560,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                 {/* Gender */}
                 <div className="md:col-span-2">
                   <fieldset>
-                    <legend className="block mb-1 font-medium text-gray-800">
-                      Preferred Gender
-                    </legend>
+                    <legend className="block mb-1 font-medium text-gray-800">Preferred Gender</legend>
                     <div className="flex flex-wrap gap-4">
                       {[
                         { label: "Any", value: "" },
@@ -637,10 +568,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                         { label: "Female", value: "Female" },
                         { label: "Other", value: "Other" },
                       ].map((g) => (
-                        <label
-                          key={g.label}
-                          className="flex items-center gap-2 text-gray-700"
-                        >
+                        <label key={g.label} className="flex items-center gap-2 text-gray-700">
                           <input
                             type="radio"
                             name="gender"
@@ -657,10 +585,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Qualification */}
                 <div className="md:col-span-2">
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="qualification"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="qualification">
                     Qualification <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -687,9 +612,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     id="description"
                     name="description"
                     value={formData.description || ""}
-                    onChange={(html) =>
-                      setFormData((prev) => ({ ...prev, description: html }))
-                    }
+                    onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
                     label="Job Description"
                     placeholder="Describe the responsibilities of this job and other specific requirements here..."
                     required
@@ -715,10 +638,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Experience */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="totalExp"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="totalExp">
                     Total Experience <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -819,15 +739,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Benefits */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">
-                    Job Benefits
-                  </label>
+                  <label className="block mb-1 font-medium text-gray-800">Job Benefits</label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.benefits.map((b) => (
-                      <span
-                        key={b}
-                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
-                      >
+                      <span key={b} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
                         {b}
                         <button
                           type="button"
@@ -874,15 +789,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Skills */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">
-                    Skills
-                  </label>
+                  <label className="block mb-1 font-medium text-gray-800">Skills</label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
-                      >
+                      <span key={skill} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
                         {skill}
                         <button
                           type="button"
@@ -929,15 +839,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Documents */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">
-                    Documents Required
-                  </label>
+                  <label className="block mb-1 font-medium text-gray-800">Documents Required</label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.documents.map((d) => (
-                      <span
-                        key={d}
-                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
-                      >
+                      <span key={d} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
                         {d}
                         <button
                           type="button"
@@ -1071,10 +976,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Shift */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="shift"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="shift">
                     Shift <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -1094,10 +996,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
 
                 {/* Weekend */}
                 <div>
-                  <label
-                    className="block mb-1 font-medium text-gray-800"
-                    htmlFor="weekend"
-                  >
+                  <label className="block mb-1 font-medium text-gray-800" htmlFor="weekend">
                     Weekend <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -1117,11 +1016,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="text-[#D4AF37] hover:underline"
-                >
+                <button type="button" onClick={() => setStep(1)} className="text-[#D4AF37] hover:underline">
                   Back
                 </button>
                 <button
@@ -1137,7 +1032,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PostJobForm;
+export default PostJobForm

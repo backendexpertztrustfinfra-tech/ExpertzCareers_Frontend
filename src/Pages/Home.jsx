@@ -1,27 +1,26 @@
+"use client"
 
-import React, { useRef, useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import Hero from "../Components/Home/Hero";
-// import JobSearchBar from "../Components/Home/JobSearchBar";
-import CategoryCards from "../Components/Home/CategoryCards";
-import JobPromo from "../Components/Home/JobPromo";
-import QualificationCards from "../Components/Home/QualificationCards";
-import JobTypeCards from "../Components/Home/JobTypeCards";
-// import JobFasterForm from "../Components/Home/JobFasterForm";
-import FaqSection from "../Components/Home/FaqSection";
+import { useRef, useState, useContext } from "react"
+import { AuthContext } from "../context/AuthContext"
+import Hero from "../Components/Home/Hero"
+import CategoryCards from "../Components/Home/CategoryCards"
+import JobPromo from "../Components/Home/JobPromo"
+import QualificationCards from "../Components/Home/QualificationCards"
+import JobTypeCards from "../Components/Home/JobTypeCards"
+import FaqSection from "../Components/Home/FaqSection"
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
-  const [showLoginMsg, setShowLoginMsg] = useState(false);
-  const heroRef = useRef();
+  const { user } = useContext(AuthContext)
+  const [showLoginMsg, setShowLoginMsg] = useState(false)
+  const heroRef = useRef()
 
   const handleAccessAttempt = () => {
     if (!user) {
-      heroRef.current?.scrollToLogin();
-      setShowLoginMsg(true);
-      setTimeout(() => setShowLoginMsg(false), 3000);
+      heroRef.current?.scrollToLogin()
+      setShowLoginMsg(true)
+      setTimeout(() => setShowLoginMsg(false), 3000)
     }
-  };
+  }
 
   return (
     <div className="relative">
@@ -36,24 +35,17 @@ const Home = () => {
 
       {/* Main Content */}
       <div className={`${!user ? "filter opacity-100 pointer-events-auto select-none" : ""}`}>
-        {/* <JobSearchBar /> */}
         <CategoryCards />
         <JobPromo />
         <QualificationCards />
         <JobTypeCards />
-        {/* <JobFasterForm /> */}
         <FaqSection />
       </div>
 
       {/* Blur Click Blocker */}
-      {!user && (
-        <div
-          className="fixed top-0 left-0 w-full h-full z-40"
-          onClick={handleAccessAttempt}
-        ></div>
-      )}
+      {!user && <div className="fixed top-0 left-0 w-full h-full z-40" onClick={handleAccessAttempt}></div>}
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

@@ -1,10 +1,20 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const jobCategories = [
   { title: "Delivery", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3465/3465848.png" },
-  { title: "Web Development", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png" },
-  { title: "Digital Marketing", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/4149/4149654.png" },
+  {
+    title: "Web Development",
+    vacancies: "8,10,000+",
+    image: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png",
+  },
+  {
+    title: "Digital Marketing",
+    vacancies: "8,10,000+",
+    image: "https://cdn-icons-png.flaticon.com/512/4149/4149654.png",
+  },
   { title: "Graphic Design", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/1821/1821064.png" },
   { title: "Security Guard", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3144/3144436.png" },
   { title: "Driver", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3300/3300786.png" },
@@ -12,46 +22,27 @@ const jobCategories = [
   { title: "HR Executive", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3048/3048396.png" },
   { title: "Receptionist", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/2620/2620984.png" },
   { title: "Office Assistant", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/174/174881.png" },
-  { title: "Customer Support", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/1180/1180998.png" },
+  {
+    title: "Customer Support",
+    vacancies: "8,10,000+",
+    image: "https://cdn-icons-png.flaticon.com/512/1180/1180998.png",
+  },
   { title: "Electrician", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3242/3242257.png" },
-];
-
-const jobsData = {
-  "Delivery": [{ id: 1, title: "Delivery Boy" }],
-  "Web Development": [{ id: 2, title: "Frontend Developer" }],
-  "Digital Marketing": [],
-  "Graphic Design": [],
-  "Security Guard": [],
-  "Driver": [{ id: 3, title: "Truck Driver" }],
-  "Accountant": [],
-  "HR Executive": [],
-  "Receptionist": [],
-  "Office Assistant": [],
-  "Customer Support": [],
-  "Electrician": [],
-};
+]
 
 const CategoryCards = () => {
-  const [visibleCount, setVisibleCount] = useState(8);
-  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
-  const navigate = useNavigate();
+  const [visibleCount, setVisibleCount] = useState(8)
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false)
+  const navigate = useNavigate()
 
-  const handleShowMore = () => setVisibleCount((prev) => prev + 4);
+  const handleShowMore = () => setVisibleCount((prev) => prev + 4)
 
   const handleClick = (title) => {
-    const jobs = jobsData[title] || [];
-    // console.log("[CategoryCards] Clicked:", title, "Jobs found:", jobs.length);
+    navigate(`/jobs?category=${encodeURIComponent(title)}`)
+  }
 
-    if (jobs.length > 0) {
-      navigate(`/jobs?category=${encodeURIComponent(title)}`);
-    } else {
-      setShowNoJobsMsg(true);
-      setTimeout(() => setShowNoJobsMsg(false), 3000);
-    }
-  };
-
-  const visibleCategories = jobCategories.slice(0, visibleCount);
-  const hasMore = visibleCount < jobCategories.length;
+  const visibleCategories = jobCategories.slice(0, visibleCount)
+  const hasMore = visibleCount < jobCategories.length
 
   return (
     <section className="relative py-12 sm:py-16 px-4 sm:px-8 bg-gradient-to-br from-[#fffaf0] via-white to-[#f3f4f6]">
@@ -81,13 +72,17 @@ const CategoryCards = () => {
                        hover:shadow-2xl transition-all duration-500 cursor-pointer 
                        border border-gray-100 p-6 sm:p-7 flex flex-col items-center text-center"
           >
-            <div className="absolute inset-0 rounded-2xl border-2 border-transparent 
-                            group-hover:border-yellow-400 transition-all duration-500"></div>
+            <div
+              className="absolute inset-0 rounded-2xl border-2 border-transparent 
+                            group-hover:border-yellow-400 transition-all duration-500"
+            ></div>
 
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-100 via-orange-50 to-pink-50 
-                            flex items-center justify-center shadow-inner mb-4 group-hover:scale-105 transition">
+            <div
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-100 via-orange-50 to-pink-50 
+                            flex items-center justify-center shadow-inner mb-4 group-hover:scale-105 transition"
+            >
               <img
-                src={category.image}
+                src={category.image || "/placeholder.svg"}
                 alt={category.title}
                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
               />
@@ -116,7 +111,7 @@ const CategoryCards = () => {
         </div>
       )}
     </section>
-  );
-};
+  )
+}
 
-export default CategoryCards;
+export default CategoryCards

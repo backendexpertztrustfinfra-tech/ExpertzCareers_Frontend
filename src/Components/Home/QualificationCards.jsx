@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const qualifications = [
   {
@@ -27,32 +29,16 @@ const qualifications = [
     vacancies: "1,10,000+",
     image: "https://cdn-icons-png.flaticon.com/512/3755/3755294.png",
   },
-];
-
-const jobsByQualification = {
-  "Below 12th": [{ id: 1, title: "Delivery Boy" }],
-  "12th Pass": [{ id: 2, title: "Sales Executive" }],
-  "UG / Graduate": [{ id: 3, title: "Frontend Developer" }],
-  "Post Graduate": [],
-  "PhD": [],
-};
+]
 
 const QualificationCards = () => {
-  const navigate = useNavigate();
-  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
+  const navigate = useNavigate()
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false)
 
   const handleClick = (qualification) => {
-    const jobs = jobsByQualification[qualification] || [];
-    // console.log("[QualificationCards] Clicked:", qualification, "Jobs found:", jobs.length);
-
-    if (jobs.length > 0) {
-      const encoded = encodeURIComponent(qualification);
-      navigate(`/jobs?qualification=${encoded}`);
-    } else {
-      setShowNoJobsMsg(true);
-      setTimeout(() => setShowNoJobsMsg(false), 3000);
-    }
-  };
+    const encoded = encodeURIComponent(qualification)
+    navigate(`/jobs?qualification=${encoded}`)
+  }
 
   return (
     <section className="py-14 px-4 sm:px-6 bg-gradient-to-br from-yellow-50 via-white to-pink-50 relative">
@@ -78,7 +64,7 @@ const QualificationCards = () => {
                          hover:border-yellow-400 flex flex-col items-center text-center"
             >
               <img
-                src={item.image}
+                src={item.image || "/placeholder.svg"}
                 alt={item.level}
                 className="w-14 h-14 sm:w-16 sm:h-16 object-contain mb-4 transition-transform 
                            duration-300 group-hover:scale-110"
@@ -89,18 +75,14 @@ const QualificationCards = () => {
               </h3>
 
               <p className="text-xs sm:text-sm text-gray-600">
-                View{" "}
-                <span className="text-yellow-600 font-bold">
-                  {item.vacancies}
-                </span>{" "}
-                Vacancies
+                View <span className="text-yellow-600 font-bold">{item.vacancies}</span> Vacancies
               </p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default QualificationCards;
+export default QualificationCards

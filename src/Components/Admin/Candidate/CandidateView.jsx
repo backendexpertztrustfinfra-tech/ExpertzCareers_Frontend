@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import CandidateCard from "../Database/CandidateCard";
-import {
-  getAppliedUser,
-  getSavedCandidates,
-  saveCandidate,
-} from "../../../services/apis";
-import { Listbox } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import Cookies from "js-cookie"
+import CandidateCard from "../Database/CandidateCard"
+import { getAppliedUser, getSavedCandidates, saveCandidate } from "../../../services/apis"
+import { Listbox } from "@headlessui/react"
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid"
+import Slider from "rc-slider"
+import "rc-slider/assets/index.css"
 
 const CandidateView = ({ selectedJob }) => {
-  const [appliedCandidates, setAppliedCandidates] = useState([]);
-  const [savedCandidates, setSavedCandidates] = useState([]);
-  const [tab, setTab] = useState("Applied");
-  const [loading, setLoading] = useState(false);
+  const [appliedCandidates, setAppliedCandidates] = useState([])
+  const [savedCandidates, setSavedCandidates] = useState([])
+  const [tab, setTab] = useState("Applied")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const [filters, setFilters] = useState({
     location: "",
@@ -25,159 +24,202 @@ const CandidateView = ({ selectedJob }) => {
     skills: [],
     customSkill: "",
     experience: 0,
-  });
+  })
 
-  const token = Cookies.get("userToken");
+  const token = Cookies.get("userToken")
 
-  const locations = ["Remote", "Onsite", "Hybrid"];
-  const qualifications = ["B.Tech", "MBA", "MCA", "Diploma", "Other"];
-  const skillsList = ["React", "Node.js", "Python", "Java", "SQL", "AWS"];
+  const locations = ["Remote", "Onsite", "Hybrid"]
+  const qualifications = ["B.Tech", "MBA", "MCA", "Diploma", "Other"]
+  const skillsList = ["React", "Node.js", "Python", "Java", "SQL", "AWS"]
 
-  // Reusable function to fetch and map candidate data
-  const fetchCandidates = async (apiCall, setter) => {
-    if (!token) return;
-    setLoading(true);
-    setter([]); // Clear previous data
-    try {
-      const data = await apiCall(token, selectedJob?.id);
+  const transformCandidateData = useCallback((candidatesArray) => {
+    return candidatesArray.map((user) => ({
+      _id: user._id,
+      username: user.username || "No Name",
+      useremail: user.useremail || "No Email",
+      designation: user.designation || "No Designation",
+      qualification: user.qualification || "No Info",
+      skills: Array.isArray(user.Skill) ? user.Skill : user.Skill ? user.Skill.split(",").map((s) => s.trim()) : [],
+      location: user.location || "Not Provided",
+      expectedSalary: user.salaryExpectation || "N/A",
+      lastActive: user.lastActive || "Recently",
+      experience: user.yearsofExperience || 0,
+      distance: user.distance || null,
+      phonenumber: user.phonenumber || "Not Provided",
+      previousCompany: user.previousCompany || "Not Provided",
+      introvideo: user.introvideo || null,
+      resume: user.resume || null,
+      portfioliolink: user.portfioliolink || null,
+      certificationlink: user.certificationlink || null,
+      profilePhoto: user.profilphoto || user.profilePhoto || null,
+      profileStrength: user.profileStrength || 0,
+      appliedDate: user.appliedDate || new Date().toISOString(),
+    }))
+  }, [])
 
-      const mapped = (data?.candidatesApplied || data?.savedCandidates || []).map((user) => ({
-        _id: user._id,
-        username: user.username || "No Name",
-        useremail: user.useremail || "No Email",
-        designation: user.designation || "No Designation",
-        qualification: user.qualification || "No Info",
-        skills: Array.isArray(user.Skill) ? user.Skill : (user.Skill ? [user.Skill] : []),
-        location: user.location || "Not Provided",
-        expectedSalary: user.salaryExpectation || "N/A", // Use salaryExpectation from API
-        lastActive: user.lastActive || "Recently",
-        experience: user.yearsofExperience || 0, // Use yearsofExperience
-        distance: user.distance || null,
-        phonenumber: user.phonenumber || "Not Provided",
-        // Add all new dynamic fields here
-        previousCompany: user.previousCompany || "Not Provided",
-        introvideo: user.introvideo || null,
-        resume: user.resume || null,
-        portfioliolink: user.portfioliolink || null,
-        certificationlink: user.certificationlink || null,
-        // Assuming your backend also sends a profile strength score, applied date, etc.
-        profileStrength: user.profileStrength || 0,
-        appliedDate: user.appliedDate || new Date().toISOString(), // Example
-      }));
+  const fetchCandidates = useCallback(
+    async (apiCall, setter, jobId = null) => {
+      if (!token) {
+        setError("Authentication token not found")
+        return
+      }
 
-      setter(mapped);
-    } catch (err) {
-      console.error("Error fetching candidates:", err);
-      setter([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true)
+      setError(null)
+
+      try {
+        const data = await apiCall(token, jobId)
+        const candidatesArray = data?.candidatesApplied || data?.savedCandidates || []
+        const transformedCandidates = transformCandidateData(candidatesArray)
+        setter(transformedCandidates)
+      } catch (err) {
+        console.error("Error fetching candidates:", err)
+        setError(`Failed to fetch candidates: ${err.message}`)
+        setter([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [token, transformCandidateData],
+  )
 
   // Fetch Applied Candidates on job selection
   useEffect(() => {
     if (selectedJob && token) {
-      fetchCandidates(getAppliedUser, setAppliedCandidates);
-    }
-  }, [selectedJob, token]);
+      const jobId = selectedJob.id || selectedJob._id
+      console.log("[v0] CandidateView - Selected job:", selectedJob)
+      console.log("[v0] CandidateView - Using job ID:", jobId)
 
-  // Fetch Saved Candidates
-  const handleFetchSaved = () => {
-    fetchCandidates(getSavedCandidates, setSavedCandidates);
-  };
-  
+      if (jobId) {
+        fetchCandidates(getAppliedUser, setAppliedCandidates, jobId)
+      } else {
+        console.error("[v0] CandidateView - No valid job ID found in selectedJob:", selectedJob)
+        setError("Invalid job selection. Please try selecting the job again.")
+      }
+    }
+  }, [selectedJob, token, fetchCandidates])
+
+  const handleFetchSaved = useCallback(() => {
+    fetchCandidates(getSavedCandidates, setSavedCandidates)
+  }, [fetchCandidates])
+
   // Initial fetch of saved candidates
   useEffect(() => {
-    handleFetchSaved();
-  }, [token]);
+    if (token) {
+      handleFetchSaved()
+    }
+  }, [token, handleFetchSaved])
 
-  // Save Candidate
   const handleSaveCandidate = async (candidate) => {
     try {
-      const response = await saveCandidate(token, candidate._id);
-      console.log("✅ Candidate Saved:", response);
-
-      // Add the full candidate object to savedCandidates if not already present
+      // Optimistic update
       if (!savedCandidates.some((c) => c._id === candidate._id)) {
-        setSavedCandidates((prev) => [...prev, candidate]);
+        setSavedCandidates((prev) => [...prev, candidate])
       }
-    } catch (error) {
-      console.error("❌ Error saving candidate:", error);
-    }
-  };
 
-  // Handle tab change
-  const handleTabChange = (t) => {
-    setTab(t);
-    if (t === "Saved") {
-      handleFetchSaved(); // Re-fetch saved candidates on tab switch
+      const response = await saveCandidate(token, candidate._id)
+      console.log("✅ Candidate Saved:", response)
+    } catch (error) {
+      console.error("❌ Error saving candidate:", error)
+      // Revert optimistic update on error
+      setSavedCandidates((prev) => prev.filter((c) => c._id !== candidate._id))
+      setError(`Failed to save candidate: ${error.message}`)
     }
-  };
+  }
+
+  // Handle tab change with improved state management
+  const handleTabChange = (t) => {
+    setTab(t)
+    setError(null) // Clear any previous errors
+    if (t === "Saved") {
+      handleFetchSaved()
+    }
+  }
+
+  const resetFilters = useCallback(() => {
+    setFilters({
+      location: "",
+      qualification: "",
+      customQualification: "",
+      distance: 0,
+      skills: [],
+      customSkill: "",
+      experience: 0,
+    })
+  }, [])
 
   if (!selectedJob) {
     return (
       <div className="flex flex-col items-center justify-center mt-10 text-center text-gray-500">
-        <p className="text-lg font-medium">
-          Please select a job first to view candidates.
-        </p>
+        <div className="text-6xl mb-4">🔍</div>
+        <p className="text-lg font-medium mb-2">Please select a job first to view candidates.</p>
+        <p className="text-sm text-gray-400">Choose a job from the Job Listings to see applied and saved candidates.</p>
       </div>
-    );
+    )
   }
 
-  const candidatesToShow = tab === "Applied" ? appliedCandidates : savedCandidates;
+  const candidatesToShow = tab === "Applied" ? appliedCandidates : savedCandidates
 
-  // Apply filters
+  // Apply filters with improved logic
   const filteredCandidates = candidatesToShow.filter((c) => {
-    const skillsMatch = !filters.skills.length || 
-      filters.skills.every((s) =>
-        c.skills?.map(x => x.toLowerCase()).includes(s.toLowerCase())
-      );
+    const skillsMatch =
+      !filters.skills.length ||
+      filters.skills.every((s) => c.skills?.some((skill) => skill.toLowerCase().includes(s.toLowerCase())))
 
-    const customSkillMatch = !filters.customSkill ||
-      c.skills?.some((s) =>
-        s.toLowerCase().includes(filters.customSkill.toLowerCase())
-      );
+    const customSkillMatch =
+      !filters.customSkill || c.skills?.some((s) => s.toLowerCase().includes(filters.customSkill.toLowerCase()))
 
-    const locationMatch = !filters.location ||
-      c.location?.toLowerCase().includes(filters.location.toLowerCase());
+    const locationMatch = !filters.location || c.location?.toLowerCase().includes(filters.location.toLowerCase())
 
-    const qualificationMatch = !filters.qualification ||
-      c.qualification?.toLowerCase().includes(filters.qualification.toLowerCase());
-    
-    const customQualificationMatch = !filters.customQualification ||
-      c.qualification?.toLowerCase().includes(filters.customQualification.toLowerCase());
+    const qualificationMatch =
+      !filters.qualification || c.qualification?.toLowerCase().includes(filters.qualification.toLowerCase())
 
-    const experienceMatch = !filters.experience ||
-      Number(c.experience || 0) >= Number(filters.experience);
+    const customQualificationMatch =
+      !filters.customQualification || c.qualification?.toLowerCase().includes(filters.customQualification.toLowerCase())
 
-    const distanceMatch = !filters.distance ||
-      Number(c.distance || 999) <= Number(filters.distance);
-    
-    return locationMatch && qualificationMatch && customQualificationMatch && experienceMatch && distanceMatch && skillsMatch && customSkillMatch;
-  });
+    const experienceMatch = !filters.experience || Number(c.experience || 0) >= Number(filters.experience)
+
+    const distanceMatch = !filters.distance || Number(c.distance || 999) <= Number(filters.distance)
+
+    return (
+      locationMatch &&
+      qualificationMatch &&
+      customQualificationMatch &&
+      experienceMatch &&
+      distanceMatch &&
+      skillsMatch &&
+      customSkillMatch
+    )
+  })
 
   const toggleSkill = (skill) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      skills: prev.skills.includes(skill)
-        ? prev.skills.filter((s) => s !== skill)
-        : [...prev.skills, skill],
-    }));
-  };
+      skills: prev.skills.includes(skill) ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill],
+    }))
+  }
 
   return (
     <div className="flex gap-6 flex-col md:flex-row">
       {/* Filter Sidebar */}
       <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-5 space-y-6">
-        <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
+          {(filters.location ||
+            filters.qualification ||
+            filters.customQualification ||
+            filters.distance > 0 ||
+            filters.skills.length > 0 ||
+            filters.customSkill ||
+            filters.experience > 0) && (
+            <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">Active</span>
+          )}
+        </div>
 
         {/* Location */}
         <div>
           <label className="block text-sm mb-1">Location</label>
-          <Listbox
-            value={filters.location}
-            onChange={(value) => setFilters({ ...filters, location: value })}
-          >
+          <Listbox value={filters.location} onChange={(value) => setFilters({ ...filters, location: value })}>
             <div className="relative">
               <Listbox.Button className="w-full border rounded-full py-2 px-3 text-left bg-gray-50">
                 <span>{filters.location || "Select Location"}</span>
@@ -190,9 +232,7 @@ const CandidateView = ({ selectedJob }) => {
                   <Listbox.Option
                     key={loc}
                     value={loc}
-                    className={({ active }) =>
-                      `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`
-                    }
+                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`}
                   >
                     {({ selected }) => (
                       <span className="flex items-center gap-2">
@@ -213,7 +253,11 @@ const CandidateView = ({ selectedJob }) => {
           <Listbox
             value={filters.qualification}
             onChange={(value) =>
-              setFilters({ ...filters, qualification: value, customQualification: value === "Other" ? filters.customQualification : "" })
+              setFilters({
+                ...filters,
+                qualification: value,
+                customQualification: value === "Other" ? filters.customQualification : "",
+              })
             }
           >
             <div className="relative">
@@ -228,9 +272,7 @@ const CandidateView = ({ selectedJob }) => {
                   <Listbox.Option
                     key={q}
                     value={q}
-                    className={({ active }) =>
-                      `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`
-                    }
+                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`}
                   >
                     {({ selected }) => (
                       <span className="flex items-center gap-2">
@@ -248,9 +290,7 @@ const CandidateView = ({ selectedJob }) => {
               type="text"
               placeholder="Enter qualification..."
               value={filters.customQualification}
-              onChange={(e) =>
-                setFilters({ ...filters, customQualification: e.target.value })
-              }
+              onChange={(e) => setFilters({ ...filters, customQualification: e.target.value })}
               className="w-full mt-2 border rounded-full py-2 px-3 text-sm bg-gray-50"
             />
           )}
@@ -258,9 +298,7 @@ const CandidateView = ({ selectedJob }) => {
 
         {/* Distance */}
         <div>
-          <label className="block text-sm mb-1">
-            Max Distance: {filters.distance} km
-          </label>
+          <label className="block text-sm mb-1">Max Distance: {filters.distance} km</label>
           <Slider
             min={0}
             max={100}
@@ -271,9 +309,7 @@ const CandidateView = ({ selectedJob }) => {
 
         {/* Experience */}
         <div>
-          <label className="block text-sm mb-1">
-            Min Experience: {filters.experience} years
-          </label>
+          <label className="block text-sm mb-1">Min Experience: {filters.experience} years</label>
           <Slider
             min={0}
             max={20}
@@ -305,27 +341,15 @@ const CandidateView = ({ selectedJob }) => {
             type="text"
             placeholder="Enter other skill..."
             value={filters.customSkill}
-            onChange={(e) =>
-              setFilters({ ...filters, customSkill: e.target.value })
-            }
+            onChange={(e) => setFilters({ ...filters, customSkill: e.target.value })}
             className="w-full mt-2 border rounded-full py-2 px-3 text-sm bg-gray-50"
           />
         </div>
 
         {/* Clear Filters */}
         <button
-          onClick={() =>
-            setFilters({
-              location: "",
-              qualification: "",
-              customQualification: "",
-              distance: 0,
-              skills: [],
-              customSkill: "",
-              experience: 0,
-            })
-          }
-          className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600"
+          onClick={resetFilters}
+          className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
         >
           Clear Filters
         </button>
@@ -337,41 +361,65 @@ const CandidateView = ({ selectedJob }) => {
           {["Applied", "Saved"].map((t) => (
             <button
               key={t}
-              className={`px-5 py-2 rounded-full font-medium shadow-sm ${
+              className={`px-5 py-2 rounded-full font-medium shadow-sm transition-colors ${
                 tab === t
                   ? "bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
               onClick={() => handleTabChange(t)}
             >
-              {t} Candidates
+              {t} Candidates ({tab === "Applied" ? appliedCandidates.length : savedCandidates.length})
             </button>
           ))}
         </div>
 
-        {loading && <p className="text-center text-gray-400">Loading...</p>}
+        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">{error}</div>}
+
+        {loading && (
+          <div className="flex items-center justify-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <p className="ml-3 text-gray-600">Loading candidates...</p>
+          </div>
+        )}
 
         {!loading && (
           <div className="space-y-4">
             {filteredCandidates.length === 0 ? (
-              <p className="text-gray-400 text-center">
-                No {tab.toLowerCase()} candidates found.
-              </p>
+              <div className="text-center py-10 text-gray-500">
+                <div className="text-5xl mb-4">{candidatesToShow.length === 0 ? "📭" : "🔍"}</div>
+                <p className="text-lg font-medium mb-2">
+                  {candidatesToShow.length === 0
+                    ? `No ${tab.toLowerCase()} candidates found.`
+                    : "No candidates match your filters."}
+                </p>
+                {candidatesToShow.length > 0 && (
+                  <button onClick={resetFilters} className="text-orange-600 hover:text-orange-700 underline">
+                    Clear filters to see all candidates
+                  </button>
+                )}
+              </div>
             ) : (
-              filteredCandidates.map((candidate) => (
-                <CandidateCard
-                  key={candidate._id}
-                  candidate={candidate}
-                  onSave={() => handleSaveCandidate(candidate)}
-                  isSaved={savedCandidates.some((c) => c._id === candidate._id)}
-                />
-              ))
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-gray-600">
+                    Showing {filteredCandidates.length} of {candidatesToShow.length} candidates
+                  </p>
+                </div>
+                {filteredCandidates.map((candidate) => (
+                  <CandidateCard
+                    key={candidate._id}
+                    candidate={candidate}
+                    onSave={() => handleSaveCandidate(candidate)}
+                    isSaved={savedCandidates.some((c) => c._id === candidate._id)}
+                  />
+                ))}
+              </>
             )}
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CandidateView;
+export default CandidateView

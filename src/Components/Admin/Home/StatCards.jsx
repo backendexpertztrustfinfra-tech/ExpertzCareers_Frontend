@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import Cookies from "js-cookie";
-import JobListCard from "./JobListCard";
+"use client"
+
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Cookies from "js-cookie"
+import JobListCard from "./JobListCard"
+import DatabaseQuickBox from "./DatabaseQuickBox"
 import {
   getCreatedJobs,
   getRecruiterProfile,
@@ -10,128 +12,118 @@ import {
   getPendingJobs,
   getClosedJobs,
   getActiveSubscription,
-} from "../../../services/apis";
-import {
-  FaBriefcase,
-  FaClipboardList,
-  FaClock,
-  FaTimesCircle,
-} from "react-icons/fa";
-import DatabaseQuickBox from "./DatabaseQuickBox";
-import PostJobPage from "../Job/PostJobForm";
+} from "../../../services/apis"
+import { FaBriefcase, FaClipboardList, FaClock, FaTimesCircle } from "react-icons/fa"
 
 // ✅ normalize API response
-const normalizeJobs = (data) =>
-  Array.isArray(data) ? data : Array.isArray(data?.jobs) ? data.jobs : [];
+const normalizeJobs = (data) => (Array.isArray(data) ? data : Array.isArray(data?.jobs) ? data.jobs : [])
 
 const StatCards = ({ setActiveTab }) => {
-  const [jobs, setJobs] = useState([]);
-  const [userProfile, setUserProfile] = useState(null);
+  const [jobs, setJobs] = useState([])
+  const [userProfile, setUserProfile] = useState(null)
+  const [selectedJob, setSelectedJob] = useState(null) // Add setSelectedJob state
 
   const [stats, setStats] = useState({
     liveJobs: 0,
     totalJobs: 0,
     pendingJobs: 0,
     closedJobs: 0,
-  });
+  })
 
-  const token = Cookies.get("userToken");
-  const navigate = useNavigate();
+  const token = Cookies.get("userToken")
+  const navigate = useNavigate()
 
   // ✅ fetch profile
   useEffect(() => {
     const loadProfile = async () => {
-      if (!token) return;
+      if (!token) return
       try {
-        const profile = await getRecruiterProfile(token);
-        setUserProfile(profile);
+        const profile = await getRecruiterProfile(token)
+        setUserProfile(profile)
       } catch (err) {
-        console.error("Profile error:", err);
+        console.error("Profile error:", err)
       }
-    };
-    loadProfile();
-  }, [token]);
+    }
+    loadProfile()
+  }, [token])
 
   // ✅ fetch jobs + stats
   useEffect(() => {
-    let interval;
+    let interval
     const loadJobs = async () => {
-      if (!token) return;
+      if (!token) return
       try {
-        const createdJobs = normalizeJobs(await getCreatedJobs(token));
-        const liveJobs = normalizeJobs(await getLiveJobs(token));
-        const pendingJobs = normalizeJobs(await getPendingJobs(token));
-        const closedJobs = normalizeJobs(await getClosedJobs(token));
+        const createdJobs = normalizeJobs(await getCreatedJobs(token))
+        const liveJobs = normalizeJobs(await getLiveJobs(token))
+        const pendingJobs = normalizeJobs(await getPendingJobs(token))
+        const closedJobs = normalizeJobs(await getClosedJobs(token))
 
-        setJobs(createdJobs);
+        setJobs(createdJobs)
         setStats({
           totalJobs: createdJobs.length,
           liveJobs: liveJobs.length,
           pendingJobs: pendingJobs.length,
           closedJobs: closedJobs.length,
-        });
+        })
       } catch (err) {
-        console.error("Jobs error:", err);
+        console.error("Jobs error:", err)
       }
-    };
+    }
 
-    loadJobs();
-    interval = setInterval(loadJobs, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
+    loadJobs()
+    interval = setInterval(loadJobs, 30000)
+    return () => clearInterval(interval)
+  }, [token])
 
   // ✅ check if new job was just posted via PostJobPage
   useEffect(() => {
-    const latestJob = localStorage.getItem("latest_posted_job");
+    const latestJob = localStorage.getItem("latest_posted_job")
     if (latestJob) {
       try {
-        const job = JSON.parse(latestJob);
-        setJobs((prev) => [...prev, job]);
+        const job = JSON.parse(latestJob)
+        setJobs((prev) => [...prev, job])
         setStats((prev) => ({
           ...prev,
           totalJobs: prev.totalJobs + 1,
           liveJobs: job.status === "live" ? prev.liveJobs + 1 : prev.liveJobs,
-          pendingJobs:
-            job.status === "pending" ? prev.pendingJobs + 1 : prev.pendingJobs,
-          closedJobs:
-            job.status === "closed" ? prev.closedJobs + 1 : prev.closedJobs,
-        }));
+          pendingJobs: job.status === "pending" ? prev.pendingJobs + 1 : prev.pendingJobs,
+          closedJobs: job.status === "closed" ? prev.closedJobs + 1 : prev.closedJobs,
+        }))
       } catch (err) {
-        console.error("Error parsing latest_posted_job:", err);
+        console.error("Error parsing latest_posted_job:", err)
       }
-      localStorage.removeItem("latest_posted_job");
+      localStorage.removeItem("latest_posted_job")
     }
-  }, []);
+  }, [])
 
   // ✅ handle Post Job button click
   const handlePostJobClick = async () => {
     if (!token) {
-      navigate("/login");
-      return;
+      navigate("/login")
+      return
     }
     try {
-      const sub = await getActiveSubscription();
-      console.log("👉 Active Subscription API Response:", sub);
+      const sub = await getActiveSubscription()
+      console.log("👉 Active Subscription API Response:", sub)
 
       // ✅ Handle multiple possible API shapes
-      const remainingJobs =
-        sub?.remainingJobs ?? sub?.subscription?.remainingJobs ?? 0;
+      const remainingJobs = sub?.remainingJobs ?? sub?.subscription?.remainingJobs ?? 0
 
-      console.log("👉 Extracted Remaining Jobs:", remainingJobs);
+      console.log("👉 Extracted Remaining Jobs:", remainingJobs)
 
       if (remainingJobs > 0) {
         // ✅ Recruiter has credits → open Post Job form in Admin
-        setActiveTab("JobPost");
+        setActiveTab("JobPost")
       } else {
         // ❌ No subscription OR credits = 0 → go to credits
-        console.warn("⚠️ No active credits. Redirecting to Credits page...");
-        setActiveTab("Credits");
+        console.warn("⚠️ No active credits. Redirecting to Credits page...")
+        setActiveTab("Credits")
       }
     } catch (err) {
-      console.error("❌ Subscription check failed:", err);
-      setActiveTab("Credits");
+      console.error("❌ Subscription check failed:", err)
+      setActiveTab("Credits")
     }
-  };
+  }
 
   return (
     <div className="space-y-10">
@@ -141,9 +133,7 @@ const StatCards = ({ setActiveTab }) => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
             Welcome Back, {userProfile?.user?.username || "User"} 👋
           </h1>
-          <p className="text-gray-600 mt-2 text-sm sm:text-base">
-            Here’s a quick overview of your hiring activity.
-          </p>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">Here’s a quick overview of your hiring activity.</p>
         </div>
 
         {/* ✅ Desktop button */}
@@ -169,8 +159,8 @@ const StatCards = ({ setActiveTab }) => {
         </motion.button> */}
       </div>
 
-      {/* ✅ Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* ✅ Stat cards - Updated to remove saved candidates */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
           { title: "Live Jobs", value: stats.liveJobs, icon: <FaBriefcase /> },
           {
@@ -183,11 +173,11 @@ const StatCards = ({ setActiveTab }) => {
             value: stats.pendingJobs,
             icon: <FaClock />,
           },
-          {
-            title: "Closed Jobs",
-            value: stats.closedJobs,
-            icon: <FaTimesCircle />,
-          },
+          // {
+          //   title: "Closed Jobs",
+          //   value: stats.closedJobs,
+          //   icon: <FaTimesCircle />,
+          // },
         ].map((card, i) => (
           <div
             key={i}
@@ -195,16 +185,10 @@ const StatCards = ({ setActiveTab }) => {
               shadow-md bg-white hover:shadow-xl hover:scale-[1.02] transition"
           >
             <div className="flex items-center gap-4">
-              <div className="text-xl sm:text-2xl text-orange-500">
-                {card.icon}
-              </div>
+              <div className="text-xl sm:text-2xl text-orange-500">{card.icon}</div>
               <div>
-                <h2 className="text-sm sm:text-base font-medium text-gray-600">
-                  {card.title}
-                </h2>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {card.value}
-                </p>
+                <h2 className="text-sm sm:text-base font-medium text-gray-600">{card.title}</h2>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{card.value}</p>
               </div>
             </div>
           </div>
@@ -214,10 +198,16 @@ const StatCards = ({ setActiveTab }) => {
       {/* ✅ Database quick access */}
       <DatabaseQuickBox />
 
-      {/* ✅ Job list */}
-      <JobListCard setActiveTab={setActiveTab} jobs={jobs} showAllButtonOnly />
+      {/* ✅ Job list - Pass setSelectedJob prop */}
+      <JobListCard
+        setActiveTab={setActiveTab}
+        setSelectedJob={setSelectedJob}
+        selectedJob={selectedJob}
+        jobs={jobs}
+        showAllButtonOnly
+      />
     </div>
-  );
-};
+  )
+}
 
-export default StatCards;
+export default StatCards

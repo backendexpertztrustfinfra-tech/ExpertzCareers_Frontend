@@ -153,17 +153,14 @@ export const updateRecruiterProfile = async (token, formData) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: formData, // ✅ Directly send the FormData object
+      body: formData,
     });
-    console.log("send data: ", formData);
+    console.log("send data: ", FormData);
     if (!res.ok) {
       const errMsg = await res.text();
       throw new Error(errMsg || "Profile update failed");
     }
-
     const data = await res.json();
-
-    // The login context logic is likely in a separate file, so we'll just return the data here.
     return data;
   } catch (err) {
     console.error("Update Profile Error:", err.message);

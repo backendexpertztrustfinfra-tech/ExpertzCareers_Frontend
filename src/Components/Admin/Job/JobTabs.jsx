@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+"use client";
+
+import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -72,7 +74,10 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
             const count = res?.candidatesApplied?.length ?? 0;
             return { ...job, appliedCount: count };
           } catch (err) {
-            console.error(`Error fetching applied count for job ${job.id}`, err);
+            console.error(
+              `Error fetching applied count for job ${job.id}`,
+              err
+            );
             return job;
           }
         })
@@ -113,14 +118,14 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
     }
   };
 
- const handleEditClick = (job) => {
-  navigate("/post-job", {
-    state: {
-      returnTo: { tab: "Job", refresh: true },
-      initialData: job, 
-    },
-  });
-};
+  const handleEditClick = (job) => {
+    navigate("/post-job", {
+      state: {
+        returnTo: { tab: "Job", refresh: true },
+        initialData: job,
+      },
+    });
+  };
 
   const handleJobClick = (job) => {
     setSelectedJob(job);
@@ -151,10 +156,14 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
       if (!subscription) {
         return alert("⚠️ No active plan. Please buy a plan first.");
       }
-      return alert("❌ Job post limit reached for your current subscription plan.");
+      return alert(
+        "❌ Job post limit reached for your current subscription plan."
+      );
     }
 
-    navigate("/post-job", { state: { returnTo: { tab: "Job", refresh: true } } });
+    navigate("/post-job", {
+      state: { returnTo: { tab: "Job", refresh: true } },
+    });
   };
 
   return (
@@ -176,8 +185,8 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
         ) : subscription ? (
           <p className="text-green-600 font-medium">
             ✅ Active Plan: {subscription.planName || "Plan"} (
-            {subscription.jobsPosted}/{subscription.jobPostLimit} jobs used, valid
-            till {new Date(subscription.endDate).toLocaleDateString()})
+            {subscription.jobsPosted}/{subscription.jobPostLimit} jobs used,
+            valid till {new Date(subscription.endDate).toLocaleDateString()})
           </p>
         ) : (
           <p className="text-red-500 font-medium">
@@ -218,9 +227,11 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
           onClick={handlePostJobClick}
           disabled={isPostJobDisabled}
           className={`px-6 py-2 rounded-lg font-semibold shadow-md text-white 
-            ${isPostJobDisabled
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600"} 
+            ${
+              isPostJobDisabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
+            } 
             transition`}
         >
           + Post New Job
@@ -233,9 +244,11 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
           onClick={handlePostJobClick}
           disabled={isPostJobDisabled}
           className={`sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg text-white w-16 h-16 flex items-center justify-center text-3xl
-            ${isPostJobDisabled
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500"} 
+            ${
+              isPostJobDisabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500"
+            } 
             transition`}
         >
           +

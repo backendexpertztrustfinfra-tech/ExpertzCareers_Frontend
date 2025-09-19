@@ -217,7 +217,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchJobStats();
-    
+
     // Add event listeners to update job stats
     const updateStatsHandler = () => {
       fetchJobStats();
@@ -460,7 +460,7 @@ const ProfilePage = () => {
           portfioliolink: u.portfioliolink || "",
           resume: u.resume || "",
           preferredLocation: u.preferredLocation || "",
-          availability: u.availability || "",
+          // availability: u.availability || "",
           bio: u.bio || "",
           recruterPhone: u.recruterPhone || "",
           recruterCompany: u.recruterCompany || "",
@@ -586,7 +586,7 @@ const ProfilePage = () => {
           designation: u.designation || "",
           location: u.location || "",
           experience: u.yearsofExperience || "",
-          availability: u.availability || "",
+          // availability: u.availability || "",
           bio: u.bio || "",
           profileStrength: u.profileStrength || 0,
           responseRate: u.responseRate || 0,
@@ -629,7 +629,6 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onload = () =>
         setProfile((prev) => ({ ...prev, image: reader.result }));
-
     }
   };
 
@@ -1411,22 +1410,14 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Resume Upload */}
-                  <div
-                    className="text-center p-8 border-2 border-dashed border-orange-300/50 rounded-lg hover:border-orange-500 transition-colors cursor-pointer yellow:border-orange-700/50 yellow:hover:border-orange-400"
-                    onClick={() =>
-                      document.getElementById("resumeInput").click()
-                    }
-                  >
+                  {/* Resume Upload and Preview Section */}
+                  <div className="text-center p-8 border-2 border-dashed border-orange-300/50 rounded-lg hover:border-orange-500 transition-colors yellow:border-orange-700/50 yellow:hover:border-orange-400">
                     <Upload className="w-12 h-12 text-orange-500 mx-auto mb-4" />
                     <h3 className="font-semibold mb-2">Upload Resume</h3>
                     <p className="text-sm text-gray-500 yellow:text-gray-400 mb-4">
                       PDF, DOC, or DOCX (Max 5MB)
                     </p>
-                    <Button className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose File
-                    </Button>
+
                     <input
                       id="resumeInput"
                       type="file"
@@ -1434,6 +1425,34 @@ const ProfilePage = () => {
                       accept=".pdf,.doc,.docx"
                       onChange={handleResumeUpload}
                     />
+
+                    <div className="flex flex-col items-center space-y-4">
+                      {/* Choose File Button */}
+                      <Button
+                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg w-full max-w-xs"
+                        onClick={() =>
+                          document.getElementById("resumeInput").click()
+                        }
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choose File
+                      </Button>
+
+                      {/* Corrected: Persistent Preview Link that bypasses the router */}
+                      {profile.resume && (
+                        <a
+                          href={profile.resume}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full max-w-xs"
+                        >
+                          <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full border-orange-300 text-orange-600 hover:bg-orange-50 yellow:border-orange-700 yellow:text-orange-400 yellow:hover:bg-orange-900/20 bg-transparent">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview Resume
+                          </div>
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   {/* UPDATED: Portfolio Links */}
@@ -1641,14 +1660,14 @@ const ProfilePage = () => {
             <Download className="w-5 h-5 mr-2" />
             Generate Resume
           </Button>
-          {/* <ShareMenu>
+          <ShareMenu>
             <Button
               size="lg"
               className="px-8 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
             >
               Share Profile
             </Button>
-          </ShareMenu> */}
+          </ShareMenu>
         </div>
       </div>
 

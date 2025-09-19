@@ -1,11 +1,8 @@
-// JobDescriptionBox.jsx
-import React from "react";
-
 function sanitizeHtml(dirty) {
-  if (!dirty) return "";
+  if (!dirty) return ""
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(dirty, "text/html");
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(dirty, "text/html")
 
   const whitelist = {
     P: [],
@@ -19,56 +16,56 @@ function sanitizeHtml(dirty) {
     OL: [],
     LI: [],
     A: ["href"],
-  };
+  }
 
   function cleanNode(node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      return document.createTextNode(node.textContent);
+      return document.createTextNode(node.textContent)
     }
     if (node.nodeType !== Node.ELEMENT_NODE) {
-      return null;
+      return null
     }
-    const tag = node.tagName.toUpperCase();
+    const tag = node.tagName.toUpperCase()
     if (!whitelist[tag]) {
-      const frag = document.createDocumentFragment();
+      const frag = document.createDocumentFragment()
       node.childNodes.forEach((child) => {
-        const cleaned = cleanNode(child);
-        if (cleaned) frag.appendChild(cleaned);
-      });
-      return frag;
+        const cleaned = cleanNode(child)
+        if (cleaned) frag.appendChild(cleaned)
+      })
+      return frag
     }
-    const el = document.createElement(tag.toLowerCase());
+    const el = document.createElement(tag.toLowerCase())
     if (tag === "A") {
-      const href = node.getAttribute("href");
+      const href = node.getAttribute("href")
       if (href && /^(https?:|mailto:|tel:)/i.test(href)) {
-        el.setAttribute("href", href);
-        el.setAttribute("target", "_blank");
-        el.setAttribute("rel", "noopener noreferrer");
+        el.setAttribute("href", href)
+        el.setAttribute("target", "_blank")
+        el.setAttribute("rel", "noopener noreferrer")
       }
     }
     node.childNodes.forEach((child) => {
-      const cleaned = cleanNode(child);
-      if (cleaned) el.appendChild(cleaned);
-    });
-    return el;
+      const cleaned = cleanNode(child)
+      if (cleaned) el.appendChild(cleaned)
+    })
+    return el
   }
 
-  const frag = document.createDocumentFragment();
+  const frag = document.createDocumentFragment()
   doc.body.childNodes.forEach((child) => {
-    const c = cleanNode(child);
-    if (c) frag.appendChild(c);
-  });
-  const container = document.createElement("div");
-  container.appendChild(frag);
-  return container.innerHTML;
+    const c = cleanNode(child)
+    if (c) frag.appendChild(c)
+  })
+  const container = document.createElement("div")
+  container.appendChild(frag)
+  return container.innerHTML
 }
 
 const JobDescriptionBox = ({ job }) => {
-  if (!job) return null;
+  if (!job) return null
 
   return (
     <div className="border rounded-xl p-6 shadow-md">
-      <h3 className="text-lg font-bold mb-4">Job description</h3>
+      <h3 className="text-lg font-bold mb-4">Job Description</h3>
 
       {Array.isArray(job.description) ? (
         <ul className="list-disc list-inside space-y-2">
@@ -85,7 +82,7 @@ const JobDescriptionBox = ({ job }) => {
         <p className="text-sm text-gray-500">No job description provided.</p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default JobDescriptionBox;
+export default JobDescriptionBox
