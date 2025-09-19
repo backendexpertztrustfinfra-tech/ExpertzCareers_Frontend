@@ -146,7 +146,7 @@ const ProfilePage = () => {
     phone: "",
     email: "",
     experience: "",
-    availability: "",
+    // availability: "",
     image: "",
     designation: "",
     bio: "",
@@ -392,7 +392,7 @@ const ProfilePage = () => {
     portfioliolink: "portfioliolink",
     resume: "resume",
     preferredLocation: "preferredLocation",
-    availability: "availability",
+    // availability: "availability",
     bio: "bio",
     recruterPhone: "recruterPhone",
     recruterCompany: "recruterCompany",
@@ -844,12 +844,12 @@ const ProfilePage = () => {
       value: profile.experience,
       color: "text-yellow-600",
     },
-    {
-      key: "availability",
-      icon: Calendar,
-      value: profile.availability,
-      color: "text-orange-500",
-    },
+    // {
+    //   key: "availability",
+    //   icon: Calendar,
+    //   value: profile.availability,
+    //   color: "text-orange-500",
+    // },
   ];
 
   const jobStatsData = [
@@ -1641,14 +1641,14 @@ const ProfilePage = () => {
             <Download className="w-5 h-5 mr-2" />
             Generate Resume
           </Button>
-          <ShareMenu>
+          {/* <ShareMenu>
             <Button
               size="lg"
               className="px-8 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
             >
               Share Profile
             </Button>
-          </ShareMenu>
+          </ShareMenu> */}
         </div>
       </div>
 

@@ -2,16 +2,16 @@
 import React, { useRef, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Hero from "../Components/Home/Hero";
-import JobSearchBar from "../Components/Home/JobSearchBar";
+// import JobSearchBar from "../Components/Home/JobSearchBar";
 import CategoryCards from "../Components/Home/CategoryCards";
 import JobPromo from "../Components/Home/JobPromo";
 import QualificationCards from "../Components/Home/QualificationCards";
 import JobTypeCards from "../Components/Home/JobTypeCards";
-import JobFasterForm from "../Components/Home/JobFasterForm";
+// import JobFasterForm from "../Components/Home/JobFasterForm";
 import FaqSection from "../Components/Home/FaqSection";
 
 const Home = () => {
-  const { user } = useContext(AuthContext); // ✅ useContext instead of localStorage
+  const { user } = useContext(AuthContext);
   const [showLoginMsg, setShowLoginMsg] = useState(false);
   const heroRef = useRef();
 
@@ -29,7 +29,7 @@ const Home = () => {
 
       {/* Login alert */}
       {showLoginMsg && (
-        <div className="fixed top-16 left-1/2 transform -translate-x-1/2 bg-white-500 text-black px-4 py-2 rounded shadow z-50">
+        <div className="fixed top-32 left-1/2 transform -translate-x-1/2 bg-white-500 text-black px-4 py-2 rounded shadow z-50">
           Please login first to continue
         </div>
       )}

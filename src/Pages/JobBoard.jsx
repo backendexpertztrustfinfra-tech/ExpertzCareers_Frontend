@@ -186,7 +186,7 @@ const JobBoard = () => {
               </div>
 
               {/* Sort */}
-              <div className="hidden sm:block">
+              {/* <div className="hidden sm:block">
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
@@ -197,7 +197,7 @@ const JobBoard = () => {
                   <option value="salaryLow">Salary Low → High</option>
                   <option value="company">Company Name</option>
                 </select>
-              </div>
+              </div> */}
             </div>
 
             {/* Jobs */}

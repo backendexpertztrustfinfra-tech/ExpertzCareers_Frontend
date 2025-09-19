@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const jobTypes = [
@@ -29,15 +29,39 @@ const jobTypes = [
   },
 ];
 
+const jobsByType = {
+  "Work from Home": [{ id: 1, title: "Remote Developer" }],
+  "Work from Office": [{ id: 2, title: "HR Executive" }],
+  "Part Time": [],
+  "Freelancer": [{ id: 3, title: "Freelance Designer" }],
+  "Contractual / Temporary": [],
+};
+
 const JobTypeCards = () => {
   const navigate = useNavigate();
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
 
   const handleTypeClick = (type) => {
-    navigate(`/jobs?type=${encodeURIComponent(type)}`);
+    const jobs = jobsByType[type] || [];
+    // console.log("[JobTypeCards] Clicked:", type, "Jobs found:", jobs.length);
+
+    if (jobs.length > 0) {
+      navigate(`/jobs?type=${encodeURIComponent(type)}`);
+    } else {
+      setShowNoJobsMsg(true);
+      setTimeout(() => setShowNoJobsMsg(false), 3000);
+    }
   };
 
   return (
-    <div className="py-16 px-6 max-w-7xl mx-auto">
+    <div className="py-16 px-6 max-w-7xl mx-auto relative">
+      {/* Jobs Not Found Popup */}
+      {showNoJobsMsg && (
+        <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">
+          Jobs Not Found
+        </div>
+      )}
+
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
         Choose Your <span className="text-yellow-600">Job Type</span>
       </h2>

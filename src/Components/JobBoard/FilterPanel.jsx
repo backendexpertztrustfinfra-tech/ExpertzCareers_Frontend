@@ -78,7 +78,7 @@ export default function FilterPanel({
         "Telecom",
         "Startup",
       ],
-      workMode: ["Remote", "Hybrid", "Onsite"],
+      // workMode: ["Remote", "Hybrid", "Onsite"],
       datePosted: ["Last 24 hours", "Last 7 days", "Last 30 days", "Anytime"],
     }),
     []
@@ -115,7 +115,7 @@ export default function FilterPanel({
       searchable: true,
       custom: true,
     },
-    { key: "workMode", title: "Work Mode", icon: Laptop },
+    // { key: "workMode", title: "Work Mode", icon: Laptop },
     { key: "datePosted", title: "Date Posted", icon: Calendar },
   ];
 
@@ -145,7 +145,7 @@ export default function FilterPanel({
       location: [],
       company: [],
       industry: [],
-      workMode: [],
+      // workMode: [],
       datePosted: [],
       salary: { min: 0, max: 50 },
     });

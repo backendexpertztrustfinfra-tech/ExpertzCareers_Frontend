@@ -81,8 +81,36 @@ const Footer = () => {
           </ul>
         </div>
 
+         <div>
+          <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
+           Our Wings
+          </h3>
+          <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+            {[
+              { name: "Expertz Digital And IT Solution", route: "/" },
+              { name: "Expertz DigiFinra Reality", route: "/" },
+              { name: "Expertz DigiShop", route: "/" },
+              { name: "Expertz Insta Services", route: "/" },
+              { name: "Expertz Q-Mart", route: "/terms" },
+              { name: "Expertz Fine Dine RestroCafe", route: "/" },
+              { name: "Expertz Hotels", route: "/" },
+
+            
+            ].map((item, i) => (
+              <li key={i}>
+                <Link
+                  className="hover:text-orange-500 transition-colors"
+                  to={item.route}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {/* Subscribe */}
-        <div className="col-span-2 sm:col-span-1">
+        {/* <div className="col-span-2 sm:col-span-1">
           <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
             Stay Updated
           </h3>
@@ -102,7 +130,7 @@ const Footer = () => {
               Subscribe
             </button>
           </form>
-        </div>
+        </div> */}
       </div>
 
       {/* Wave Separator */}

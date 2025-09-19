@@ -16,19 +16,52 @@ const jobCategories = [
   { title: "Electrician", vacancies: "8,10,000+", image: "https://cdn-icons-png.flaticon.com/512/3242/3242257.png" },
 ];
 
+const jobsData = {
+  "Delivery": [{ id: 1, title: "Delivery Boy" }],
+  "Web Development": [{ id: 2, title: "Frontend Developer" }],
+  "Digital Marketing": [],
+  "Graphic Design": [],
+  "Security Guard": [],
+  "Driver": [{ id: 3, title: "Truck Driver" }],
+  "Accountant": [],
+  "HR Executive": [],
+  "Receptionist": [],
+  "Office Assistant": [],
+  "Customer Support": [],
+  "Electrician": [],
+};
+
 const CategoryCards = () => {
   const [visibleCount, setVisibleCount] = useState(8);
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
   const navigate = useNavigate();
 
   const handleShowMore = () => setVisibleCount((prev) => prev + 4);
-  const handleClick = (title) => navigate(`/jobs?category=${encodeURIComponent(title)}`);
+
+  const handleClick = (title) => {
+    const jobs = jobsData[title] || [];
+    // console.log("[CategoryCards] Clicked:", title, "Jobs found:", jobs.length);
+
+    if (jobs.length > 0) {
+      navigate(`/jobs?category=${encodeURIComponent(title)}`);
+    } else {
+      setShowNoJobsMsg(true);
+      setTimeout(() => setShowNoJobsMsg(false), 3000);
+    }
+  };
 
   const visibleCategories = jobCategories.slice(0, visibleCount);
   const hasMore = visibleCount < jobCategories.length;
 
   return (
     <section className="relative py-12 sm:py-16 px-4 sm:px-8 bg-gradient-to-br from-[#fffaf0] via-white to-[#f3f4f6]">
-  
+      {/* Jobs Not Found Alert */}
+      {showNoJobsMsg && (
+        <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">
+          Jobs Not Found
+        </div>
+      )}
+
       <div className="text-center mb-12">
         <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 drop-shadow-sm">
           Explore Popular Job Categories
@@ -48,7 +81,6 @@ const CategoryCards = () => {
                        hover:shadow-2xl transition-all duration-500 cursor-pointer 
                        border border-gray-100 p-6 sm:p-7 flex flex-col items-center text-center"
           >
-        
             <div className="absolute inset-0 rounded-2xl border-2 border-transparent 
                             group-hover:border-yellow-400 transition-all duration-500"></div>
 
@@ -61,7 +93,6 @@ const CategoryCards = () => {
               />
             </div>
 
-       
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-[#e2bf4b] transition">
               {category.title}
             </h3>
@@ -71,7 +102,6 @@ const CategoryCards = () => {
           </div>
         ))}
       </div>
-
 
       {hasMore && (
         <div className="mt-12 flex justify-center">

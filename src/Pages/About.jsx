@@ -713,7 +713,6 @@ const AboutPage = () => {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
-            {/* Using the component's variant prop for cleaner code */}
             <Button
               size="lg"
               className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-xl hover:shadow-2xl hover:scale-105 hover:brightness-110 bg-gradient-to-r from-orange-400 via-pink-400 to-yellow-500 transition-all rounded-2xl"
@@ -725,7 +724,7 @@ const AboutPage = () => {
 
             <Button
               size="lg"
-              variant="glass" // Using the new 'glass' variant
+              variant="glass" 
               className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-md hover:shadow-xl hover:scale-105 transition-all rounded-2xl"
               aria-label="Partner With Us"
             >

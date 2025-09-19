@@ -3,24 +3,22 @@ import {
   FaRupeeSign,
   FaGraduationCap,
   FaMapMarkerAlt,
-  FaLanguage,
   FaPhoneAlt,
   FaBriefcase,
   FaLink,
+  FaPlayCircle,
+  FaFilePdf,
+  FaExternalLinkAlt,
 } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
-import { MdPersonAdd } from "react-icons/md";
-import { FaPlayCircle, FaFilePdf, FaExternalLinkAlt } from "react-icons/fa";
-import { MdOutlineWorkOutline } from "react-icons/md";
+import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md";
 
 const CandidateCard = ({ candidate, onSave, isSaved }) => {
-  const [showphonenumber, setShowphonenumber] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
 
   const {
     _id,
     username,
-    useremail,
-    designation,
     qualification,
     skills,
     location,
@@ -43,8 +41,6 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
   const handleCall = () => {
     if (phonenumber) {
       window.open(`tel:${phonenumber}`, "_self");
-    } else {
-      alert("Candidate phone number is not available");
     }
   };
 
@@ -54,20 +50,13 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
         `sms:${phonenumber}?body=Hello ${username}, you are shortlisted for the interview.`,
         "_self"
       );
-    } else {
-      alert("Candidate phone number is not available");
     }
   };
 
   const handleWhatsAppInvite = () => {
     if (phonenumber) {
       const encodedMessage = encodeURIComponent(inviteMessage);
-      window.open(
-        `https://wa.me/${phonenumber}?text=${encodedMessage}`,
-        "_blank"
-      );
-    } else {
-      alert("Candidate phone number is not available");
+      window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`);
     }
   };
 
@@ -76,10 +65,10 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
     onSave(_id);
   };
 
-  const isAppliedToday = (appliedDate) => {
-    if (!appliedDate) return false;
+  const isAppliedToday = (dateStr) => {
+    if (!dateStr) return false;
     const today = new Date();
-    const date = new Date(appliedDate);
+    const date = new Date(dateStr);
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
@@ -90,13 +79,17 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
   const appliedToday = isAppliedToday(appliedDate);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5 sm:p-8 w-full max-w-5xl mx-auto transition-transform hover:scale-[1.01]">
+    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 w-full max-w-5xl mx-auto hover:shadow-lg transition">
+      {/* Top Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
         <div className="flex items-start gap-4 w-full">
           <img
-            src={profilePhoto || "https://cdn-icons-png.flaticon.com/512/219/219969.png"}
-            alt={`${username}'s avatar`}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border shadow-sm object-cover"
+            src={
+              profilePhoto ||
+              "https://cdn-icons-png.flaticon.com/512/219/219969.png"
+            }
+            alt={`${username || "Candidate"}'s avatar`}
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border object-cover"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -104,17 +97,17 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
                 {username || "Unknown"}
               </h2>
               {appliedToday && (
-                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
                   NEW
                 </span>
               )}
               {isSaved && (
-                <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">
                   Saved
                 </span>
               )}
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-gray-600 text-sm">
+            <div className="flex flex-wrap gap-4 mt-2 text-gray-600 text-sm">
               <span className="flex items-center gap-1">
                 <FaRupeeSign /> {expectedSalary || "N/A"}
               </span>
@@ -124,154 +117,148 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
               <span className="flex items-center gap-1">
                 <FaMapMarkerAlt /> {location || "Not Provided"}
               </span>
-              {/* Note: I've removed the hardcoded languages and FaLanguage icon as it's not present in your data */}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
-          <span className="bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 text-xs sm:text-sm font-medium px-3 py-1 rounded-full">
+        <div className="flex flex-col items-end gap-2">
+          <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
             Applied: {lastActive || "Recently"}
           </span>
           {!isSaved && (
             <button
               onClick={handleSaveClick}
-              className="text-gray-500 text-sm hover:text-blue-500 transition flex items-center gap-1"
+              className="text-blue-600 text-sm hover:underline flex items-center gap-1"
             >
-              <MdPersonAdd /> Save Candidate
+              <MdPersonAdd /> Save
             </button>
           )}
         </div>
       </div>
 
+      {/* Grid Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 text-sm">
         {/* Skills */}
-        <div className="flex flex-col">
+        <div>
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <FaBriefcase className="text-gray-500" />
             Skills
           </h3>
-          <div className="flex-1">
-            <p className="text-gray-700">
-              {Array.isArray(skills) && skills.length > 0
-                ? skills.join(", ")
-                : "Not Provided"}
-            </p>
-          </div>
+          <p className="text-gray-600">
+            {Array.isArray(skills) && skills.length > 0
+              ? skills.join(", ")
+              : "Not Provided"}
+          </p>
         </div>
 
         {/* Experience */}
-        <div className="flex flex-col">
+        <div>
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <MdOutlineWorkOutline className="text-gray-500" />
-            Work Experience
+            Experience
           </h3>
-          <div className="flex-1">
-            <p className="text-gray-700">
-              {experience ? `${experience} years` : "Not Provided"}
-            </p>
-            {previousCompany && (
-              <p className="text-gray-500 mt-1">at {previousCompany}</p>
-            )}
-          </div>
+          <p className="text-gray-600">
+            {experience ? `${experience} years` : "Not Provided"}
+          </p>
+          {previousCompany && (
+            <p className="text-gray-500 text-xs mt-1">at {previousCompany}</p>
+          )}
         </div>
 
         {/* Documents */}
-        <div className="flex flex-col">
+        <div>
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <FaFilePdf className="text-gray-500" />
             Documents
           </h3>
-          <div className="flex flex-col space-y-2 flex-1">
+          <div className="space-y-1">
             {resume ? (
               <a
                 href={resume}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-blue-600 hover:underline"
+                className="flex items-center gap-1 text-blue-600 hover:underline"
               >
                 <FaExternalLinkAlt className="w-3 h-3" /> Resume
               </a>
             ) : (
-              <p className="text-gray-500">Resume Not Provided</p>
+              <p className="text-gray-400">Resume Not Provided</p>
             )}
             {certificationlink ? (
               <a
                 href={certificationlink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-blue-600 hover:underline"
+                className="flex items-center gap-1 text-blue-600 hover:underline"
               >
                 <FaExternalLinkAlt className="w-3 h-3" /> Certificates
               </a>
             ) : (
-              <p className="text-gray-500">Certificates Not Provided</p>
+              <p className="text-gray-400">Certificates Not Provided</p>
             )}
           </div>
         </div>
 
         {/* Portfolio */}
-        <div className="flex flex-col">
+        <div>
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <FaLink className="text-gray-500" />
             Portfolio
           </h3>
-          <div className="flex-1">
-            {portfioliolink ? (
-              <a
-                href={portfioliolink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-blue-600 hover:underline"
-              >
-                <FaExternalLinkAlt className="w-3 h-3" /> View Portfolio
-              </a>
-            ) : (
-              <p className="text-gray-500">Not Provided</p>
-            )}
-          </div>
+          {portfioliolink ? (
+            <a
+              href={portfioliolink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline"
+            >
+              <FaExternalLinkAlt className="w-3 h-3" /> View Portfolio
+            </a>
+          ) : (
+            <p className="text-gray-400">Not Provided</p>
+          )}
         </div>
       </div>
 
+      {/* Intro Video */}
       {introvideo && (
-        <div className="mt-6 flex flex-col items-center">
+        <div className="mt-6">
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <FaPlayCircle className="text-red-500" />
             Video Intro
           </h3>
           <video
             src={introvideo}
-            className="w-full max-w-md rounded-lg shadow-lg border-2 border-orange-300"
+            className="w-full max-w-lg rounded-lg shadow-sm border"
             controls
-          >
-            Your browser does not support the video tag.
-          </video>
+          />
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 w-full">
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
         <button
           onClick={() => {
-            setShowphonenumber(true);
+            setShowPhone(true);
             handleCall();
           }}
-          className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-xl shadow transition w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
         >
-          <FaPhoneAlt /> {showphonenumber ? phonenumber : "View phone number"}
+          <FaPhoneAlt /> {showPhone ? phonenumber : "View Phone"}
         </button>
 
         <button
           onClick={handleSMS}
-          className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm px-5 py-2.5 rounded-xl shadow transition w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
         >
-          <IoMdSend /> Send SMS
+          <IoMdSend /> SMS
         </button>
 
         <button
           onClick={handleWhatsAppInvite}
-          className="flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 text-sm px-5 py-2.5 rounded-xl border shadow transition w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-5 py-2.5 rounded-lg border transition w-full sm:w-auto"
         >
-          <MdPersonAdd /> Invite for Interview
+          <MdPersonAdd /> WhatsApp Invite
         </button>
       </div>
     </div>

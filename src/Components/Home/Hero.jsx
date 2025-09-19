@@ -14,8 +14,7 @@ import { signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase-config";
 import { AuthContext } from "../../context/AuthContext";
 import SuccessfullyLogin from "../../assets/animation/succesfulllogin";
-import { GoogleAuthProvider } from "firebase/auth";
-import { signOut } from "firebase/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👁️ Added for eye icon
 
 const Hero = forwardRef(({ onlogin }, ref) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -30,10 +29,20 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   // ✨ New state for loading
   const [loading, setLoading] = useState(false);
 
+  // 👁️ New states for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // 🔑 New state for form validation errors
+  const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
   const [signupData, setSignupData] = useState({
     username: "",
     useremail: "",
     password: "",
+    confirmPassword: "", // 🔐 Added confirm password field
     usertype: "jobseeker",
   });
 
@@ -69,18 +78,47 @@ const Hero = forwardRef(({ onlogin }, ref) => {
     Cookies.set("usertype", usertype || "");
   };
 
+  // 📧 Strict email validation
+  const validateEmail = (email) => {
+    const trimmedEmail = email.trim();
+    if (trimmedEmail.length === 0) {
+      return false; 
+    }
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(trimmedEmail);
+  };
+
+  // 🔑 Strict password validation (min 6 chars, letters, and numbers)
+  const validatePassword = (password) => {
+    const trimmedPassword = password.trim();
+    const hasLettersAndNumbers = /[a-zA-Z]/.test(trimmedPassword) && /[0-9]/.test(trimmedPassword);
+    return trimmedPassword.length >= 6 && hasLettersAndNumbers;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // 📧 Trim and validate email
+    const trimmedEmail = email.trim();
+    if (!validateEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError("");
+
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ useremail: email, password }),
+        body: JSON.stringify({ useremail: trimmedEmail, password }),
       });
 
-      if (!res.ok) throw new Error("Login failed");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+      }
       const { token, usertype } = await res.json();
 
       if (token && usertype) {
@@ -100,8 +138,6 @@ const Hero = forwardRef(({ onlogin }, ref) => {
           );
         }, 2000);
       }
-
-      // console.log("token:", token);
     } catch (err) {
       alert(err.message || "Login error");
     } finally {
@@ -111,16 +147,48 @@ const Hero = forwardRef(({ onlogin }, ref) => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    // 📧 Trim and validate email
+    const trimmedEmail = signupData.useremail.trim();
+    if (!validateEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError("");
+
+    // 🔑 Trim and validate password
+    const trimmedPassword = signupData.password.trim();
+    if (!validatePassword(trimmedPassword)) {
+      setPasswordError("Password must be at least 6 characters long and contain both letters and numbers.");
+      return;
+    }
+    setPasswordError("");
+
+    // 🔐 Check if passwords match
+    const trimmedConfirmPassword = signupData.confirmPassword.trim();
+    if (trimmedPassword !== trimmedConfirmPassword) {
+      setConfirmPasswordError("Passwords do not match.");
+      return;
+    }
+    setConfirmPasswordError("");
+
     setLoading(true);
     try {
+      const { confirmPassword, ...dataToSend } = signupData; // Exclude confirmPassword
+      dataToSend.useremail = trimmedEmail; // Update with trimmed email
+      dataToSend.password = trimmedPassword; // Update with trimmed password
+
       const res = await fetch(`${BASE_URL}/user/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(signupData),
+        body: JSON.stringify(dataToSend),
       });
 
-      if (!res.ok) throw new Error("Signup failed");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Signup failed");
+      }
       const { token } = await res.json();
 
       if (token) {
@@ -136,140 +204,54 @@ const Hero = forwardRef(({ onlogin }, ref) => {
     }
   };
 
-  const googleProvider = new GoogleAuthProvider();
-  googleProvider.addScope("email");
-  googleProvider.addScope("profile");
-
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
-      // 1️⃣ Firebase popup
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      const idToken = await user.getIdToken();
 
-      // 2️⃣ Ensure email exists
-      const email =
-        user?.email ||
-        user?.providerData?.[0]?.email ||
-        result?._tokenResponse?.email;
-
-      if (!email) {
-        alert(
-          "⚠️ Unable to retrieve your Google email. Please try another account."
-        );
-        await auth.signOut();
-        return;
-      }
-
-      const googlePassword = `${user.uid}_google`;
-
-      // 3️⃣ Try backend login
-      let loginRes = await fetch(`${BASE_URL}/user/login`, {
+      const res = await fetch(`${BASE_URL}/user/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          useremail: email,
-          password: googlePassword,
-        }),
+        body: JSON.stringify({ idToken }),
       });
 
-      if (loginRes.ok) {
-        const { token, usertype } = await loginRes.json();
+      if (!res.ok) throw new Error("Google login failed");
+
+      const { token, usertype } = await res.json();
+
+      if (token) {
         saveTokenInCookie(token, usertype);
         login(token);
+        onlogin?.();
 
-        if (!usertype) {
-          // User exists but no type → redirect to /signup
-          navigate("/signup");
+        if (usertype === "jobseeker") {
+          navigate("/jobs");
+        } else if (usertype === "recruter") {
+          navigate("/admin");
         } else {
-          navigate(usertype === "jobseeker" ? "/jobs" : "/admin");
-        }
-        return;
-      }
-
-      // 4️⃣ If login failed with 401 → try to see if user exists in backend (without usertype)
-      if (loginRes.status === 401 || loginRes.status === 404) {
-        // Check if user exists
-        const checkUserRes = await fetch(
-          `${BASE_URL}/user/getByEmail?email=${encodeURIComponent(email)}`
-        );
-        if (checkUserRes.ok) {
-          const existingUser = await checkUserRes.json();
-          // Auto-login using Google uid + _google
-          const autoLoginRes = await fetch(`${BASE_URL}/user/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              useremail: email,
-              password: googlePassword,
-            }),
-          });
-
-          if (autoLoginRes.ok) {
-            const { token } = await autoLoginRes.json();
-            saveTokenInCookie(token, null);
-            login(token);
-            // Redirect to signup to complete profile/usertype
-            navigate("/signup");
-            return;
-          }
-        } else {
-          // 5️⃣ User truly doesn't exist → Signup automatically
-          const signupRes = await fetch(`${BASE_URL}/user/signup`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username: user.displayName || "New User",
-              useremail: email,
-              password: googlePassword,
-            }),
-          });
-
-          if (signupRes.ok) {
-            const { token } = await signupRes.json();
-            saveTokenInCookie(token, null);
-            login(token);
-            navigate("/signup");
-            return;
-          } else {
-            const errData = await signupRes.json().catch(() => ({}));
-            throw new Error(
-              errData.message || "Signup failed. Please try again."
-            );
-          }
+          navigate("/signup-choice");
         }
       }
-
-      // Any other error
-      const errData = await loginRes.json().catch(() => ({}));
-      throw new Error(
-        errData.message || "Google login failed. Please try again."
-      );
     } catch (err) {
-      console.error("Google login error:", err);
-      if (err.code === "auth/popup-closed-by-user") {
-        alert("Google login was cancelled. Please try again.");
-      } else if (err.code === "auth/cancelled-popup-request") {
-        alert("Please complete the existing Google login popup.");
-      } else {
-        alert(err.message || "Google login failed. Please try another method.");
-      }
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email) return alert("Please enter your email to reset password.");
-    setLoading(true);
+    if (!email || !validateEmail(email)) {
+      setEmailError("Please enter a valid email to reset password.");
+      return;
+    }
+    setEmailError("");
     try {
       await sendPasswordResetEmail(auth, email);
-      alert(`Password reset email sent to ${email}. Check your inbox.`);
+      alert("Reset email sent! Please check your inbox.");
     } catch (err) {
-      console.error("Password reset error:", err);
-      alert("Failed to send reset email: " + err.message);
-    } finally {
-      setLoading(false);
+      alert("Reset failed: " + err.message);
     }
   };
 
@@ -287,16 +269,8 @@ const Hero = forwardRef(({ onlogin }, ref) => {
         </div>
       )}
 
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-yellow-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
-        <div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-pink-400/20 rounded-full blur-3xl animate-float"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-2xl animate-pulse-slow"></div>
-      </div>
-
-      <div className="relative  flex flex-col lg:flex-row items-center justify-between px-8 py-12 max-w-7xl mx-auto">
+      {/* Hero content and Form */}
+      <div className="relative flex flex-col lg:flex-row items-center justify-between px-8 py-12 max-w-7xl mx-auto">
         {/* Left Content */}
         <div className="flex-1 lg:pr-12 mb-12 lg:mb-0">
           <div className="space-y-6">
@@ -317,7 +291,6 @@ const Hero = forwardRef(({ onlogin }, ref) => {
               away.
             </p>
 
-            {/* 🚀 Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
                 onClick={() => navigate("/companies")}
@@ -415,36 +388,73 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                     />
                   </div>
 
+                  {/* 📧 Email field with validation */}
                   <div>
                     <input
                       type="email"
                       placeholder="Email Address"
-                      className="w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                      className={`w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${emailError ? 'border-red-500' : 'border-gray-200'}`}
                       value={signupData.useremail}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setSignupData({
                           ...signupData,
                           useremail: e.target.value,
-                        })
-                      }
+                        });
+                        setEmailError("");
+                      }}
                       required
                     />
+                    {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                   </div>
 
-                  <div>
+                  {/* 🔑 Password field with validation and eye toggle */}
+                  <div className="relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Create Password"
-                      className="w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                      className={`w-full px-4 py-4 pr-12 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${passwordError ? 'border-red-500' : 'border-gray-200'}`}
                       value={signupData.password}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setSignupData({
                           ...signupData,
                           password: e.target.value,
-                        })
-                      }
+                        });
+                        setPasswordError("");
+                      }}
                       required
                     />
+                    <div
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                    {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+                  </div>
+
+                  {/* 🔐 Confirm Password field with validation and eye toggle */}
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      className={`w-full px-4 py-4 pr-12 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${confirmPasswordError ? 'border-red-500' : 'border-gray-200'}`}
+                      value={signupData.confirmPassword}
+                      onChange={(e) => {
+                        setSignupData({
+                          ...signupData,
+                          confirmPassword: e.target.value,
+                        });
+                        setConfirmPasswordError("");
+                      }}
+                      required
+                    />
+                    <div
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 cursor-pointer"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                    {confirmPasswordError && <p className="text-red-500 text-xs mt-1">{confirmPasswordError}</p>}
                   </div>
 
                   <div>
@@ -466,7 +476,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
 
                   <button
                     type="submit"
-                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-indigo-500/25 transform hover:scale-[1.02] transition-all duration-300"
+                    className="w-full py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-indigo-500/25 transform hover:scale-[1.02] transition-all duration-300"
                   >
                     Create Account
                   </button>
@@ -475,7 +485,12 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                     Already have an account?{" "}
                     <button
                       type="button"
-                      onClick={() => setIsSignup(false)}
+                      onClick={() => {
+                        setIsSignup(false);
+                        setEmailError("");
+                        setPasswordError("");
+                        setConfirmPasswordError("");
+                      }}
                       className="text-orange-600 font-semibold hover:text-orange-700 transition-colors"
                     >
                       Login
@@ -484,26 +499,38 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                 </form>
               ) : (
                 <form onSubmit={handleLogin} className="space-y-5">
+                  {/* 📧 Email field with validation */}
                   <div>
                     <input
                       type="email"
                       placeholder="Email Address"
-                      className="w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                      className={`w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${emailError ? 'border-red-500' : 'border-gray-200'}`}
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError("");
+                      }}
                       required
                     />
+                    {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                   </div>
 
-                  <div>
+                  {/* 🔑 Password field with eye toggle */}
+                  <div className="relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="w-full px-4 py-4 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-4 pr-12 bg-white/70 backdrop-blur-sm text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
+                    <div
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
                   </div>
 
                   <div className="flex justify-end">
@@ -564,7 +591,10 @@ const Hero = forwardRef(({ onlogin }, ref) => {
                     Don't have an account?{" "}
                     <button
                       type="button"
-                      onClick={() => setIsSignup(true)}
+                      onClick={() => {
+                        setIsSignup(true);
+                        setEmailError("");
+                      }}
                       className="text-orange-600 font-semibold hover:text-yellow-700 transition-colors"
                     >
                       Sign Up

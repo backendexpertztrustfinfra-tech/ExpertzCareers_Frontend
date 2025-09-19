@@ -144,8 +144,6 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const decoded = jwtDecode(token);
-
-      // 🔥 Update usertype in cookie if backend sends it
       if (usertypeFromApi) {
         Cookies.set("usertype", usertypeFromApi, { expires: 7 });
       }
@@ -154,10 +152,9 @@ export const AuthProvider = ({ children }) => {
 
       setUser({ ...decoded, usertype, source: "api" });
 
-      // Redirect if usertype is still missing
       const currentPath = window.location.pathname;
-      if (!usertype && currentPath !== "/signup") {
-        window.location.href = "/signup";
+      if (!usertype && currentPath !== "/") {
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Failed to decode token:", err.message);

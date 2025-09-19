@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const qualifications = [
@@ -29,16 +29,40 @@ const qualifications = [
   },
 ];
 
+const jobsByQualification = {
+  "Below 12th": [{ id: 1, title: "Delivery Boy" }],
+  "12th Pass": [{ id: 2, title: "Sales Executive" }],
+  "UG / Graduate": [{ id: 3, title: "Frontend Developer" }],
+  "Post Graduate": [],
+  "PhD": [],
+};
+
 const QualificationCards = () => {
   const navigate = useNavigate();
+  const [showNoJobsMsg, setShowNoJobsMsg] = useState(false);
 
   const handleClick = (qualification) => {
-    const encoded = encodeURIComponent(qualification);
-    navigate(`/jobs?qualification=${encoded}`);
+    const jobs = jobsByQualification[qualification] || [];
+    // console.log("[QualificationCards] Clicked:", qualification, "Jobs found:", jobs.length);
+
+    if (jobs.length > 0) {
+      const encoded = encodeURIComponent(qualification);
+      navigate(`/jobs?qualification=${encoded}`);
+    } else {
+      setShowNoJobsMsg(true);
+      setTimeout(() => setShowNoJobsMsg(false), 3000);
+    }
   };
 
   return (
-    <section className="py-14 px-4 sm:px-6 bg-gradient-to-br from-yellow-50 via-white to-pink-50">
+    <section className="py-14 px-4 sm:px-6 bg-gradient-to-br from-yellow-50 via-white to-pink-50 relative">
+      {/* Jobs Not Found Popup */}
+      {showNoJobsMsg && (
+        <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">
+          Jobs Not Found
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-800 mb-10 tracking-tight">
           What is your <span className="text-yellow-600">Qualification?</span>

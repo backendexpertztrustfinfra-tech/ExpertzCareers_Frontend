@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, allowedtype }) => {
   const usertype = Cookies.get("usertype");
 
   if (!token || !allowedtype.includes(usertype)) {
-    return <Navigate to="/unauthorized" />; // You can create this page
+    return <Navigate to="/unauthorized" />;
   }
 
   return children;

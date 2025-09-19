@@ -9,8 +9,7 @@ import {
 import Cookies from "js-cookie";
 import { deleteJob } from "../../../services/apis";
 
-const DashboardJobCard = ({  job,  onDeleteSuccess,  onEditClick,  onJobClick,
-}) => {
+const DashboardJobCard = ({ job, onDeleteSuccess, onEditClick, onJobClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const menuRef = useRef(null);
@@ -58,52 +57,51 @@ const DashboardJobCard = ({  job,  onDeleteSuccess,  onEditClick,  onJobClick,
 
   return (
     <div
-      className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md 
-                 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+      className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm 
+                 hover:shadow-md hover:scale-[1.01] transition-all duration-200 
+                 cursor-pointer flex flex-col gap-3"
       onClick={() => onJobClick && onJobClick(job)}
     >
       {/* Top Section */}
       <div className="flex justify-between items-start">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           {job.companyLogo ? (
             <img
               src={job.companyLogo}
               alt={job.company}
-              className="w-12 h-12 rounded-lg border object-cover"
+              className="w-10 h-10 rounded-md border object-cover"
             />
           ) : (
-            <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-orange-100 border border-orange-300">
-              <span className="text-lg font-bold text-orange-700">
+            <div className="w-10 h-10 flex items-center justify-center rounded-md bg-orange-100 border border-orange-300">
+              <span className="text-sm font-bold text-orange-700">
                 {job.company?.[0] || "C"}
               </span>
             </div>
           )}
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-semibold text-lg text-gray-800">
-                {job.jobTitle}
-              </h3>
-              <span
-                className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                  job.status === "Active"
-                    ? "bg-green-100 text-green-600"
-                    : job.status === "Closed"
-                    ? "bg-red-100 text-red-600"
-                    : job.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-600"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {job.status}
-              </span>
-            </div>
-            <p className="text-sm text-gray-500">{job.company}</p>
+          <div className="max-w-[160px]">
+            <h3 className="font-semibold text-sm md:text-base text-gray-800 truncate">
+              {job.jobTitle}
+            </h3>
+            <p className="text-xs text-gray-500 truncate">{job.company}</p>
+            <span
+              className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                job.status === "Active"
+                  ? "bg-green-100 text-green-600"
+                  : job.status === "Closed"
+                  ? "bg-red-100 text-red-600"
+                  : job.status === "Pending"
+                  ? "bg-yellow-100 text-yellow-600"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {job.status}
+            </span>
           </div>
         </div>
 
         {/* Menu */}
-        <div className="flex items-center gap-2 relative" ref={menuRef}>
-          <span className="text-xs text-gray-400">
+        <div className="flex items-center gap-1 relative" ref={menuRef}>
+          <span className="text-[11px] text-gray-400">
             {getTimeAgo(job.createdAt)}
           </span>
           <button
@@ -111,26 +109,26 @@ const DashboardJobCard = ({  job,  onDeleteSuccess,  onEditClick,  onJobClick,
               e.stopPropagation();
               setMenuOpen(!menuOpen);
             }}
-            className="p-2 rounded-full hover:bg-gray-100 transition"
+            className="p-1 rounded-full hover:bg-gray-100 transition"
           >
-            <FaEllipsisV />
+            <FaEllipsisV size={14} />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-8 w-36 bg-white border rounded-md shadow-lg z-50">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditClick(job);
-                  setMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
-              >
-                ✏️ Edit
-              </button>
+            <div className="absolute right-0 top-6 w-32 bg-white border rounded-md shadow-lg z-50 text-sm">
+             <button
+  onClick={(e) => {
+    e.stopPropagation();
+    onEditClick(job);
+    setMenuOpen(false);
+  }}
+  className="block w-full text-left px-3 py-2 text-blue-600 hover:bg-blue-50"
+>
+  ✏️ Edit
+</button>
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                className="block w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
               >
                 {loading ? "Deleting..." : "🗑 Delete"}
               </button>
@@ -140,66 +138,44 @@ const DashboardJobCard = ({  job,  onDeleteSuccess,  onEditClick,  onJobClick,
       </div>
 
       {/* Job Info */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-4">
-        <div className="flex items-center gap-2 text-gray-700 font-medium">
-          <FaBriefcase className="text-orange-500" /> {job.jobType || "N/A"}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-1">
+        <div className="flex items-center gap-1 text-gray-700">
+          <FaBriefcase className="text-orange-500" size={12} />{" "}
+          {job.jobType || "N/A"}
         </div>
-        <div className="flex items-center gap-2 text-gray-700 font-medium">
-          <FaUsers className="text-orange-500" /> {job.noofOpening || 0}{" "}
-          Openings
+        <div className="flex items-center gap-1 text-gray-700">
+          <FaUsers className="text-orange-500" size={12} /> {job.noofOpening || 0} Openings
         </div>
-        <div className="flex items-center gap-2 text-gray-700 font-medium">
-          <FaRupeeSign className="text-orange-500" />{" "}
+        <div className="flex items-center gap-1 text-gray-700">
+          <FaRupeeSign className="text-orange-500" size={12} />{" "}
           {job.SalaryIncentive || "Not Disclosed"}
         </div>
-        <div className="flex items-center gap-2 text-gray-700 font-medium">
-          <FaMapMarkerAlt className="text-orange-500" />{" "}
+        <div className="flex items-center gap-1 text-gray-700">
+          <FaMapMarkerAlt className="text-orange-500" size={12} />{" "}
           {job.location || "Remote"}
         </div>
       </div>
 
       {/* Candidate Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <button
-          className="py-2 text-sm font-medium rounded-lg border border-blue-200 bg-blue-50 
+          className="py-1.5 text-xs font-medium rounded-md border border-blue-200 bg-blue-50 
                      hover:bg-blue-100 text-blue-700 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             onJobClick && onJobClick(job);
           }}
         >
-          👥 Candidates: {job.appliedCount}
+          👥 {job.appliedCount ?? 0} Candidates
         </button>
         <button
-          className="py-2 text-sm font-medium rounded-lg border border-green-200 bg-green-50 
+          className="py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 
                      hover:bg-green-100 text-green-700"
           onClick={(e) => e.stopPropagation()}
         >
-          📞 Contacted: {job.contactedCount ?? 0}
+          📞 {job.contactedCount ?? 0} Contacted
         </button>
-        {/* <button
-          className="py-2 text-sm font-medium rounded-lg border border-purple-200 bg-purple-50 
-                     hover:bg-purple-100 text-purple-700"
-          onClick={(e) => e.stopPropagation()}
-        >
-          ⭐ Review: {job.reviewCount ?? 0}
-        </button> */}
       </div>
-
-      {/* Upgrade CTA */}
-        {/* <div className="mt-4">
-          <button
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm md:text-base font-semibold rounded-lg 
-                      bg-gradient-to-r from-orange-400 via-amber-500 to-red-500 
-                      text-white shadow-md 
-                      hover:from-orange-500 hover:via-amber-600 hover:to-red-600 
-                      hover:shadow-lg hover:scale-[1.02] 
-                      transition-all duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            🚀 Unlock More Candidates – Upgrade Now
-          </button>
-        </div> */}
     </div>
   );
 };
