@@ -36,7 +36,7 @@ const SignupModal = ({ close, onSignup }) => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-10">
-            <div className="w-8 h-8 border-4 border-[#b88b16] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-[#caa057] border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-3 text-gray-600 text-sm">Creating account...</p>
           </div>
         ) : (
@@ -65,7 +65,7 @@ const SignupModal = ({ close, onSignup }) => {
             />
             <button
               onClick={signupHandler}
-              className="w-full bg-[#b88b16] text-white p-2 rounded"
+              className="w-full bg-[#caa057] text-white p-2 rounded hover:bg-[#b4924c] transition-colors"
             >
               Sign Up
             </button>

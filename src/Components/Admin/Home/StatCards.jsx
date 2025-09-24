@@ -130,7 +130,7 @@ const StatCards = ({ setActiveTab }) => {
       {/* ✅ Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-[#caa057] to-[#caa057] bg-clip-text text-transparent">
             Welcome Back, {userProfile?.user?.username || "User"} 👋
           </h1>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">Here’s a quick overview of your hiring activity.</p>
@@ -174,9 +174,9 @@ const StatCards = ({ setActiveTab }) => {
             icon: <FaClock />,
           },
           // {
-          //   title: "Closed Jobs",
-          //   value: stats.closedJobs,
-          //   icon: <FaTimesCircle />,
+          //   title: "Closed Jobs",
+          //   value: stats.closedJobs,
+          //   icon: <FaTimesCircle />,
           // },
         ].map((card, i) => (
           <div
@@ -185,7 +185,7 @@ const StatCards = ({ setActiveTab }) => {
               shadow-md bg-white hover:shadow-xl hover:scale-[1.02] transition"
           >
             <div className="flex items-center gap-4">
-              <div className="text-xl sm:text-2xl text-orange-500">{card.icon}</div>
+              <div className="text-xl sm:text-2xl text-[#caa057]">{card.icon}</div>
               <div>
                 <h2 className="text-sm sm:text-base font-medium text-gray-600">{card.title}</h2>
                 <p className="text-2xl sm:text-3xl font-bold text-gray-900">{card.value}</p>

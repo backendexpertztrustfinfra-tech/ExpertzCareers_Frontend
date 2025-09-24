@@ -4,7 +4,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Page Title */}
-      <h1 className="text-4xl font-bold text-orange-600 mb-6">Privacy Policy</h1>
+      <h1 className="text-4xl font-bold text-[#caa057] mb-6">Privacy Policy</h1>
 
       {/* Intro Paragraph */}
       <p className="text-gray-700 text-lg leading-relaxed mb-6">

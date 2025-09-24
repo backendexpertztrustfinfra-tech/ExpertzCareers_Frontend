@@ -14,8 +14,8 @@ const GlobalSearch = () => {
   };
 
   return (
-    <div className="flex items-center bg-white border border-yellow-600 rounded px-3 py-1 w-full">
-      <MagnifyingGlassIcon className="h-5 w-5 text-yellow-600 mr-2" />
+    <div className="flex items-center bg-white border border-[#caa057] rounded px-3 py-1 w-full">
+      <MagnifyingGlassIcon className="h-5 w-5 text-[#caa057] mr-2" />
       <input
         type="text"
         placeholder="Search jobs, companies..."

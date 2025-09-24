@@ -13,14 +13,12 @@ const Button = ({
 }) => {
   const baseClasses =
     "inline-flex items-center justify-center rounded-lg font-semibold cursor-pointer border-0 no-underline transition-all duration-300 hover:scale-105";
-  // The padding and font size for the large button are now defined here for consistency.
   const sizeClasses = size === "lg" ? "text-lg px-8 py-4" : "text-sm px-6 py-3";
   const variantClasses = {
-    default: "bg-yellow-500 text-white hover:bg-yellow-600",
-    secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200",
+    default: "bg-[#caa057] text-white hover:bg-[#b4924c]",
+    secondary: "bg-[#fff1ed] text-slate-700 hover:bg-slate-200",
     outline:
-      "bg-transparent text-yellow-500 border-2 border-yellow-500 hover:bg-yellow-50",
-    // Added the glass variant to the component, so you don't need to define it inline.
+      "bg-transparent text-[#caa057] border-2 border-[#caa057] hover:bg-[#fff1ed]",
     glass:
       "bg-white/40 backdrop-blur-lg text-gray-800 hover:text-white border-2 border-white/60 transition-colors",
   };
@@ -52,8 +50,8 @@ const CardContent = ({ children, className = "" }) => (
 // Simple Badge component
 const Badge = ({ children, variant = "default", className = "" }) => {
   const variantClasses = {
-    default: "bg-yellow-500 text-white",
-    outline: "bg-transparent text-yellow-500 border border-yellow-500",
+    default: "bg-[#caa057] text-white",
+    outline: "bg-transparent text-[#caa057] border border-[#caa057]",
   };
 
   return (
@@ -77,7 +75,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     checkCircle: "✓",
     star: "⭐",
     trendingUp: "📈",
-    globe: "�",
+    globe: "🌐",
     shield: "🛡️",
     briefcase: "💼",
     rocket: "🚀",
@@ -149,32 +147,32 @@ const AboutPage = () => {
       title: "AI-Powered Intelligence",
       description:
         "Advanced machine learning algorithms that understand your career DNA and match you with perfect opportunities",
-      gradient: "from-purple-500 to-yellow-500",
-      bgGradient: "from-purple-50 to-yellow-50",
+      gradient: "from-purple-500 to-[#caa057]",
+      bgGradient: "from-purple-50 to-[#fff1ed]",
     },
     {
       icon: <Icon name="network" size={32} />,
       title: "Global Network",
       description:
         "Connect with industry leaders, mentors, and peers across 50+ countries and 200+ industries",
-      gradient: "from-orange-500 to-teal-500",
-      bgGradient: "from-orange-50 to-teal-50",
+      gradient: "from-[#caa057] to-teal-500",
+      bgGradient: "from-[#fff1ed] to-teal-50",
     },
     {
       icon: <Icon name="rocket" size={32} />,
       title: "Career Acceleration",
       description:
         "Fast-track your professional growth with personalized learning paths and skill development programs",
-      gradient: "from-orange-500 to-red-500",
-      bgGradient: "from-orange-50 to-red-50",
+      gradient: "from-[#caa057] to-red-500",
+      bgGradient: "from-[#fff1ed] to-red-50",
     },
     {
       icon: <Icon name="shield" size={32} />,
       title: "Trust & Security",
       description:
         "Bank-level security protecting your data with verified companies and transparent hiring processes",
-      gradient: "from-yellow-500 to-cyan-500",
-      bgGradient: "from-yellow-50 to-cyan-50",
+      gradient: "from-[#caa057] to-cyan-500",
+      bgGradient: "from-[#fff1ed] to-cyan-50",
     },
   ];
 
@@ -261,74 +259,61 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Combined CSS Animations into a single block */}
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-        @keyframes pulse-glow {
-          0%,
-          100% {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-          }
-          50% {
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-          }
-        }
-        .float-animation {
-          animation: float 6s ease-in-out infinite;
-        }
-        .pulse-glow {
-          animation: pulse-glow 2s infinite;
-        }
-        .fade-in-up {
-          opacity: ${isVisible ? 1 : 0};
-          transform: translateY(${isVisible ? "0" : "30px"});
-          transition: all 1s ease-out;
-        }
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-          background-size: 300% 300%;
-          animation: gradientShift 12s ease infinite;
-        }
-      `}</style>
+
+      <style>{`
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(202, 160, 87, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(202, 160, 87, 0.8); }
+  }
+  .float-animation { animation: float 6s ease-in-out infinite; }
+  .pulse-glow { animation: pulse-glow 2s infinite; }
+  .fade-in-up {
+    opacity: ${isVisible ? 1 : 0};
+    transform: translateY(${isVisible ? "0" : "30px"});
+    transition: all 1s ease-out;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient {
+    background-size: 300% 300%;
+    animation: gradientShift 12s ease infinite;
+  }
+`}</style>
 
       {/* Hero Section - Added responsive classes for better mobile display */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-yellow-50 via-white to-orange-50 py-16 md:py-32 px-4 md:px-6 text-center">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#fff1ed] via-white to-[#fff1ed] py-16 md:py-32 px-4 md:px-6 text-center">
         {/* Floating elements */}
-        <div className="absolute top-10 left-4 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-yellow-400/30 to-orange-400/30 rounded-full blur-sm float-animation"></div>
+        <div className="absolute top-10 left-4 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-[#caa057]/30 to-[#caa057]/30 rounded-full blur-sm float-animation"></div>
         <div
-          className="absolute top-20 right-4 w-12 h-12 md:w-20 md:h-20 bg-gradient-to-br from-orange-400/25 to-amber-400/25 rounded-full blur-sm float-animation"
+          className="absolute top-20 right-4 w-12 h-12 md:w-20 md:h-20 bg-gradient-to-br from-[#caa057]/25 to-[#caa057]/25 rounded-full blur-sm float-animation"
           style={{ animationDelay: "2s" }}
         ></div>
 
         <div className="relative max-w-7xl mx-auto">
           <div className="fade-in-up">
             {/* Adjusted badge sizing and padding for better responsiveness */}
-            <Badge className="mb-6 md:mb-12 text-sm sm:text-lg px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-600 border border-yellow-200">
+            <Badge className="mb-6 md:mb-12 text-sm sm:text-lg px-4 py-2 bg-gradient-to-r from-[#caa057] to-[#e6b85c] text-white border border-[#caa057]">
               Transforming 50,000+ Careers Since 2020
             </Badge>
 
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-4 md:mb-10 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 bg-clip-text text-transparent leading-snug md:leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-4 md:mb-10 bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] bg-clip-text text-transparent leading-snug md:leading-tight">
               About Expertz Career
             </h1>
 
             <p className="text-base md:text-2xl lg:text-3xl text-slate-600 mb-8 md:mb-16 max-w-5xl mx-auto leading-relaxed font-medium">
               Where{" "}
-              <span className="text-yellow-500 font-bold">
+              <span className="text-[#caa057] font-bold">
                 ambition meets AI
               </span>
               , and
-              <span className="text-orange-500 font-bold">
+              <span className="text-[#caa057] font-bold">
                 {" "}
                 dreams become careers
               </span>
@@ -339,13 +324,14 @@ const AboutPage = () => {
             {/* CTA buttons are now more responsive on small screens */}
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
               <Link to="/profile">
-              <Button
-                size="lg"
-                className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-white pulse-glow"
-                aria-label="Start Your Journey"
-              >
-                Start Your Journey <Icon name="arrowRight" size={24} className="ml-2" />
-              </Button>
+                <Button
+                  size="lg"
+                  className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 bg-gradient-to-r from-[#caa057] to-[#caa057] text-white pulse-glow"
+                  aria-label="Start Your Journey"
+                >
+                  Start Your Journey{" "}
+                  <Icon name="arrowRight" size={24} className="ml-2" />
+                </Button>
               </Link>
               <Button
                 size="lg"
@@ -361,7 +347,7 @@ const AboutPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-slate-50/50 to-slate-100/30">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-[#fff1ed]/50 to-slate-100/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-4 text-slate-800">
@@ -384,10 +370,10 @@ const AboutPage = () => {
                 }}
               >
                 <CardContent className="p-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl mb-6 text-yellow-500">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] rounded-2xl mb-6 text-[#caa057]">
                     {stat.icon}
                   </div>
-                  <div className="text-3xl md:text-4xl lg:text-5xl font-black text-yellow-500 mb-3">
+                  <div className="text-3xl md:text-4xl lg:text-5xl font-black text-[#caa057] mb-3">
                     {stat.number}
                   </div>
                   <div className="text-lg font-bold text-slate-800 mb-2">
@@ -404,7 +390,7 @@ const AboutPage = () => {
       </section>
 
       {/* Team Highlights Section */}
-      <section className="py-16 md:py-20 px-4 md:px-6 bg-gradient-to-br from-yellow-50/50 to-orange-50/50">
+      <section className="py-16 md:py-20 px-4 md:px-6 bg-gradient-to-br from-[#fff1ed]/50 to-[#fff1ed]/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-6 text-slate-800">
@@ -423,7 +409,7 @@ const AboutPage = () => {
                 className="bg-white/80 backdrop-blur-sm border-0"
               >
                 <CardContent className="p-8 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 text-white rounded-xl mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#caa057] to-[#caa057] text-white rounded-xl mb-6">
                     {highlight.icon}
                   </div>
                   <h3 className="text-xl font-bold mb-3 text-slate-800">
@@ -452,7 +438,7 @@ const AboutPage = () => {
 
           <div className="relative">
             {/* Timeline Line: Adjusted to be on the left on small screens and centered on medium screens */}
-            <div className="absolute left-6 md:left-1/2 transform md:-translate-x-1/2 w-1 md:w-2 h-full bg-gradient-to-b from-yellow-500 via-orange-500 to-amber-500 rounded-full"></div>
+            <div className="absolute left-6 md:left-1/2 transform md:-translate-x-1/2 w-1 md:w-2 h-full bg-gradient-to-b from-[#caa057] via-[#caa057] to-[#caa057] rounded-full"></div>
 
             {timeline.map((item, index) => (
               <div
@@ -471,22 +457,24 @@ const AboutPage = () => {
                   <Card
                     className={`${
                       activeTimelineItem === index
-                        ? "bg-white border-4 border-yellow-300 scale-105 shadow-2xl"
+                        ? "bg-white border-4 border-[#caa057] scale-105 shadow-2xl"
                         : "bg-white/80 border-0"
                     } transition-all duration-500`}
                   >
                     <CardContent className="p-8 sm:p-10">
                       <div
                         className={`flex items-center gap-4 mb-4 md:mb-6 ${
-                          index % 2 === 0 ? "justify-start md:justify-end" : "justify-start"
+                          index % 2 === 0
+                            ? "justify-start md:justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        <div className="p-3 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 text-white shadow-lg">
+                        <div className="p-3 rounded-2xl bg-gradient-to-br from-[#caa057] to-[#caa057] text-white shadow-lg">
                           {item.icon}
                         </div>
                         <Badge
                           variant="outline"
-                          className="text-lg px-4 py-2 font-bold border-2 border-yellow-500"
+                          className="text-lg px-4 py-2 font-bold border-2 border-[#caa057]"
                         >
                           {item.year}
                         </Badge>
@@ -497,13 +485,13 @@ const AboutPage = () => {
                       <p className="text-md md:text-lg text-slate-600 leading-relaxed mb-4">
                         {item.description}
                       </p>
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 rounded-full">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#fff1ed] rounded-full">
                         <Icon
                           name="checkCircle"
                           size={16}
-                          className="text-yellow-500"
+                          className="text-[#caa057]"
                         />
-                        <span className="text-sm font-semibold text-yellow-600">
+                        <span className="text-sm font-semibold text-[#caa057]">
                           {item.achievement}
                         </span>
                       </div>
@@ -515,7 +503,7 @@ const AboutPage = () => {
                 <div
                   className={`absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-8 h-8 rounded-full border-4 border-white shadow-lg ${
                     activeTimelineItem === index
-                      ? "bg-gradient-to-br from-yellow-500 to-orange-500 scale-125"
+                      ? "bg-gradient-to-br from-[#caa057] to-[#caa057] scale-125"
                       : "bg-slate-300 scale-100"
                   } transition-all duration-300`}
                 ></div>
@@ -570,10 +558,10 @@ const AboutPage = () => {
       <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <Card className="p-8 md:p-12 bg-gradient-to-br from-yellow-100/50 via-yellow-50/50 to-orange-100/50 border border-yellow-200 shadow-2xl">
+            <Card className="p-8 md:p-12 bg-gradient-to-br from-[#fff1ed]/50 via-[#fff1ed]/50 to-[#fff1ed]/50 border border-[#fff1ed] shadow-2xl">
               <CardContent className="p-0">
                 <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
-                  <div className="p-3 md:p-4 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl text-white shadow-lg">
+                  <div className="p-3 md:p-4 bg-gradient-to-br from-[#caa057] to-[#caa057] rounded-2xl text-white shadow-lg">
                     <Icon name="target" size={32} md:size={40} />
                   </div>
                   <h2 className="text-3xl md:text-5xl font-black text-slate-800">
@@ -595,24 +583,26 @@ const AboutPage = () => {
                     "Create inclusive opportunities for all backgrounds",
                   ].map((item, index) => (
                     <div key={index} className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#fff1ed] rounded-full flex items-center justify-center">
                         <Icon
                           name="checkCircle"
                           size={20}
-                          className="text-yellow-500"
+                          className="text-[#caa057]"
                         />
                       </div>
-                      <span className="text-sm md:text-lg text-slate-600">{item}</span>
+                      <span className="text-sm md:text-lg text-slate-600">
+                        {item}
+                      </span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="p-8 md:p-12 bg-gradient-to-br from-orange-100/50 via-orange-50/50 to-amber-100/50 border border-orange-200 shadow-2xl">
+            <Card className="p-8 md:p-12 bg-gradient-to-br from-[#fff1ed]/50 via-[#fff1ed]/50 to-[#fff1ed]/50 border border-[#fff1ed] shadow-2xl">
               <CardContent className="p-0">
                 <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
-                  <div className="p-3 md:p-4 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl text-white shadow-lg">
+                  <div className="p-3 md:p-4 bg-gradient-to-br from-[#caa057] to-[#caa057] rounded-2xl text-white shadow-lg">
                     <Icon name="lightbulb" size={32} md:size={40} />
                   </div>
                   <h2 className="text-3xl md:text-5xl font-black text-slate-800">
@@ -649,7 +639,7 @@ const AboutPage = () => {
                     },
                   ].map((item, index) => (
                     <div key={index} className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-orange-200 rounded-xl flex items-center justify-center text-orange-600">
+                      <div className="w-10 h-10 bg-[#fff1ed] rounded-xl flex items-center justify-center text-[#caa057]">
                         {item.icon}
                       </div>
                       <div>
@@ -668,10 +658,10 @@ const AboutPage = () => {
       </section>
 
       {/* CTA Section - The buttons now use the custom `Button` component correctly */}
-      <section className="py-24 md:py-28 px-4 md:px-6 relative overflow-hidden bg-gradient-to-br from-pink-100 via-orange-100 to-blue-100 animate-gradient">
+      <section className="py-24 md:py-28 px-4 md:px-6 relative overflow-hidden bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed] animate-gradient">
         {/* Floating abstract blobs */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 bg-pink-200/50 blur-3xl rounded-full animate-[float_8s_ease-in-out_infinite]"></div>
-        <div className="absolute -bottom-32 -right-20 w-80 h-80 bg-orange-200/40 blur-3xl rounded-full animate-[float_10s_ease-in-out_infinite]"></div>
+        <div className="absolute -top-20 -left-20 w-72 h-72 bg-[#fff1ed]/50 blur-3xl rounded-full animate-[float_8s_ease-in-out_infinite]"></div>
+        <div className="absolute -bottom-32 -right-20 w-80 h-80 bg-[#fff1ed]/40 blur-3xl rounded-full animate-[float_10s_ease-in-out_infinite]"></div>
 
         {/* Subtle particles */}
         <div className="absolute inset-0">
@@ -692,20 +682,20 @@ const AboutPage = () => {
         <div className="relative max-w-5xl mx-auto text-center text-gray-800">
           <h2 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
             Ready to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-pink-500 to-yellow-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057]">
               Transform
             </span>{" "}
             Your Career?
           </h2>
-          <div className="w-32 h-1 mx-auto mb-8 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full shadow-md"></div>
+          <div className="w-32 h-1 mx-auto mb-8 bg-gradient-to-r from-[#caa057] to-[#caa057] rounded-full shadow-md"></div>
 
           <p className="text-lg md:text-2xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed">
             Join over{" "}
-            <span className="font-bold text-orange-600">
+            <span className="font-bold text-[#caa057]">
               50,000 professionals
             </span>{" "}
             who trust
-            <span className="font-semibold text-pink-600">
+            <span className="font-semibold text-[#caa057]">
               {" "}
               Expertz Career
             </span>{" "}
@@ -716,27 +706,27 @@ const AboutPage = () => {
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
             <Link to="/jobs">
-            <Button
-              size="lg"
-              className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-xl hover:shadow-2xl hover:scale-105 hover:brightness-110 bg-gradient-to-r from-orange-400 via-pink-400 to-yellow-500 transition-all rounded-2xl"
-              aria-label="Find Your Dream Job"
-            >
-              Find Your Dream Job
-              <Icon name="arrowRight" size={24} className="ml-2" />
-            </Button>
+              <Button
+                size="lg"
+                className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-xl hover:shadow-2xl hover:scale-105 hover:brightness-110 bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] transition-all rounded-2xl"
+                aria-label="Find Your Dream Job"
+              >
+                Find Your Dream Job
+                <Icon name="arrowRight" size={24} className="ml-2" />
+              </Button>
             </Link>
 
             <Link to="/contact">
-            <Button
-              size="lg"
-              variant="glass" 
-              className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-md hover:shadow-xl hover:scale-105 transition-all rounded-2xl"
-              aria-label="Partner With Us"
-            >
-              Partner With Us
-              <Icon name="network" size={24} className="ml-2" />
-            </Button>
-            </Link> 
+              <Button
+                size="lg"
+                variant="glass"
+                className="text-lg md:text-xl px-8 md:px-12 py-4 md:py-6 shadow-md hover:shadow-xl hover:scale-105 transition-all rounded-2xl"
+                aria-label="Partner With Us"
+              >
+                Partner With Us
+                <Icon name="network" size={24} className="ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

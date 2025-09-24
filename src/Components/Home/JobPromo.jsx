@@ -7,30 +7,30 @@ const features = [
     id: 1,
     title: "Verified Jobs Only",
     desc: "Every opportunity is carefully screened for authenticity.",
-    icon: <Briefcase className="w-7 h-7 text-yellow-700" />,
+    icon: <Briefcase className="w-7 h-7 text-[#caa057]" />,
   },
   {
     id: 2,
     title: "Jobs Near You",
     desc: "Find trusted openings in your preferred location.",
-    icon: <MapPin className="w-7 h-7 text-yellow-700" />,
+    icon: <MapPin className="w-7 h-7 text-[#caa057]" />,
   },
   {
     id: 3,
     title: "Direct HR Connect",
     desc: "Call recruiters directly & fast-track your interviews.",
-    icon: <PhoneCall className="w-7 h-7 text-yellow-700" />,
+    icon: <PhoneCall className="w-7 h-7 text-[#caa057]" />,
   },
 ];
 
 const JobPromo = () => {
   return (
-    <section className="relative bg-gradient-to-br from-[#FFF9F2] via-[#FDF8F0] to-white py-12 md:py-20">
+    <section className="relative bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-white py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug">
-            Find Your <span className="text-yellow-600">Dream Job</span> with{" "}
-            <span className="text-yellow-700">Expertz Career</span>
+            Find Your <span className="text-[#caa057]">Dream Job</span> with{" "}
+            <span className="text-[#caa057]">Expertz Career</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-gray-600">
             Explore verified opportunities, connect with top recruiters, and
@@ -57,9 +57,9 @@ const JobPromo = () => {
             />
           </div>
           <Link to="/jobs">
-          <button className="flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-md text-sm sm:text-base w-full sm:w-auto">
-            <Search size={18} /> Search
-          </button>
+            <button className="flex items-center justify-center gap-2 bg-[#caa057] hover:bg-[#b4924c] text-white px-6 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-md text-sm sm:text-base w-full sm:w-auto">
+              <Search size={18} /> Search
+            </button>
           </Link>
         </div>
 
@@ -68,9 +68,9 @@ const JobPromo = () => {
           {features.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-gray-100 hover:border-yellow-300 transition rounded-2xl p-8 shadow-lg flex flex-col items-center text-center h-full"
+              className="bg-white border border-gray-100 hover:border-[#caa057] transition rounded-2xl p-8 shadow-lg flex flex-col items-center text-center h-full"
             >
-              <div className="bg-yellow-100 p-4 rounded-full mb-4">
+              <div className="bg-[#fff1ed] p-4 rounded-full mb-4">
                 {item.icon}
               </div>
               <h3 className="text-lg font-semibold text-gray-900">
@@ -87,13 +87,13 @@ const JobPromo = () => {
         <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/jobs"
-            className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700 text-white font-medium px-8 py-4 rounded-xl shadow-md transition transform hover:scale-105 text-center text-sm sm:text-base"
+            className="w-full sm:w-auto bg-[#caa057] hover:bg-[#b4924c] text-white font-medium px-8 py-4 rounded-xl shadow-md transition transform hover:scale-105 text-center text-sm sm:text-base"
           >
             Browse Jobs
           </Link>
           <Link
             to="/companies"
-            className="w-full sm:w-auto border border-yellow-600 text-yellow-700 hover:bg-yellow-50 px-8 py-4 rounded-xl font-medium transition transform hover:scale-105 text-center text-sm sm:text-base"
+            className="w-full sm:w-auto border border-[#caa057] text-[#caa057] hover:bg-[#fff1ed] px-8 py-4 rounded-xl font-medium transition transform hover:scale-105 text-center text-sm sm:text-base"
           >
             Explore Industries
           </Link>

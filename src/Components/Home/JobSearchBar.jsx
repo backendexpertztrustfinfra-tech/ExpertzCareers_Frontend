@@ -12,7 +12,7 @@ const JobSearchBar = () => {
   const navigate = useNavigate();
 
   const locations = [
-    "Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai","Kolkata","Pune","Ahmedabad", "Jaipur", "Lucknow",
+    "Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
     "Kanpur", "Nagpur", "Indore", "Bhopal", "Patna", "Ludhiana", "Agra", "Nashik", "Vadodara", "Varanasi",
     "Meerut", "Rajkot", "Kochi", "Coimbatore", "Thiruvananthapuram", "Visakhapatnam", "Surat", "Ranchi",
     "Jamshedpur", "Noida", "Gurgaon", "Faridabad", "Ghaziabad", "Chandigarh", "Amritsar", "Dehradun",
@@ -60,7 +60,7 @@ const JobSearchBar = () => {
       <h2 className="text-2xl md:text-3xl font-semibold mb-8">
         What Kind of a Role Do You Want?
       </h2>
-                               
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -69,7 +69,7 @@ const JobSearchBar = () => {
         className="flex flex-col lg:flex-row flex-wrap gap-4 bg-white px-6 py-6 mx-auto max-w-7xl justify-between items-center"
       >
         {/* Role */}
-        <div className="flex items-center border border-[#e2bf4b] py-2 px-2 rounded-full gap-2 w-full lg:flex-1 min-w-[180px]">
+        <div className="flex items-center border border-[#caa057] py-2 px-2 rounded-full gap-2 w-full lg:flex-1 min-w-[180px]">
           <FaSearch className="text-gray-400" />
           <input
             type="text"
@@ -84,7 +84,7 @@ const JobSearchBar = () => {
         <select
           value={industry}
           onChange={(e) => setIndustry(e.target.value)}
-          className="bg-transparent border-l border border-[#e2bf4b] py-2 rounded-full text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2"
+          className="bg-transparent border-l border border-[#caa057] py-2 rounded-full text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2"
         >
           <option value="">Select Industry</option>
           {industries.map((ind, idx) => (
@@ -96,7 +96,7 @@ const JobSearchBar = () => {
         <select
           value={department}
           onChange={(e) => setDepartment(e.target.value)}
-          className="bg-transparent border-l border border-[#e2bf4b] py-2 rounded-full text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2"
+          className="bg-transparent border-l border border-[#caa057] py-2 rounded-full text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2"
         >
           <option value="">Select Department</option>
           {departments.map((dep, idx) => (
@@ -108,7 +108,7 @@ const JobSearchBar = () => {
         <select
           value={experience}
           onChange={(e) => setExperience(e.target.value)}
-          className="bg-transparent border-l  text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2 border border-[#e2bf4b] py-2  rounded-full"
+          className="bg-transparent border-l text-sm outline-none text-gray-800 w-full lg:flex-1 min-w-[180px] px-2 border border-[#caa057] py-2 rounded-full"
         >
           <option value="">Select Experience</option>
           <option value="0-1">0-1 Years</option>
@@ -118,38 +118,37 @@ const JobSearchBar = () => {
         </select>
 
         {/* Location Input + Datalist */}
-       <div className="w-full lg:flex-1 min-w-[180px] relative ">
-  <input
-    type="text"
-    placeholder="Enter or select location"
-    value={location}
-    onChange={(e) => setLocation(e.target.value)}
-    className="bg-white text-gray-800  px-4 py-2 w-full border border-[#e2bf4b] rounded-full outline-none"
-  />
-  {location && ( 
-    <ul className="absolute z-10 bg-white border border-[#e2bf4b] mt-1 w-full max-h-60 overflow-auto rounded-lg shadow-lg text-left text-sm">
-      {locations
-        .filter((loc) =>
-          loc.toLowerCase().includes(location.toLowerCase())
-        )
-        .map((loc, idx) => (
-          <li
-            key={idx}
-            className="px-4 py-2 hover:bg-[#f5e9b0] cursor-pointer"
-            onClick={() => setLocation(loc)}
-          >                                                                                                                                                                                                                                                                                                                      
-            {loc}
-          </li>
-        ))}
-    </ul>
-  )}
-</div>
-         
+        <div className="w-full lg:flex-1 min-w-[180px] relative ">
+          <input
+            type="text"
+            placeholder="Enter or select location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="bg-white text-gray-800 px-4 py-2 w-full border border-[#caa057] rounded-full outline-none"
+          />
+          {location && (
+            <ul className="absolute z-10 bg-white border border-[#caa057] mt-1 w-full max-h-60 overflow-auto rounded-lg shadow-lg text-left text-sm">
+              {locations
+                .filter((loc) =>
+                  loc.toLowerCase().includes(location.toLowerCase())
+                )
+                .map((loc, idx) => (
+                  <li
+                    key={idx}
+                    className="px-4 py-2 hover:bg-[#fff1ed] cursor-pointer"
+                    onClick={() => setLocation(loc)}
+                  >
+                    {loc}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
 
         {/* Search Button */}
         <button
           type="submit"
-          className="bg-[#e2bf4b] hover:bg-[#D08700] text-white font-semibold text-sm px-6 py-2 rounded-full transition-all w-full sm:w-auto"
+          className="bg-[#caa057] hover:bg-[#b4924c] text-white font-semibold text-sm px-6 py-2 rounded-full transition-all w-full sm:w-auto"
         >
           Search
         </button>
@@ -159,375 +158,3 @@ const JobSearchBar = () => {
 };
 
 export default JobSearchBar;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client"
+
+import { useState } from "react"
 import { FaCheckCircle, FaEnvelope, FaFileAlt } from "react-icons/fa";
 
 const VerificationBox = () => {
@@ -37,7 +39,7 @@ const VerificationBox = () => {
         className={`w-full py-2.5 rounded-lg text-sm sm:text-base font-semibold transition ${
           verified
             ? "bg-green-600 text-white cursor-not-allowed"
-            : "bg-yellow-500 text-white hover:bg-yellow-600"
+            : "bg-[#caa057] text-white hover:bg-[#b4924c]"
         }`}
       >
         {verified ? "Verified" : "Verify Now"}
@@ -50,12 +52,12 @@ const Item = ({ icon, label, status }) => {
   const statusColor =
     status === "Completed" || status === "Verified"
       ? "text-green-600"
-      : "text-yellow-500";
+      : "text-[#caa057]";
 
   return (
     <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1 sm:gap-2">
       <div className="flex items-center gap-2 text-gray-700">
-        <div className="text-yellow-500 text-base sm:text-lg">{icon}</div>
+        <div className="text-[#caa057] text-base sm:text-lg">{icon}</div>
         <span className="text-sm sm:text-base font-medium">{label}</span>
       </div>
       <span className={`text-xs sm:text-sm font-semibold ${statusColor}`}>

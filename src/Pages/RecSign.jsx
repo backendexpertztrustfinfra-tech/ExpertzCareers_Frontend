@@ -1,4 +1,5 @@
-// src/components/RecSign.jsx
+"use client";
+
 import React, { useState, useContext } from "react";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
@@ -149,9 +150,9 @@ const RecSign = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center items-center py-10 px-4">
+    <div className="min-h-screen bg-[#fff1ed] flex justify-center items-center py-10 px-4">
       <div className="w-full max-w-4xl bg-white p-10 rounded-2xl shadow-2xl border border-gray-200">
-        <h2 className="text-3xl text-center mb-8 text-[#D4AF37] font-bold">
+        <h2 className="text-3xl text-center mb-8 text-[#caa057] font-bold">
           Recruiter / Company Registration
         </h2>
 
@@ -166,7 +167,7 @@ const RecSign = () => {
                 placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               />
               <input
@@ -175,7 +176,7 @@ const RecSign = () => {
                 placeholder="Email Address"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               />
               <input
@@ -184,7 +185,7 @@ const RecSign = () => {
                 placeholder="Phone Number"
                 value={formData.recruterPhone}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               />
               <input
@@ -193,7 +194,7 @@ const RecSign = () => {
                 placeholder="Company Name"
                 value={formData.recruterCompany}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               />
             </div>
@@ -217,7 +218,7 @@ const RecSign = () => {
                 rows="3"
                 value={formData.recruterCompanyAddress}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               ></textarea>
 
@@ -227,7 +228,7 @@ const RecSign = () => {
                 placeholder="Industry"
                 value={formData.recruterIndustry}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 required
               />
             </div>
@@ -253,10 +254,10 @@ const RecSign = () => {
                   value={formData.recruterGstIn}
                   onChange={handleChange}
                   maxLength={15}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#caa057] outline-none"
                 />
 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#D4AF37] transition">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#caa057] transition">
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
@@ -315,7 +316,7 @@ const RecSign = () => {
                       onClick={() => setSelectedDocType(doc)}
                       className={`p-3 text-center border rounded-lg cursor-pointer transition ${
                         selectedDocType === doc
-                          ? "bg-[#D4AF37] text-white border-[#D4AF37]"
+                          ? "bg-[#caa057] text-white border-[#caa057]"
                           : "border-gray-300 bg-gray-50 hover:bg-gray-100"
                       }`}
                     >
@@ -326,7 +327,7 @@ const RecSign = () => {
 
                 {selectedDocType && (
                   <>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#D4AF37] transition">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#caa057] transition">
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
@@ -380,7 +381,7 @@ const RecSign = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#D4AF37] text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
+            className="w-full bg-[#caa057] text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
           >
             Verify & Signup
           </button>

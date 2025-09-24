@@ -83,7 +83,7 @@ const BillingProfileCard = () => {
         );
 
   return (
-    <div className="w-full min-h-screen bg-[#fffef5] p-4 pt-0 sm:p-6">
+    <div className="w-full min-h-screen bg-[#fff1ed] p-4 pt-0 sm:p-6">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">
           Billing Profile
@@ -123,8 +123,8 @@ const BillingProfileCard = () => {
               onClick={() => setActiveTab(tab)}
               className={`flex-shrink-0 px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all border shadow-sm ${
                 activeTab === tab
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-500 shadow-md scale-105"
-                  : "bg-white text-gray-700 hover:bg-yellow-100 border-gray-300"
+                  ? "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white border-[#caa057] shadow-md scale-105"
+                  : "bg-white text-gray-700 hover:bg-[#fff1ed] border-gray-300"
               }`}
             >
               {tab}
@@ -139,7 +139,7 @@ const BillingProfileCard = () => {
           ) : (
             <table className="w-full min-w-[650px] text-sm sm:text-base text-left border-collapse">
               <thead>
-                <tr className="bg-gradient-to-r from-yellow-300 via-amber-500 to-orange-500 text-gray-800 text-sm sm:text-base">
+                <tr className="bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-gray-800 text-sm sm:text-base">
                   <th className="p-3 border-b">Date</th>
                   <th className="p-3 border-b">Plan</th>
                   <th className="p-3 border-b">Expires</th>
@@ -153,7 +153,7 @@ const BillingProfileCard = () => {
                   filteredData.map((item, idx) => (
                     <tr
                       key={idx}
-                      className="border-b border-gray-200 hover:bg-yellow-50 transition"
+                      className="border-b border-gray-200 hover:bg-[#fff1ed] transition"
                     >
                       <td className="p-3">
                         {new Date(item.paymentDate).toLocaleDateString()}
@@ -179,7 +179,7 @@ const BillingProfileCard = () => {
                             item.status === "completed"
                               ? "bg-green-100 text-green-700"
                               : item.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700"
+                              ? "bg-[#fff1ed] text-[#caa057]"
                               : "bg-red-100 text-red-600"
                           }`}
                         >

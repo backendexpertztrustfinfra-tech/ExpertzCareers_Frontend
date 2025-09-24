@@ -143,88 +143,88 @@ const JobDetails = () => {
   }, [job, token])
 
   // useEffect(() => {
-  //   if (!job) return
+  //   if (!job) return
 
-  //   const fetchRelatedJobs = async () => {
-  //     setLoadingRelated(true)
-  //     try {
-  //       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/getalllivejobs")
-  //       const data = await res.json()
+  //   const fetchRelatedJobs = async () => {
+  //     setLoadingRelated(true)
+  //     try {
+  //       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/getalllivejobs")
+  //       const data = await res.json()
 
-  //       let jobsArray = []
-  //       if (Array.isArray(data)) jobsArray = data
-  //       else if (data?.liveJobs && Array.isArray(data.liveJobs)) jobsArray = data.liveJobs
-  //       else if (data?.jobs && Array.isArray(data.jobs)) jobsArray = data.jobs
-  //       else if (data?.data && Array.isArray(data.data)) jobsArray = data.data
-  //       else if (data && typeof data === "object") {
-  //         const possibleArrays = Object.values(data).filter(Array.isArray)
-  //         if (possibleArrays.length > 0) jobsArray = possibleArrays[0]
-  //       }
+  //       let jobsArray = []
+  //       if (Array.isArray(data)) jobsArray = data
+  //       else if (data?.liveJobs && Array.isArray(data.liveJobs)) jobsArray = data.liveJobs
+  //       else if (data?.jobs && Array.isArray(data.jobs)) jobsArray = data.jobs
+  //       else if (data?.data && Array.isArray(data.data)) jobsArray = data.data
+  //       else if (data && typeof data === "object") {
+  //         const possibleArrays = Object.values(data).filter(Array.isArray)
+  //         if (possibleArrays.length > 0) jobsArray = possibleArrays[0]
+  //       }
 
-  //       const related = jobsArray
-  //         .filter((j) => {
-  //           const jId = j._id || j.id || j.jobId
-  //           if (jId === job.id) return false // Exclude current job
+  //       const related = jobsArray
+  //         .filter((j) => {
+  //           const jId = j._id || j.id || j.jobId
+  //           if (jId === job.id) return false // Exclude current job
 
-  //           const jobCategory = (j.category || j.jobCategory || "").toLowerCase()
-  //           const currentCategory = (job.category || job.jobCategory || "").toLowerCase()
+  //           const jobCategory = (j.category || j.jobCategory || "").toLowerCase()
+  //           const currentCategory = (job.category || job.jobCategory || "").toLowerCase()
 
-  //           const jobSkills = j.jobSkills || j.skills || j.keySkills || j.jobSkillsString || ""
-  //           const currentSkills = job.skills || job.jobSkills || []
+  //           const jobSkills = j.jobSkills || j.skills || j.keySkills || j.jobSkillsString || ""
+  //           const currentSkills = job.skills || job.jobSkills || []
 
-  //           const jobLocation = (j.location || "").toLowerCase()
-  //           const currentLocation = (job.location || "").toLowerCase()
+  //           const jobLocation = (j.location || "").toLowerCase()
+  //           const currentLocation = (job.location || "").toLowerCase()
 
-  //           // Match by category
-  //           if (jobCategory && currentCategory && jobCategory === currentCategory) return true
+  //           // Match by category
+  //           if (jobCategory && currentCategory && jobCategory === currentCategory) return true
 
-  //           // Match by skills
-  //           if (Array.isArray(currentSkills) && currentSkills.length > 0) {
-  //             const skillsArray = Array.isArray(jobSkills)
-  //               ? jobSkills
-  //               : typeof jobSkills === "string"
-  //                 ? jobSkills.split(",").map((s) => s.trim().toLowerCase())
-  //                 : []
+  //           // Match by skills
+  //           if (Array.isArray(currentSkills) && currentSkills.length > 0) {
+  //             const skillsArray = Array.isArray(jobSkills)
+  //               ? jobSkills
+  //               : typeof jobSkills === "string"
+  //                 ? jobSkills.split(",").map((s) => s.trim().toLowerCase())
+  //                 : []
 
-  //             const hasMatchingSkill = currentSkills.some((skill) =>
-  //               skillsArray.some((jSkill) => jSkill.includes(skill.toLowerCase())),
-  //             )
-  //             if (hasMatchingSkill) return true
-  //           }
+  //             const hasMatchingSkill = currentSkills.some((skill) =>
+  //               skillsArray.some((jSkill) => jSkill.includes(skill.toLowerCase())),
+  //             )
+  //             if (hasMatchingSkill) return true
+  //           }
 
-  //           // Match by location
-  //           if (jobLocation && currentLocation && jobLocation.includes(currentLocation)) return true
+  //           // Match by location
+  //           if (jobLocation && currentLocation && jobLocation.includes(currentLocation)) return true
 
-  //           return false
-  //         })
-  //         .slice(0, 6) // Limit to 6 related jobs
-  //         .map((j) => {
-  //           const id = j._id || j.id || j.jobId || Math.random().toString(36).slice(2)
-  //           const company = j.companyName || j.company || j.employerName || "Company Name"
+  //           return false
+  //         })
+  //         .slice(0, 6) // Limit to 6 related jobs
+  //         .map((j) => {
+  //           const id = j._id || j.id || j.jobId || Math.random().toString(36).slice(2)
+  //           const company = j.companyName || j.company || j.employerName || "Company Name"
 
-  //           return {
-  //             id,
-  //             title: j.jobTitle || j.title || "No Title",
-  //             company,
-  //             location: j.location || "Location",
-  //             type: j.jobType || j.type || "Full-time",
-  //             salary: j.salary || j.SalaryIncentive || "Not disclosed",
-  //             category: j.category || j.jobCategory || "General",
-  //             logo: j.companyLogo || "/placeholder.svg",
-  //             createdAt: j.createdAt || new Date().toISOString(),
-  //           }
-  //         })
+  //           return {
+  //             id,
+  //             title: j.jobTitle || j.title || "No Title",
+  //             company,
+  //             location: j.location || "Location",
+  //             type: j.jobType || j.type || "Full-time",
+  //             salary: j.salary || j.SalaryIncentive || "Not disclosed",
+  //             category: j.category || j.jobCategory || "General",
+  //             logo: j.companyLogo || "/placeholder.svg",
+  //             createdAt: j.createdAt || new Date().toISOString(),
+  //           }
+  //         })
 
-  //       setRelatedJobs(related)
-  //     } catch (err) {
-  //       console.error("[JobDetails] fetch related jobs error:", err)
-  //       setRelatedJobs([])
-  //     } finally {
-  //       setLoadingRelated(false)
-  //     }
-  //   }
+  //       setRelatedJobs(related)
+  //     } catch (err) {
+  //       console.error("[JobDetails] fetch related jobs error:", err)
+  //       setRelatedJobs([])
+  //     } finally {
+  //       setLoadingRelated(false)
+  //     }
+  //   }
 
-  //   fetchRelatedJobs()
+  //   fetchRelatedJobs()
   // }, [job])
 
   if (!job) {
@@ -383,10 +383,10 @@ const JobDetails = () => {
     if (skillsArray.length === 0) return null
 
     return (
-      <Section title="Required Skills" icon={<Code size={18} className="text-orange-500" />}>
+      <Section title="Required Skills" icon={<Code size={18} className="text-[#caa057]" />}>
         <div className="flex flex-wrap gap-2">
           {skillsArray.map((skill, index) => (
-            <span key={index} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+            <span key={index} className="px-3 py-1 bg-[#fff1ed] text-[#caa057] rounded-full text-sm font-medium">
               {skill}
             </span>
           ))}
@@ -454,12 +454,12 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed]">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-xl bg-orange-100 text-orange-600 hover:bg-orange-200 shadow transition"
+            className="p-2 rounded-xl bg-[#fff1ed] text-[#caa057] hover:bg-[#fff1ed] shadow transition"
           >
             <ArrowLeft size={20} />
           </button>
@@ -467,10 +467,10 @@ const JobDetails = () => {
         </div>
 
         {/* Hero Card */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-orange-100 mb-6 hover:shadow-2xl transition">
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-[#fff1ed] mb-6 hover:shadow-2xl transition">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-white border border-orange-200 shadow-sm">
+              <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-white border border-[#fff1ed] shadow-sm">
                 <img
                   src={job.logo || "/placeholder.svg"}
                   alt={job.company || job.companyName}
@@ -492,7 +492,7 @@ const JobDetails = () => {
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all ${
                   applied
                     ? "bg-green-500 text-white"
-                    : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:opacity-90"
+                    : "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white hover:opacity-90"
                 }`}
               >
                 {loading ? "Applying..." : applied ? "✅ Applied" : "Apply Now"}
@@ -501,7 +501,7 @@ const JobDetails = () => {
                 onClick={handleSave}
                 className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
                   saved
-                    ? "border-orange-400 text-orange-600 bg-orange-50"
+                    ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]"
                     : "border-gray-300 text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -524,7 +524,7 @@ const JobDetails = () => {
 
             {renderBenefits()}
 
-            {renderDocuments}
+            {renderDocuments()}
 
             {/* Related Jobs section */}
             {relatedJobs.length > 0 && (
@@ -538,7 +538,7 @@ const JobDetails = () => {
                         key={relatedJob.id}
                         onClick={() => handleRelatedJobClick(relatedJob)}
                         className="cursor-pointer bg-white/90 backdrop-blur rounded-xl p-4 border border-gray-100 
-                                   hover:border-orange-300 hover:shadow-md transition-all duration-200"
+                                     hover:border-orange-300 hover:shadow-md transition-all duration-200"
                       >
                         <div className="flex items-start gap-3">
                           <img
@@ -575,7 +575,7 @@ const JobDetails = () => {
           <div className="space-y-6">
             <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Building2 size={18} className="text-orange-500" /> Company Info
+                <Building2 size={18} className="text-[#caa057]" /> Company Info
               </h3>
               <div className="space-y-3">
                 <InfoItem label="Company" value={job.company || job.companyName} />
@@ -589,7 +589,7 @@ const JobDetails = () => {
                       href={job.website}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-orange-600 underline hover:text-orange-700"
+                      className="text-[#caa057] underline hover:text-[#b4924c]"
                     >
                       {job.website}
                     </a>
@@ -624,28 +624,28 @@ const JobDetails = () => {
       <div className="lg:hidden fixed bottom-4 left-3 right-3 bg-white/95 backdrop-blur-md border shadow-xl rounded-2xl p-3 flex gap-3 items-center">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-xl bg-orange-100 text-orange-600 hover:bg-orange-200 shadow transition"
+          className="p-2 rounded-xl bg-[#fff1ed] text-[#caa057] hover:bg-[#fff1ed] shadow transition"
         >
           <ArrowLeft size={20} />
         </button>
         <button
           onClick={handleApply}
           disabled={loading || applied}
-          className={`flex-1 py-2.5 rounded-xl font-semibold text-sm shadow-md transition ${
+          className={`flex-1 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all ${
             applied
               ? "bg-green-500 text-white"
-              : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:opacity-90"
+              : "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white hover:opacity-90"
           }`}
         >
           {loading ? "Applying..." : applied ? "✅ Applied" : "Apply Now"}
         </button>
         <button
           onClick={handleSave}
-          className={`px-4 rounded-xl font-semibold text-sm border shadow-sm transition ${
-            saved ? "border-orange-400 text-orange-600 bg-orange-50" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+          className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
+            saved ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]" : "border-gray-300 text-gray-600 hover:bg-gray-50"
           }`}
         >
-          {saved ? "⭐" : <Bookmark size={18} />}
+          {saved ? "⭐ Saved" : <Bookmark size={18} />}
         </button>
       </div>
     </div>
@@ -653,7 +653,7 @@ const JobDetails = () => {
 }
 
 const Section = ({ title, children, icon }) => (
-  <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition">
+  <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-6 border border-[#fff1ed] hover:shadow-2xl transition">
     <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
       {icon} {title}
     </h3>
@@ -663,7 +663,7 @@ const Section = ({ title, children, icon }) => (
 
 const Detail = ({ icon, label, text }) => (
   <div className="flex items-center gap-2 p-3 bg-white/90 backdrop-blur rounded-xl border text-gray-700 shadow hover:shadow-md transition">
-    <span className="p-1 bg-orange-50 rounded text-orange-600">{icon}</span>
+    <span className="p-1 bg-[#fff1ed] rounded text-[#caa057]">{icon}</span>
     <div className="flex-1 min-w-0">
       <div className="text-xs text-gray-500 font-medium">{label}</div>
       <div className="text-sm font-semibold truncate">{text}</div>

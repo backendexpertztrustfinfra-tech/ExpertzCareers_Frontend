@@ -1,5 +1,5 @@
-import React from "react";
-import { href, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaFacebookF,
   FaInstagram,
@@ -7,241 +7,128 @@ import {
   FaLinkedinIn,
   FaYoutube,
 } from "react-icons/fa";
-import LOGO from "../../assets/Image/LOGO.png";
+import { ChevronDown } from "lucide-react";
+import LOGO from "../../assets/Image/logo_2.png";
 
 const Footer = () => {
   return (
-    <footer className="relative bg-gradient-to-br from-orange-50 via-white to-orange-100 text-gray-800 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-[#fff1ed] via-white to-[#fff1ed] text-gray-800 overflow-hidden">
       {/* Floating dots background */}
       <div className="absolute inset-0">
-        <div className="w-full h-full animate-[float_20s_linear_infinite] bg-[radial-gradient(circle,rgba(255,165,0,0.12)_1px,transparent_1px)] bg-[length:35px_35px]"></div>
+        <div className="w-full h-full animate-[float_20s_linear_infinite] bg-[radial-gradient(circle,rgba(202,160,87,0.08)_1px,transparent_1px)] bg-[length:35px_35px]" />
       </div>
 
-      {/* Main Footer */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
-        {/* Logo & About */}
-        <div className="flex flex-col space-y-2 sm:space-y-3 col-span-2 sm:col-span-1">
-          <img
-            src={LOGO}
-            alt="Logo"
-            className="h-14 sm:h-16 w-auto object-contain" // bigger logo
-          />
-          <h2 className="text-base sm:text-lg font-bold">
-            Expertz Trust Finfra Pvt Ltd
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-            Empowering futures with jobs, trust & technology.
-          </p>
-        </div>
-
-        {/* Company Links */}
-        <div>
-          <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
-            Company
-          </h3>
-          <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-            {[
-              { name: "Home", route: "/" },
-              { name: "About Us", route: "/about" },
-              { name: "Mission", route: "/mission" },
-              { name: "Vision", route: "/vision" },
-            ].map((item, i) => (
-              <li key={i}>
-                <Link
-                  className="hover:text-orange-500 transition-colors"
-                  to={item.route}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Support Links */}
-        <div>
-          <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
-            Support
-          </h3>
-          <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-            {[
-              { name: "Contact", route: "/contact" },
-              { name: "Privacy Policy", route: "/privacy-policy" },
-              { name: "Terms & Conditions", route: "/terms" },
-            ].map((item, i) => (
-              <li key={i}>
-                <Link
-                  className="hover:text-orange-500 transition-colors"
-                  to={item.route}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-         <div>
-          <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
-           Our Wings
-          </h3>
-          <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-            {[
-              { name: "Expertz Digital And IT Solution", route: "https://expertzdigitalsolution.com" },
-              { name: "Expertz DigiFinra Reality", route: "https://expertztrustfinfra.com/" },
-              { name: "Expertz DigiShop", route: "https://expertzdigishop.com/" },
-              { name: "Expertz Insta Services", route: "/" },
-              { name: "Expertz Q-Mart", route: "/terms" },
-              { name: "Expertz Fine Dine RestroCafe", route: "https://expertzfinedinerestrocafe.com/" },
-              { name: "Expertz Hotels", route: "/" },
-
-            
-            ].map((item, i) => (
-              <li key={i}>
-                <Link
-                  className="hover:text-orange-500 transition-colors"
-                  to={item.route}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Subscribe */}
-        {/* <div className="col-span-2 sm:col-span-1">
-          <h3 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3">
-            Stay Updated
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
-            Subscribe for job alerts & latest updates.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="px-2 sm:px-3 py-1 sm:py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-400 outline-none w-full sm:flex-1 text-xs sm:text-sm transition-all duration-300 hover:scale-[1.02]"
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 md:py-12">
+        {/* Main Content Grid for Desktop */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between md:gap-12 mb-8">
+          {/* Logo and Tagline Section */}
+          <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-4 mb-8 md:mb-0 max-w-lg mx-auto md:mx-0">
+            <img
+              src={LOGO}
+              alt="Expertz Career Logo"
+              className="h-24 sm:h-28 w-auto object-contain drop-shadow-md"
             />
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-4 sm:px-5 py-1 sm:py-2 rounded-lg hover:scale-105 transition-transform text-xs sm:text-sm"
-            >
-              Subscribe
-            </button>
-          </form>
-        </div> */}
-      </div>
-
-      {/* Wave Separator */}
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180 z-0">
-        <svg
-          className="relative block w-full h-12 sm:h-20"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          viewBox="0 0 1200 120"
-        >
-          <defs>
-            <linearGradient
-              id="waveGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="10%" stopColor="#fde68a" />
-              <stop offset="50%" stopColor="#fcd34d" />
-              <stop offset="100%" stopColor="#fbbf24" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M985 90C900 80 820 50 740 30c-80-20-170-15-250 5
-        -60 15-115 40-175 50C230 95 120 85 0 50V120h1200V95
-        c-70 10-140 5-215-5z"
-            fill="url(#waveGradient)"
-          />
-        </svg>
-      </div>
-
-      {/* Social Icons & Copyright */}
-      {/* <div className="relative z-10 bg-orange-100 py-4 sm:py-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6">
-          <div className="flex space-x-2 sm:space-x-3">
-            {[FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaYoutube].map(
-              (Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-                >
-                  <Icon className="text-xs sm:text-sm" />
-                </a>
-              )
-            )}
+            <h2 className="text-lg sm:text-xl font-bold">Expertz Career</h2>
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed max-w-sm">
+              Building brighter futures with trust, innovation, and
+              opportunities.
+            </p>
           </div>
-          <p className="text-xs text-gray-500 text-center sm:text-right">
-            &copy; {new Date().getFullYear()} Expertz Trust Finfra. All rights
-            reserved.
+
+          {/* Links Grid for Desktop */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+            <FooterLinks
+              title="Company"
+              links={[
+                { name: "Home", route: "/", external: false },
+                { name: "About Us", route: "/about", external: false },
+                { name: "Mission", route: "/mission", external: false },
+                { name: "Vision", route: "/vision", external: false },
+              ]}
+            />
+            <FooterLinks
+              title="Support"
+              links={[
+                { name: "Contact", route: "/contact", external: false },
+                { name: "Privacy Policy", route: "/privacy-policy", external: false },
+                { name: "Terms & Conditions", route: "/terms", external: false },
+              ]}
+            />
+            <FooterLinks
+              title="Our Wings"
+              links={[
+                { name: "Expertz Digital And IT Solution", route: "https://expertzdigitalsolution.com", external: true },
+                { name: "Expertz DigiFinra Reality", route: "https://expertztrustfinfra.com/", external: true },
+                { name: "Expertz DigiShop", route: "https://expertzdigishop.com/", external: true },
+                { name: "Expertz Insta Services", route: "/", external: false },
+                { name: "Expertz Q-Mart", route: "/terms", external: false },
+                { name: "Expertz Fine Dine RestroCafe", route: "https://expertzfinedinerestrocafe.com/", external: true },
+                { name: "Expertz Hotels", route: "/", external: false },
+              ]}
+            />
+          </div>
+        </div>
+
+        {/* Mobile Accordions */}
+        <div className="md:hidden space-y-4">
+          <Accordion
+            title="Company"
+            links={[
+              { name: "Home", route: "/", external: false },
+              { name: "About Us", route: "/about", external: false },
+              { name: "Mission", route: "/mission", external: false },
+              { name: "Vision", route: "/vision", external: false },
+            ]}
+          />
+          <Accordion
+            title="Support"
+            links={[
+              { name: "Contact", route: "/contact", external: false },
+              { name: "Privacy Policy", route: "/privacy-policy", external: false },
+              { name: "Terms & Conditions", route: "/terms", external: false },
+            ]}
+          />
+          <Accordion
+            title="Our Wings"
+            links={[
+              { name: "Expertz Digital And IT Solution", route: "https://expertzdigitalsolution.com", external: true },
+              { name: "Expertz DigiFinra Reality", route: "https://expertztrustfinfra.com/", external: true },
+              { name: "Expertz DigiShop", route: "https://expertzdigishop.com/", external: true },
+              { name: "Expertz Insta Services", route: "/", external: false },
+              { name: "Expertz Q-Mart", route: "/terms", external: false },
+              { name: "Expertz Fine Dine RestroCafe", route: "https://expertzfinedinerestrocafe.com/", external: true },
+              { name: "Expertz Hotels", route: "/", external: false },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* Combined Social, Copyright, and Tagline Section */}
+      <div className="relative z-10 bg-[#fff1ed] py-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-6">
+          <p className="text-xs sm:text-sm text-gray-600 text-center order-2 md:order-1">
+            &copy; {new Date().getFullYear()} Expertz Trust Finfra. All rights reserved.
+          </p>
+          <div className="flex space-x-3 order-1 md:order-2">
+            <SocialIcon
+              Icon={FaFacebookF}
+              href="https://www.facebook.com/profile.php?id=61575748576224"
+            />
+            <SocialIcon
+              Icon={FaInstagram}
+              href="https://www.instagram.com/expertz_digital_it_solution/"
+            />
+            <SocialIcon Icon={FaTwitter} href="https://x.com/home" />
+            <SocialIcon
+              Icon={FaYoutube}
+              href="https://www.youtube.com/@ExpertzTrustFinfra"
+            />
+            <SocialIcon Icon={FaLinkedinIn} href="https://www.linkedin.com" />
+          </div>
+          <p className="text-xs sm:text-sm font-medium text-[#caa057] text-center order-3 w-full md:w-auto mt-4 md:mt-0">
+            Made with ❤️ by <span className="font-semibold">Expertz Team</span> | Powered by Innovation ✨
           </p>
         </div>
-      </div> */}
-      {/* Social Icons & Copyright */}
-<div className="relative z-10 bg-orange-100 py-4 sm:py-6">
-  <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6">
-    <div className="flex space-x-2 sm:space-x-3">
-      <a
-        href="https://www.facebook.com/profile.php?id=61575748576224"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-      >
-        <FaFacebookF className="text-xs sm:text-sm" />
-      </a>
-      <a
-        href="https://www.instagram.com/expertz_digital_it_solution/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-      >
-        <FaInstagram className="text-xs sm:text-sm" />
-      </a>
-      <a
-        href="https://x.com/home"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-      >
-        <FaTwitter className="text-xs sm:text-sm" />
-      </a>
-      <a
-        href="https://www.youtube.com/@ExpertzTrustFinfra"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-      >
-        <FaYoutube className="text-xs sm:text-sm" />
-      </a>
-      <a
-        href="https://www.linkedin.com"
-        target="_blank"
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full shadow text-gray-600 hover:text-orange-500 transition"
-      >
-        <FaLinkedinIn className="text-xs sm:text-sm" />
-      </a>
-    </div>
-    <p className="text-xs text-gray-500 text-center sm:text-right">
-      &copy; {new Date().getFullYear()} Expertz Trust Finfra. All rights reserved.
-    </p>
-  </div>
-</div>
-
-
-      {/* Tagline */}
-      <div className="relative z-10 bg-orange-50 py-2 sm:py-4 text-center">
-        <p className="text-xs sm:text-sm font-medium text-orange-600">
-          Made with ❤️ by Expertz Team | Powered by Innovation ✨
-        </p>
       </div>
 
       <style>
@@ -255,5 +142,96 @@ const Footer = () => {
     </footer>
   );
 };
+
+/* Desktop Footer Links */
+function FooterLinks({ title, links }) {
+  return (
+    <div>
+      <h3 className="text-base font-semibold mb-4">{title}</h3>
+      <ul className="space-y-2 text-sm">
+        {links.map((item, i) => (
+          <li key={i}>
+            {item.external ? (
+              <a
+                href={item.route}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#caa057] transition-colors"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <Link
+                to={item.route}
+                className="hover:text-[#caa057] transition-colors"
+              >
+                {item.name}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* Mobile Accordion */
+function Accordion({ title, links }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border rounded-lg bg-white shadow-sm">
+      <button
+        className="w-full flex items-center justify-between px-4 py-3 font-medium text-gray-800"
+        onClick={() => setOpen(!open)}
+      >
+        {title}
+        <ChevronDown
+          className={`w-5 h-5 transform transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <ul className="px-4 pb-3 space-y-2 text-sm">
+          {links.map((item, i) => (
+            <li key={i}>
+              {item.external ? (
+                <a
+                  href={item.route}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#caa057] transition-colors"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  to={item.route}
+                  className="hover:text-[#caa057] transition-colors"
+                >
+                  {item.name}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* Social Icon */
+function SocialIcon({ Icon, href }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow hover:shadow-md text-gray-600 hover:text-[#caa057] transition"
+    >
+      <Icon className="text-sm" />
+    </a>
+  );
+}
 
 export default Footer;

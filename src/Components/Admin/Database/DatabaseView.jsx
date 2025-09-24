@@ -163,7 +163,7 @@ const DatabaseView = ({ onShowPlan }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-100 font-sans">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#caa057]"></div>
         <p className="ml-4 text-xl font-medium text-gray-700">Loading...</p>
       </div>
     );
@@ -177,7 +177,7 @@ const DatabaseView = ({ onShowPlan }) => {
 
       <p className="text-gray-600 mb-6">
         {subscriptionDetails
-          ? `Viewing candidates for your ${subscriptionDetails.planName} plan.`
+          ? `Viewing candidates for your ${subscriptionDetails.planId.planName} plan.`
           : "Please activate a plan to view candidates."}
       </p>
 
@@ -210,7 +210,7 @@ const DatabaseView = ({ onShowPlan }) => {
         <div className="mt-8 text-center">
           <button
             onClick={handleShowMore}
-            className="bg-orange-500 text-white font-semibold px-8 py-4 rounded-full shadow-lg hover:bg-orange-600 transition-colors transform hover:scale-105"
+            className="bg-[#caa057] text-white font-semibold px-8 py-4 rounded-full shadow-lg hover:bg-[#b4924c] transition-colors transform hover:scale-105"
           >
             Show More Candidates
           </button>
@@ -230,7 +230,7 @@ const DatabaseView = ({ onShowPlan }) => {
           </p>
           <button
             onClick={handleViewPlansClick}
-            className="bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-400 text-white font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transition-transform"
+            className="bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transition-transform"
           >
             View Plans
           </button>

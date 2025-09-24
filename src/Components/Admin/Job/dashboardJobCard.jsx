@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   FaEllipsisV,
@@ -63,8 +65,8 @@ const DashboardJobCard = ({
   return (
     <div
       className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm 
-                 hover:shadow-md hover:scale-[1.01] transition-all duration-200 
-                 cursor-pointer flex flex-col gap-3"
+                   hover:shadow-md hover:scale-[1.01] transition-all duration-200 
+                   cursor-pointer flex flex-col gap-3"
       onClick={() => onJobClick && onJobClick(job)}
     >
       {/* Top Section */}
@@ -77,8 +79,8 @@ const DashboardJobCard = ({
               className="w-10 h-10 rounded-md border object-cover"
             />
           ) : (
-            <div className="w-10 h-10 flex items-center justify-center rounded-md bg-orange-100 border border-orange-300">
-              <span className="text-sm font-bold text-orange-700">
+            <div className="w-10 h-10 flex items-center justify-center rounded-md bg-[#fff1ed] border border-[#caa057]">
+              <span className="text-sm font-bold text-[#caa057]">
                 {job.company?.[0] || "C"}
               </span>
             </div>
@@ -145,19 +147,19 @@ const DashboardJobCard = ({
       {/* Job Info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-1">
         <div className="flex items-center gap-1 text-gray-700">
-          <FaBriefcase className="text-orange-500" size={12} />{" "}
+          <FaBriefcase className="text-[#caa057]" size={12} />{" "}
           {job.jobType || "N/A"}
         </div>
         <div className="flex items-center gap-1 text-gray-700">
-          <FaUsers className="text-orange-500" size={12} />{" "}
+          <FaUsers className="text-[#caa057]" size={12} />{" "}
           {job.noofOpening || 0} Openings
         </div>
         <div className="flex items-center gap-1 text-gray-700">
-          <FaRupeeSign className="text-orange-500" size={12} />{" "}
+          <FaRupeeSign className="text-[#caa057]" size={12} />{" "}
           {job.SalaryIncentive || "Not Disclosed"}
         </div>
         <div className="flex items-center gap-1 text-gray-700">
-          <FaMapMarkerAlt className="text-orange-500" size={12} />{" "}
+          <FaMapMarkerAlt className="text-[#caa057]" size={12} />{" "}
           {job.location || "Remote"}
         </div>
       </div>
@@ -166,7 +168,7 @@ const DashboardJobCard = ({
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <button
           className="py-1.5 text-xs font-medium rounded-md border border-blue-200 bg-blue-50 
-                     hover:bg-blue-100 text-blue-700 flex items-center justify-center"
+                       hover:bg-blue-100 text-blue-700 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             onJobClick && onJobClick(job);
@@ -176,7 +178,7 @@ const DashboardJobCard = ({
         </button>
         <button
           className="py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 
-                     hover:bg-green-100 text-green-700"
+                       hover:bg-green-100 text-green-700"
           onClick={(e) => e.stopPropagation()}
         >
           📞 {job.contactedCount ?? 0} Contacted

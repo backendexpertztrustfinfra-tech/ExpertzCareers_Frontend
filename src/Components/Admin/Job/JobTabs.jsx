@@ -172,7 +172,7 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">
           <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-xl">
-            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-[#caa057] border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-3 text-gray-700 font-medium">Loading jobs...</p>
           </div>
         </div>
@@ -211,7 +211,7 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
                 ${
                   activeStatus === tab
-                    ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
+                    ? "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
@@ -230,7 +230,7 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
             ${
               isPostJobDisabled
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
+                : "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c]"
             } 
             transition`}
         >
@@ -247,7 +247,7 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
             ${
               isPostJobDisabled
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500"
+                : "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057]"
             } 
             transition`}
         >

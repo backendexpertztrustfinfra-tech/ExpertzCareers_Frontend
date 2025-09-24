@@ -142,7 +142,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
 
                 {/* Email */}
                 <div className="flex items-center gap-2 text-sm sm:text-base text-gray-700 truncate mt-1">
-                  <HiOutlineMail className="text-orange-500 w-5 h-5 flex-shrink-0" />
+                  <HiOutlineMail className="text-[#caa057] w-5 h-5 flex-shrink-0" />
                   <span className="truncate">
                     {userProfile?.user?.useremail || "No Email"}
                   </span>
@@ -150,7 +150,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
 
                 {/* Phone */}
                 <div className="flex items-center gap-2 text-sm sm:text-base text-gray-600 truncate mt-0.5">
-                  <HiOutlinePhone className="text-orange-400 w-5 h-5 flex-shrink-0" />
+                  <HiOutlinePhone className="text-[#caa057] w-5 h-5 flex-shrink-0" />
                   <span className="truncate">
                     {userProfile?.user?.recruterPhone || "No Phone"}
                   </span>
@@ -161,7 +161,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 mt-4 space-y-2 px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
+        <nav className="flex-1 mt-4 space-y-2 px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[#caa057] scrollbar-track-transparent">
           {tabs.map((tab) => (
             <SidebarTab
               key={tab.label}
@@ -177,7 +177,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
         <div className="p-4">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg 
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg 
               bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold 
               shadow hover:scale-105 transition-all duration-200"
           >
@@ -197,8 +197,8 @@ const SidebarTab = ({ icon, label, activeTab, onClick, collapsed }) => (
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
       ${
         activeTab === label
-          ? "bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white shadow-md"
-          : "text-gray-700 hover:bg-yellow-100 hover:text-yellow-700"
+          ? "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white shadow-md"
+          : "text-gray-700 hover:bg-[#fff1ed] hover:text-[#caa057]"
       }`}
   >
     <span className="text-lg">{icon}</span>

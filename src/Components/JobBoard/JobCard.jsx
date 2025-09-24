@@ -17,6 +17,70 @@ import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { BASE_URL } from "../../config";
 
+/**
+ * Sanitize job description HTML
+ */
+function sanitizeHtml(dirty) {
+  if (!dirty) return "";
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(dirty, "text/html");
+
+  const whitelist = {
+    P: [],
+    BR: [],
+    STRONG: [],
+    B: [],
+    EM: [],
+    I: [],
+    U: [],
+    UL: [],
+    OL: [],
+    LI: [],
+    A: ["href"],
+  };
+
+  function cleanNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent);
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
+
+    const tag = node.tagName.toUpperCase();
+    if (!whitelist[tag]) {
+      const frag = document.createDocumentFragment();
+      node.childNodes.forEach((child) => {
+        const cleaned = cleanNode(child);
+        if (cleaned) frag.appendChild(cleaned);
+      });
+      return frag;
+    }
+
+    const el = document.createElement(tag.toLowerCase());
+    if (tag === "A") {
+      const href = node.getAttribute("href");
+      if (href && /^(https?:|mailto:|tel:)/i.test(href)) {
+        el.setAttribute("href", href);
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer");
+      }
+    }
+    node.childNodes.forEach((child) => {
+      const cleaned = cleanNode(child);
+      if (cleaned) el.appendChild(cleaned);
+    });
+    return el;
+  }
+
+  const frag = document.createDocumentFragment();
+  doc.body.childNodes.forEach((child) => {
+    const c = cleanNode(child);
+    if (c) frag.appendChild(c);
+  });
+
+  const container = document.createElement("div");
+  container.appendChild(frag);
+  return container.innerHTML;
+}
+
 const JobCard = ({
   job,
   showActions = true,
@@ -254,12 +318,12 @@ const JobCard = ({
   return (
     <div
       onClick={handleViewDetails}
-      className="relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-lg transition-all duration-300 p-4 sm:p-6 mb-5 cursor-pointer border border-orange-200"
+      className="relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-lg transition-all duration-300 p-4 sm:p-6 mb-5 cursor-pointer border border-[#fff1ed]"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-3 items-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-200">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-[#fff1ed] flex items-center justify-center border border-[#fff1ed]">
             <img
               src={normalized.logo}
               alt={normalized.company}
@@ -271,7 +335,7 @@ const JobCard = ({
               {normalized.title}
             </h3>
             <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
-              <TrendingUp size={14} className="text-orange-500" />
+              <TrendingUp size={14} className="text-[#caa057]" />
               <span className="line-clamp-1">{normalized.company}</span>
             </div>
           </div>
@@ -298,7 +362,7 @@ const JobCard = ({
             <BookmarkIcon
               size={18}
               className={
-                saved ? "text-orange-500 fill-orange-500" : "text-gray-500"
+                saved ? "text-[#caa057] fill-[#caa057]" : "text-gray-500"
               }
             />
           </motion.button>
@@ -319,7 +383,7 @@ const JobCard = ({
       {/* Description */}
       {normalized.description && (
         <div
-          className="mb-3 p-2 rounded-lg bg-orange-50 border border-orange-200 text-xs sm:text-sm text-gray-700 line-clamp-2 prose prose-sm max-w-none"
+          className="mb-3 p-2 rounded-lg bg-[#fff1ed] border border-[#fff1ed] text-xs sm:text-sm text-gray-700 line-clamp-2 prose prose-sm max-w-none"
           dangerouslySetInnerHTML={{
             __html: Array.isArray(normalized.description)
               ? normalized.description.join(" ")
@@ -331,11 +395,11 @@ const JobCard = ({
       {/* Skills / Category */}
       {normalized.category && (
         <div className="flex gap-2 mb-3 flex-wrap">
-          <span className="px-2 py-1 text-[11px] sm:text-xs font-semibold bg-orange-100 rounded-full">
+          <span className="px-2 py-1 text-[11px] sm:text-xs font-semibold bg-[#fff1ed] rounded-full">
             {normalized.category}
           </span>
           {normalized.experience && (
-            <span className="px-2 py-1 text-[11px] sm:text-xs font-semibold bg-yellow-100 rounded-full">
+            <span className="px-2 py-1 text-[11px] sm:text-xs font-semibold bg-[#fff1ed] rounded-full">
               {normalized.experience}
             </span>
           )}
@@ -343,10 +407,10 @@ const JobCard = ({
       )}
 
       {/* Footer */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-orange-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[#fff1ed]">
         <div className="flex gap-3 text-[11px] sm:text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
-            <Clock size={12} className="text-orange-500" />
+            <Clock size={12} className="text-[#caa057]" />
             <span>
               {normalized.postedDate
                 ? new Date(normalized.postedDate).toLocaleDateString()
@@ -354,7 +418,7 @@ const JobCard = ({
             </span>
           </span>
           <span className="flex items-center gap-1.5">
-            <Users size={12} className="text-yellow-600" />
+            <Users size={12} className="text-[#caa057]" />
             <span>{normalized.applicants || "—"}</span>
           </span>
         </div>
@@ -367,7 +431,7 @@ const JobCard = ({
               className={`px-4 py-2 rounded-lg font-medium text-xs sm:text-sm w-full sm:w-auto ${
                 applied
                   ? "bg-green-500 text-white cursor-not-allowed"
-                  : "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                  : "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white"
               }`}
             >
               {loading ? "Applying..." : applied ? "✅ Applied" : "Apply Now"}
@@ -377,7 +441,7 @@ const JobCard = ({
                 e.stopPropagation();
                 handleViewDetails(e);
               }}
-              className="px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border border-orange-300 text-orange-600 w-full sm:w-auto"
+              className="px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border border-[#caa057] text-[#caa057] w-full sm:w-auto"
             >
               View Details
             </button>
@@ -389,7 +453,7 @@ const JobCard = ({
 };
 
 const Detail = ({ icon, text }) => (
-  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 p-1.5 rounded bg-orange-50">
+  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 p-1.5 rounded bg-[#fff1ed]">
     <div className="p-1 rounded bg-white shadow-sm">{icon}</div>
     <span className="truncate">{text || "—"}</span>
   </div>

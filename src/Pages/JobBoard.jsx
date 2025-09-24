@@ -170,13 +170,13 @@ const JobBoard = () => {
   }, [searchTerm, filters, sortOption, jobs])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-white">
       {/* Hero */}
-      <div className="relative bg-gradient-to-r from-yellow-100 via-orange-50 to-white">
+      <div className="relative bg-gradient-to-r from-[#fff1ed] via-[#fff1ed] to-white">
         <div className="container mx-auto px-4 py-8 sm:py-12 text-center">
           <h1 className="text-3xl sm:text-5xl font-extrabold mb-4">
             Find Your{" "}
-            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#caa057] to-[#caa057] bg-clip-text text-transparent">
               Dream Job
             </span>
           </h1>
@@ -186,7 +186,7 @@ const JobBoard = () => {
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center bg-white rounded-xl shadow-md overflow-hidden">
               <div className="flex items-center px-4 py-2 flex-1">
-                <Search size={20} className="text-yellow-500 mr-2" />
+                <Search size={20} className="text-[#caa057] mr-2" />
                 <input
                   type="text"
                   placeholder="Search jobs, companies, locations..."
@@ -195,7 +195,7 @@ const JobBoard = () => {
                   className="flex-1 bg-transparent text-gray-700 placeholder-gray-500 outline-none text-sm sm:text-base"
                 />
               </div>
-              <button className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold">
+              <button className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#caa057] to-[#caa057] text-white font-semibold">
                 Search
               </button>
             </div>
@@ -243,7 +243,7 @@ const JobBoard = () => {
               <p className="text-center text-gray-500 py-8">Loading jobs...</p>
             ) : filteredJobs.length === 0 ? (
               <div className="text-center py-16">
-                <Briefcase size={36} className="text-yellow-500 mx-auto mb-3" />
+                <Briefcase size={36} className="text-[#caa057] mx-auto mb-3" />
                 <h3 className="text-base font-semibold">No Jobs Found</h3>
                 <p className="text-gray-500 text-sm">Try adjusting filters or search terms.</p>
               </div>

@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getCreatedJobs, getAppliedUser } from "../../../services/apis"
 import Cookies from "js-cookie"
 import DashboardJobCard from "../Job/dashboardJobCard"
+import { getCreatedJobs, getAppliedUser } from "../../../services/apis"
 
 const JobListCard = ({ setActiveTab, setSelectedJob }) => {
   const [jobs, setJobs] = useState([])
@@ -43,7 +43,7 @@ const JobListCard = ({ setActiveTab, setSelectedJob }) => {
                 appliedCount: 0,
               }
             }
-          }),
+          })
         )
 
         setJobs(jobsWithCounts)
@@ -104,9 +104,9 @@ const JobListCard = ({ setActiveTab, setSelectedJob }) => {
         <button
           onClick={() => setActiveTab("Job")}
           className="px-6 py-2 text-sm sm:text-base rounded-lg font-semibold 
-            bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white 
-            hover:from-yellow-500 hover:via-amber-600 hover:to-orange-600 
-            shadow-md transition-transform hover:scale-105"
+             bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white 
+             hover:from-[#b4924c] hover:via-[#b4924c] hover:to-[#b4924c] 
+             shadow-md transition-transform hover:scale-105"
         >
           View All
         </button>
@@ -125,13 +125,13 @@ const JobListCard = ({ setActiveTab, setSelectedJob }) => {
           <p className="mb-3">No jobs found</p>
           <button
             onClick={() => setActiveTab("Job")}
-            className="px-5 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white font-medium shadow"
+            className="px-5 py-2 rounded-lg bg-[#caa057] hover:bg-[#b4924c] text-white font-medium shadow"
           >
             ➕ Post a Job
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[22rem] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[22rem] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#caa057] scrollbar-track-gray-100">
           {jobs.map((job) => (
             <DashboardJobCard
               key={job._id}

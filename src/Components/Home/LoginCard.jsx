@@ -28,7 +28,7 @@ const LoginCard = ({ onLogin }) => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button
-        className="w-full bg-[#b88b16] text-white py-2 rounded-md hover:opacity-90"
+        className="w-full bg-[#caa057] text-white py-2 rounded-md hover:bg-[#b4924c]"
         onClick={handleSubmit}
       >
         Submit

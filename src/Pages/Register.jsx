@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { updateUserProfile } from "../../src/services/apis"; 
+import { updateUserProfile } from "../../src/services/apis";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -21,45 +23,44 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const token = Cookies.get("userToken");
+    e.preventDefault();
+    const token = Cookies.get("userToken");
 
-  if (!token) {
-    alert("You must be logged in to update your profile.");
-    return;
-  }
+    if (!token) {
+      alert("You must be logged in to update your profile.");
+      return;
+    }
 
-  const payload = {
-    username: formData.name,
-    useremail: formData.email,
-    designation: formData.designation,
-    previousCompany: formData.previousCompany,
-    experience: formData.experience,
-    previousSalary: formData.previousSalary,
-    salaryExpectation: formData.salaryExpectation,
+    const payload = {
+      username: formData.name,
+      useremail: formData.email,
+      designation: formData.designation,
+      previousCompany: formData.previousCompany,
+      experience: formData.experience,
+      previousSalary: formData.previousSalary,
+      salaryExpectation: formData.salaryExpectation,
+    };
+
+    try {
+      const response = await updateUserProfile(token, payload);
+
+      if (response?.msg === "User Update Succssfully") {
+        const role = formData.designation?.toLowerCase().trim();
+        const exp = formData.experience?.toLowerCase().trim();
+        navigate(`/jobs?role=${role}&experience=${exp}`);
+      } else {
+        alert(response?.msg || "Profile update failed.");
+      }
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Something went wrong.");
+    }
   };
 
-  try {
-    const response = await updateUserProfile(token, payload);
-
-    if (response?.msg === "User Update Succssfully") {
-      const role = formData.designation?.toLowerCase().trim();
-      const exp = formData.experience?.toLowerCase().trim();
-      navigate(`/jobs?role=${role}&experience=${exp}`);
-    } else {
-      alert(response?.msg || "Profile update failed.");
-    }
-  } catch (err) {
-    console.error("Update failed:", err);
-    alert("Something went wrong.");
-  }
-};
-
-
   return (
-    <div className="min-h-screen flex items-center justify-center py-10 px-4 bg-[#fdfaf5]">
+    <div className="min-h-screen flex items-center justify-center py-10 px-4 bg-[#fff1ed]">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-8">
-        <h2 className="text-3xl font-bold text-center text-[#D4AF37] mb-2">
+        <h2 className="text-3xl font-bold text-center text-[#caa057] mb-2">
           Register
         </h2>
         <p className="text-center text-gray-600 mb-8">
@@ -84,7 +85,7 @@ const Register = () => {
                 onChange={handleChange}
                 required
                 placeholder={rest.placeholder}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
               />
             </div>
           ))}
@@ -96,7 +97,7 @@ const Register = () => {
               value={formData.experience}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
             >
               <option value="">Select experience</option>
               <option value="0-1 years">0-1 years</option>
@@ -108,7 +109,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#D4AF37] hover:bg-[#c9a232] text-white font-semibold py-2 rounded-lg transition"
+            className="w-full bg-[#caa057] hover:bg-[#b4924c] text-white font-semibold py-2 rounded-lg transition"
           >
             Register & Find Jobs
           </button>

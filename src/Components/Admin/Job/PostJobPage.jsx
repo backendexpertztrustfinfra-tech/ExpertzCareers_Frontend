@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PostJobForm from "../Job/PostJobForm";
 
@@ -23,7 +25,7 @@ const PostJobPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center px-3 sm:px-6 py-6 sm:py-10">
+    <div className="min-h-screen bg-[#fff1ed] flex items-start justify-center px-3 sm:px-6 py-6 sm:py-10">
       <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg sm:rounded-2xl p-4 sm:p-6 md:p-10">
         {/* Back Button */}
         <button
@@ -35,9 +37,9 @@ const PostJobPage = () => {
           className="mb-6 inline-flex items-center justify-center gap-2 
              px-4 py-2 rounded-full 
              text-sm sm:text-base font-medium 
-             text-[#D4AF37] border border-[#D4AF37] 
-             hover:bg-[#D4AF37] hover:text-white 
-             focus:ring-2 focus:ring-[#D4AF37]/50 focus:outline-none
+             text-[#caa057] border border-[#caa057] 
+             hover:bg-[#caa057] hover:text-white 
+             focus:ring-2 focus:ring-[#caa057]/50 focus:outline-none
              transition-all duration-300"
         >
           <span className="text-base sm:text-lg">←</span>
@@ -47,7 +49,7 @@ const PostJobPage = () => {
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-            Post a <span className="text-[#D4AF37]">New Job</span>
+            Post a <span className="text-[#caa057]">New Job</span>
           </h1>
           <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-md mx-auto">
             Fill out the details below to publish your job listing.

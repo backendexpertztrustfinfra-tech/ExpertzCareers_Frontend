@@ -51,10 +51,10 @@ export default function ExperienceTab({
   return (
     <div className="space-y-6">
       {FIELDS.map((field) => (
-        <Card key={field.key} className="border-orange-200/50 yellow:border-orange-800/50">
+        <Card key={field.key} className="border-[#fff1ed]">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <field.icon className="w-5 h-5 mr-2 text-orange-500" />
+              <field.icon className="w-5 h-5 mr-2 text-[#caa057]" />
               {field.title}
             </CardTitle>
             <CardDescription>{field.description}</CardDescription>
@@ -78,7 +78,7 @@ export default function ExperienceTab({
                 <Button
                   variant="outline"
                   onClick={() => handleEdit(field.key, profile[field.key])}
-                  className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                  className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                 >
                   <Edit3 className="w-4 h-4 mr-2" />
                   Edit
@@ -86,12 +86,12 @@ export default function ExperienceTab({
               </div>
             ) : (
               <div className="text-center py-12">
-                <field.icon className="w-16 h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
+                <field.icon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Add Your {field.title}</h3>
-                <p className="text-gray-500 yellow:text-gray-400 mb-6">{field.description}</p>
+                <p className="text-gray-500 mb-6">{field.description}</p>
                 <Button
                   onClick={() => handleEdit(field.key, "")}
-                  className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                  className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                 >
                   <ChevronRight className="w-4 h-4 mr-2" />
                   Get Started

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
@@ -50,7 +52,7 @@ const InfoItem = ({ icon, label, value, isEditing, name, onChange }) => {
           value={displayValue || ""}
           onChange={onChange}
           placeholder={`Enter ${label}`}
-          className="w-full sm:w-2/3 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none"
+          className="w-full sm:w-2/3 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#caa057] focus:outline-none"
         />
       ) : (
         <p className="text-gray-800 text-sm sm:w-2/3">{displayValue || "—"}</p>
@@ -109,7 +111,7 @@ const CreditsSection = ({ navigate, token }) => {
           </p>
           <button
             onClick={handleBuyCredits}
-            className="w-full sm:w-auto px-6 py-2 bg-orange-600 text-white font-semibold rounded-lg shadow hover:bg-orange-700 transition"
+            className="w-full sm:w-auto px-6 py-2 bg-[#caa057] text-white font-semibold rounded-lg shadow hover:bg-[#b4924c] transition"
           >
             Buy Credits
           </button>
@@ -119,7 +121,7 @@ const CreditsSection = ({ navigate, token }) => {
 
   return (
     <Card title="Your Job Credits">
-      <div className="bg-gradient-to-r from-orange-400 to-yellow-400 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between text-white shadow mb-6">
+      <div className="bg-gradient-to-r from-[#caa057] to-[#caa057] rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between text-white shadow mb-6">
         <div className="flex items-center gap-2">
           <FaCoins size={22} />
           <span className="text-xl font-bold">
@@ -128,7 +130,7 @@ const CreditsSection = ({ navigate, token }) => {
         </div>
         <button
           onClick={handleBuyCredits}
-          className="mt-3 sm:mt-0 w-full sm:w-auto px-6 py-2 bg-white text-orange-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition"
+          className="mt-3 sm:mt-0 w-full sm:w-auto px-6 py-2 bg-white text-[#caa057] font-semibold rounded-lg shadow hover:bg-gray-100 transition"
         >
           Buy More Credits
         </button>
@@ -212,7 +214,7 @@ const ProfilePage = ({ onUpdate }) => {
             recruterCompanyAddress: user.user.recruterCompanyAddress || "",
             recruterGstIn: user.user.recruterGstIn || "",
             companyWebsite: user.user.companyWebsite || "",
-            companyLinkedIn: user.user.companyLinkedIn || "",
+            recruterLinkedIn: user.user.companyLinkedIn || "",
             recruterCompanyDoc: user.user.recruterCompanyDoc || "",
           }));
         }
@@ -318,14 +320,14 @@ const ProfilePage = ({ onUpdate }) => {
                 : "/default-logo.png"
             }
             alt="Profile"
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-orange-400 object-cover shadow cursor-pointer"
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#caa057] object-cover shadow cursor-pointer"
             onClick={isEditing ? handleLogoClick : undefined}
           />
           {isEditing && (
             <>
               <div
                 onClick={handleLogoClick}
-                className="absolute bottom-2 right-2 bg-orange-500 text-white p-1.5 rounded-full cursor-pointer hover:bg-orange-600 transition"
+                className="absolute bottom-2 right-2 bg-[#caa057] text-white p-1.5 rounded-full cursor-pointer hover:bg-[#b4924c] transition"
               >
                 <FaCamera size={14} />
               </div>
@@ -403,7 +405,7 @@ const ProfilePage = ({ onUpdate }) => {
           <button
             onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
             disabled={loading}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:opacity-90 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
+            className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:opacity-90 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
           >
             {isEditing ? (loading ? "Saving..." : "Save Changes") : "Edit Profile"}
           </button>
@@ -418,8 +420,8 @@ const ProfilePage = ({ onUpdate }) => {
             onClick={() => setActiveTab(tabId)}
             className={`px-3 sm:px-4 py-2 font-medium transition border-b-2 whitespace-nowrap ${
               activeTab === tabId
-                ? "border-orange-500 text-orange-600"
-                : "border-transparent text-gray-500 hover:text-orange-600"
+                ? "border-[#caa057] text-[#caa057]"
+                : "border-transparent text-gray-500 hover:text-[#caa057]"
             }`}
           >
             {tabId === "company" && "Company Info"}
@@ -505,7 +507,7 @@ const ProfilePage = ({ onUpdate }) => {
                   <>
                     <button
                       onClick={handleDocClick}
-                      className="bg-orange-500 text-white px-3 py-1 text-xs rounded-lg hover:bg-orange-600 transition"
+                      className="bg-[#caa057] text-white px-3 py-1 text-xs rounded-lg hover:bg-[#b4924c] transition"
                     >
                       Upload
                     </button>
@@ -541,7 +543,7 @@ const ProfilePage = ({ onUpdate }) => {
         <button
           onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
           disabled={loading}
-          className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-5 py-3 rounded-full font-semibold shadow-lg transition"
+          className="bg-gradient-to-r from-[#caa057] to-[#caa057] text-white px-5 py-3 rounded-full font-semibold shadow-lg transition"
         >
           {isEditing ? (loading ? "..." : "Save") : "Edit"}
         </button>

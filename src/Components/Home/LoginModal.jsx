@@ -35,7 +35,7 @@ const LoginModal = ({ close, onLogin }) => {
         />
         <button
           onClick={loginHandler}
-          className="w-full bg-[#b88b16] text-white p-2 rounded"
+          className="w-full bg-[#caa057] text-white p-2 rounded hover:bg-[#b4924c] transition-colors"
         >
           Login
         </button>

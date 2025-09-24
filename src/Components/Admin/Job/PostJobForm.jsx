@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Cookies from "js-cookie"
-import { postJob, updateJob } from "../../../services/apis"
+import { postJob, updateJob, sendNotification } from "../../../services/apis"
 import { indianStates } from "../../Admin/Location/locations"
 import { toast } from "react-toastify"
 
@@ -185,6 +185,8 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       weekend: job.weekend || "",
       startTime: startTime,
       endTime: endTime,
+      status: job.status || "",
+      closedDate: job.closedDate || "",
     }
   }
 
@@ -384,11 +386,25 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
         if (!data) throw new Error("Failed to update job")
         toast.success("✅ Job Updated Successfully")
         if (onSubmit) onSubmit(data.UpdatedData)
+
+        await sendNotification({
+          token,
+          title: "Job Updated",
+          message: `The job "${payload.jobTitle}" has been updated successfully.`,
+          userId,
+          jobId: initialData?.id,
+        })
       } else {
         data = await postJob(token, payload, userId)
         if (!data) throw new Error("Failed to post job")
         toast.success("Job Posted Successfully")
         if (onSubmit) onSubmit(data.job)
+
+        await sendNotification({
+          title: "New Job Posted",
+          message: `A new job "${payload.jobTitle}" has been posted.`,
+          userId,
+        })
       }
       onClose && onClose()
     } catch (err) {
@@ -400,21 +416,21 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
   }
 
   const inputClass =
-    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
+    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#caa057] bg-white"
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6 px-3 md:py-10 md:px-6 overflow-y-auto bg-transparent">
       <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 w-full max-w-4xl">
         {/* Header */}
         <div className="px-6 md:px-8 pt-6 pb-4 border-b">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{initialData ? "Edit Job" : "Post a Job"}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#caa057]">{initialData ? "Edit Job" : "Post a Job"}</h2>
           <p className="text-sm text-gray-500 mt-1">
             Fill the details below. Fields marked with * are required. Mobile responsive and accessible.
           </p>
 
           <div className="mt-4 flex items-center gap-3" aria-hidden="true">
-            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
-            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#caa057]" : "bg-gray-200"}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#caa057]" : "bg-gray-200"}`} />
           </div>
           <div className="mt-2 flex justify-between text-xs text-gray-500">
             <span>Job Details</span>
@@ -624,7 +640,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="bg-[#D4AF37] text-white px-5 py-2 rounded-lg hover:brightness-95"
+                  className="bg-[#caa057] text-white px-5 py-2 rounded-lg hover:brightness-95"
                 >
                   Next
                 </button>
@@ -779,7 +795,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             benefits: [...prev.benefits, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
                       >
                         {s}
                       </button>
@@ -829,7 +845,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             skills: [...prev.skills, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
                       >
                         {s}
                       </button>
@@ -879,7 +895,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             documents: [...prev.documents, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
                       >
                         {s}
                       </button>
@@ -1016,12 +1032,12 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <button type="button" onClick={() => setStep(1)} className="text-[#D4AF37] hover:underline">
+                <button type="button" onClick={() => setStep(1)} className="text-[#caa057] hover:underline">
                   Back
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#D4AF37] text-white px-6 py-2 rounded-lg hover:brightness-95 disabled:opacity-60"
+                  className="bg-[#caa057] text-white px-6 py-2 rounded-lg hover:brightness-95 disabled:opacity-60"
                   disabled={loading}
                 >
                   {loading ? "Saving..." : initialData ? "Update" : "Submit"}

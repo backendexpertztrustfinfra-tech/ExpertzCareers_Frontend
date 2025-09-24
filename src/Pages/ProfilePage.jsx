@@ -35,7 +35,6 @@ import {
   Zap,
   Users,
   Eye,
-  Heart,
   Video,
   Upload,
   Edit3,
@@ -58,9 +57,12 @@ import {
   Compass,
   Bell,
   X,
+  Heart,
 } from "lucide-react";
-import generateResumeHtml from "../Components/UserProfile/generateResume";
-import ShareMenu from "../Components/UserProfile/ShareMenu";
+// import generateResumeHtml from "../Components/UserProfile/generateResume";
+// import ResumePreview from "./ResumePreview"
+import generateResume from "../utils/generateResume";
+// import ShareMenu from "../Components/UserProfile/ShareMenu";
 import { BASE_URL } from "../config";
 
 // ✅ ----------------- Reusable Component for Editable Fields -----------------
@@ -83,21 +85,21 @@ const EditableField = ({
           <textarea
             value={tempValue}
             onChange={(e) => onTempChange(e.target.value)}
-            className={`w-full p-3 border border-orange-300/50 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-200/20 ${className}`}
+            className={`w-full p-3 border border-[#caa057] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1ed] ${className}`}
             rows={multiline === true ? 3 : multiline}
           />
         ) : (
           <input
             value={tempValue}
             onChange={(e) => onTempChange(e.target.value)}
-            className={`bg-transparent border-b-2 border-orange-500 outline-none ${className}`}
+            className={`bg-transparent border-b-2 border-[#caa057] outline-none ${className}`}
           />
         )}
         <div className="flex space-x-2">
           <Button
             size="sm"
             onClick={onSave}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-[#caa057] hover:bg-[#b4924c]"
           >
             Save
           </Button>
@@ -105,7 +107,7 @@ const EditableField = ({
             size="sm"
             variant="outline"
             onClick={onCancel}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent"
+            className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed] bg-transparent"
           >
             Cancel
           </Button>
@@ -116,7 +118,7 @@ const EditableField = ({
 
   return (
     <span
-      className={`cursor-pointer hover:text-orange-600 transition-colors ${
+      className={`cursor-pointer hover:text-[#caa057] transition-colors ${
         !value ? "text-gray-400" : "text-gray-900"
       } ${className}`}
       onClick={() => onEdit(field, value)}
@@ -129,11 +131,11 @@ const EditableField = ({
 // ✅ ----------------- Reusable Component for Stat Cards -----------------
 const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
   <div
-    className={`text-center p-4 ${bg} rounded-xl hover:scale-105 transition-transform duration-300 border border-orange-100/50 yellow:border-orange-800/50`}
+    className={`text-center p-4 ${bg} rounded-xl hover:scale-105 transition-transform duration-300 border border-[#fff1ed]`}
   >
     <Icon className={`w-8 h-8 mx-auto mb-2 ${color}`} />
     <div className="text-2xl font-bold">{value}</div>
-    <div className="text-sm text-gray-600 yellow:text-gray-400">{label}</div>
+    <div className="text-sm text-gray-600">{label}</div>
     {trend && <div className="text-xs text-green-600 mt-1">{trend}</div>}
   </div>
 );
@@ -632,7 +634,7 @@ const ProfilePage = () => {
     }
   };
 
-  //  UPDATED: Function to upload video to backend
+  // UPDATED: Function to upload video to backend
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -725,18 +727,42 @@ const ProfilePage = () => {
     }
   };
 
-  const handleGenerateAndDownloadResume = () => {
-    const resumeContent = generateResumeHtml(profile);
-    const blob = new Blob([resumeContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${profile.name || "Resume"}_CV.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // const handleGenerateAndDownloadResume = () => {
+  //   const resumeContent = generateResumeHtml(profile);
+  //   const blob = new Blob([resumeContent], { type: "text/html" });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${profile.name || "Resume"}_CV.html`;
+  //   document.body.appendChild(a);
+  //   a.click();
+  //   document.body.removeChild(a);
+  //   URL.revokeObjectURL(url);
 
+  //   setModalMessage("Your resume has been generated and downloaded!");
+  //   setShowModal(true);
+  // };
+
+  // const handlePreviewResume = () => {
+  //   if (!profile.name && !profile.email) {
+  //     setModalMessage(
+  //       "Please fill in at least your name and email before previewing the resume."
+  //     );
+  //     setShowModal(true);
+  //     return;
+  //   }
+  //   setShowPreview(true);
+  // };
+
+  const handleDownloadResume = () => {
+    if (!profile.name && !profile.email) {
+      setModalMessage(
+        "Please fill in at least your name and email before generating the resume."
+      );
+      setShowModal(true);
+      return;
+    }
+    generateResume(profile);
     setModalMessage("Your resume has been generated and downloaded!");
     setShowModal(true);
   };
@@ -823,31 +849,31 @@ const ProfilePage = () => {
       key: "location",
       icon: MapPin,
       value: profile.location,
-      color: "text-orange-500",
+      color: "text-[#caa057]",
     },
     {
       key: "phone",
       icon: Phone,
       value: profile.phone,
-      color: "text-yellow-500",
+      color: "text-[#caa057]",
     },
     {
       key: "email",
       icon: Mail,
       value: profile.email,
-      color: "text-orange-600",
+      color: "text-[#caa057]",
     },
     {
       key: "experience",
       icon: Briefcase,
       value: profile.experience,
-      color: "text-yellow-600",
+      color: "text-[#caa057]",
     },
     // {
-    //   key: "availability",
-    //   icon: Calendar,
-    //   value: profile.availability,
-    //   color: "text-orange-500",
+    //   key: "availability",
+    //   icon: Calendar,
+    //   value: profile.availability,
+    //   color: "text-orange-500",
     // },
   ];
 
@@ -856,42 +882,42 @@ const ProfilePage = () => {
       label: "Applied",
       value: jobStats.applied,
       icon: Rocket,
-      color: "text-orange-500",
-      bg: "bg-orange-100 yellow:bg-orange-900/30",
+      color: "text-[#caa057]",
+      bg: "bg-[#fff1ed]",
     },
     // {
-    //  label: "Interviews",
-    //  value: jobStats.interviews,
-    //  icon: Users,
-    //  color: "text-yellow-500",
-    //  bg: "bg-yellow-100 yellow:bg-yellow-900/30",
+    //  label: "Interviews",
+    //  value: jobStats.interviews,
+    //  icon: Users,
+    //  color: "text-yellow-500",
+    //  bg: "bg-yellow-100",
     // },
     {
       label: "Saved",
       value: jobStats.saved,
       icon: Heart,
       color: "text-red-500",
-      bg: "bg-red-100 yellow:bg-red-900/30",
+      bg: "bg-[#fff1ed]",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 yellow:from-orange-950/20 yellow:via-yellow-950/20 yellow:to-amber-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
-        <Card className="overflow-hidden bg-gradient-to-br from-white via-orange-50 to-yellow-50 yellow:from-gray-900 yellow:via-orange-950/30 yellow:to-yellow-950/30 border-2 border-orange-200/50 yellow:border-orange-800/50 shadow-2xl mb-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5"></div>
+        <Card className="overflow-hidden bg-gradient-to-br from-white via-[#fff1ed] to-[#fff1ed] border-2 border-[#fff1ed] shadow-2xl mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#caa057]/5 via-transparent to-[#caa057]/5"></div>
           <CardContent className="relative p-6 sm:p-8">
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
               {/* Avatar and Video Intro Section */}
               <div className="relative group text-center md:text-left mb-6 md:mb-0">
                 <div className="relative inline-block">
-                  <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-4 border-gradient-to-br from-orange-400 to-yellow-400 shadow-2xl ring-4 ring-orange-200/50 yellow:ring-orange-800/50">
+                  <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-4 border-gradient-to-br from-[#caa057] to-[#caa057] shadow-2xl ring-4 ring-[#fff1ed]">
                     <AvatarImage
                       src={profile.image || "/placeholder.svg"}
                       alt={profile.name}
                     />
-                    <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-orange-500 to-yellow-500 text-white">
+                    <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-[#caa057] to-[#caa057] text-white">
                       {profile.name
                         .split(" ")
                         .map((n) => n[0])
@@ -907,7 +933,7 @@ const ProfilePage = () => {
                     onChange={handleImageChange}
                     accept="image/*"
                   />
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#caa057] to-[#caa057] rounded-full flex items-center justify-center shadow-lg">
                     <Crown className="w-4 h-4 text-white" />
                   </div>
                 </div>
@@ -917,10 +943,10 @@ const ProfilePage = () => {
                     <div className="relative">
                       <video
                         src={profile.videoIntro}
-                        className="w-full max-w-xs mx-auto h-24 rounded-xl object-cover border-2 border-orange-300/50 shadow-lg"
+                        className="w-full max-w-xs mx-auto h-24 rounded-xl object-cover border-2 border-[#caa057] shadow-lg"
                         controls
                       />
-                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
+                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-[#caa057] to-[#caa057] text-white">
                         <Video className="w-3 h-3 mr-1" />
                         Intro
                       </Badge>
@@ -935,10 +961,10 @@ const ProfilePage = () => {
                     </div>
                   ) : (
                     <div className="relative group w-full max-w-xs mx-auto">
-                      <div className="w-full h-24 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-xl border-2 border-dashed border-orange-300/50 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-yellow-200 transition-all duration-300 group-hover:scale-105">
+                      <div className="w-full h-24 bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] rounded-xl border-2 border-dashed border-[#caa057] flex items-center justify-center cursor-pointer hover:from-[#fff1ed] hover:to-[#fff1ed] transition-all duration-300 group-hover:scale-105">
                         <div className="text-center">
-                          <Video className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                          <p className="text-xs text-orange-600 font-medium">
+                          <Video className="w-8 h-8 text-[#caa057] mx-auto mb-2" />
+                          <p className="text-xs text-[#caa057] font-medium">
                             Add Video Intro
                           </p>
                           <p className="text-xs text-gray-500">
@@ -970,14 +996,14 @@ const ProfilePage = () => {
                       onSave={handleSave}
                       onCancel={handleCancel}
                       onTempChange={setTempValue}
-                      className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 yellow:from-white yellow:to-gray-200 bg-clip-text text-transparent"
+                      className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent"
                     />
                     {editingField !== "name" && (
-                      <Edit3 className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-orange-500" />
+                      <Edit3 className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-[#caa057]" />
                     )}
                   </h1>
 
-                  <p className="text-base sm:text-xl text-gray-600 yellow:text-gray-300 mt-1 sm:mt-2">
+                  <p className="text-base sm:text-xl text-gray-600 mt-1 sm:mt-2">
                     <EditableField
                       field="designation"
                       value={profile.designation}
@@ -987,7 +1013,7 @@ const ProfilePage = () => {
                       onSave={handleSave}
                       onCancel={handleCancel}
                       onTempChange={setTempValue}
-                      className="text-base sm:text-xl text-gray-600 yellow:text-gray-300"
+                      className="text-base sm:text-xl text-gray-600"
                     />
                   </p>
                 </div>
@@ -996,7 +1022,7 @@ const ProfilePage = () => {
                   {contactInfo.map(({ key, icon: Icon, value, color }) => (
                     <div
                       key={key}
-                      className="flex items-center space-x-3 p-3 rounded-xl bg-white/60 yellow:bg-gray-800/60 hover:bg-orange-50 yellow:hover:bg-orange-900/20 transition-all duration-300 group border border-orange-100/50 yellow:border-orange-800/50 hover:border-orange-300/50 hover:shadow-lg"
+                      className="flex items-center space-x-3 p-3 rounded-xl bg-white/60 hover:bg-[#fff1ed] transition-all duration-300 group border border-[#fff1ed] hover:border-[#caa057] hover:shadow-lg"
                     >
                       <Icon className={`w-5 h-5 ${color}`} />
                       <EditableField
@@ -1008,7 +1034,7 @@ const ProfilePage = () => {
                         onSave={handleSave}
                         onCancel={handleCancel}
                         onTempChange={setTempValue}
-                        className="flex-1 group-hover:text-orange-600 transition-colors text-sm sm:text-base font-medium"
+                        className="flex-1 group-hover:text-[#caa057] transition-colors text-sm sm:text-base font-medium"
                       />
                     </div>
                   ))}
@@ -1016,11 +1042,11 @@ const ProfilePage = () => {
 
                 {/* Stats Grid */}
                 {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-                  <div className="text-center p-6 bg-gradient-to-br from-orange-100 to-orange-200 yellow:from-orange-900/30 yellow:to-orange-800/30 rounded-xl border border-orange-200/50 yellow:border-orange-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-2xl sm:text-3xl font-bold text-orange-600 yellow:text-orange-400">
+                  <div className="text-center p-6 bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] rounded-xl border border-[#fff1ed] hover:scale-105 transition-transform duration-300">
+                    <div className="text-2xl sm:text-3xl font-bold text-[#caa057]">
                       {profile.profileStrength}%
                     </div>
-                    <div className="text-xs sm:text-sm text-orange-700 yellow:text-orange-300 font-medium">
+                    <div className="text-xs sm:text-sm text-[#caa057] font-medium">
                       Profile Strength
                     </div>
                     <Progress
@@ -1028,36 +1054,36 @@ const ProfilePage = () => {
                       className="mt-3 h-2"
                     />
                     <div className="flex items-center justify-center mt-2">
-                      <Flame className="w-4 h-4 text-orange-500 mr-1" />
-                      <span className="text-xs text-orange-600">
+                      <Flame className="w-4 h-4 text-[#caa057] mr-1" />
+                      <span className="text-xs text-[#caa057]">
                         Hot Profile!
                       </span>
                     </div>
                   </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-yellow-100 to-yellow-200 yellow:from-yellow-900/30 yellow:to-yellow-800/30 rounded-xl border border-yellow-200/50 yellow:border-yellow-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-2xl sm:text-3xl font-bold text-yellow-600 yellow:text-yellow-400">
+                  <div className="text-center p-6 bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] rounded-xl border border-[#fff1ed] hover:scale-105 transition-transform duration-300">
+                    <div className="text-2xl sm:text-3xl font-bold text-[#caa057]">
                       {profile.responseRate}%
                     </div>
-                    <div className="text-xs sm:text-sm text-yellow-700 yellow:text-yellow-300 font-medium">
+                    <div className="text-xs sm:text-sm text-[#caa057] font-medium">
                       Response Rate
                     </div>
                     <div className="flex items-center justify-center mt-2">
-                      <Zap className="w-4 h-4 text-yellow-500 mr-1" />
-                      <span className="text-xs text-yellow-600">
+                      <Zap className="w-4 h-4 text-[#caa057] mr-1" />
+                      <span className="text-xs text-[#caa057]">
                         Lightning Fast!
                       </span>
                     </div>
                   </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-amber-100 to-amber-200 yellow:from-amber-900/30 yellow:to-amber-800/30 rounded-xl border border-amber-200/50 yellow:border-amber-700/50 hover:scale-105 transition-transform duration-300">
-                    <div className="text-2xl sm:text-3xl font-bold text-amber-600 yellow:text-amber-400">
+                  <div className="text-center p-6 bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] rounded-xl border border-[#fff1ed] hover:scale-105 transition-transform duration-300">
+                    <div className="text-2xl sm:text-3xl font-bold text-[#caa057]">
                       {jobStats.searchAppearances}
                     </div>
-                    <div className="text-xs sm:text-sm text-amber-700 yellow:text-amber-300 font-medium">
+                    <div className="text-xs sm:text-sm text-[#caa057] font-medium">
                       Search Appearances
                     </div>
                     <div className="flex items-center justify-center mt-2">
-                      <TrendingUp className="w-4 h-4 text-amber-500 mr-1" />
-                      <span className="text-xs text-amber-600">
+                      <TrendingUp className="w-4 h-4 text-[#caa057] mr-1" />
+                      <span className="text-xs text-[#caa057]">
                         Trending Up!
                       </span>
                     </div>
@@ -1074,7 +1100,7 @@ const ProfilePage = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-14 sm:h-16 bg-white/80 yellow:bg-gray-900/80 backdrop-blur-sm border border-orange-200/50 yellow:border-orange-800/50 rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-14 sm:h-16 bg-white/80 backdrop-blur-sm border border-[#fff1ed] rounded-xl">
             {[
               {
                 value: "overview",
@@ -1100,7 +1126,7 @@ const ProfilePage = () => {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white"
+                className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#caa057] data-[state=active]:to-[#caa057] data-[state=active]:text-white"
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
                 {label}
@@ -1109,89 +1135,95 @@ const ProfilePage = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Job Activity Dashboard */}
-              <div className="lg:col-span-2">
-                <Card className="border-orange-200/50 dark:border-orange-800/50 h-full">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-lg sm:text-2xl">
-                      <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-orange-500" />
-                      Job Activity Dashboard
-                    </CardTitle>
-                    <CardDescription>
-                      Your job search performance at a glance
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {jobStatsData.map((stat) => (
-                        <StatCard key={stat.label} {...stat} />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {/* Job Activity Dashboard */}
+    <div className="lg:col-span-2">
+      <Card className="border-[#fff1ed] h-full bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center text-lg sm:text-2xl">
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[#caa057]" />
+            Job Activity Dashboard
+          </CardTitle>
+          <CardDescription>
+            Your job search performance at a glance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {jobStatsData.map((stat) => (
+              <StatCard key={stat.label} {...stat} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
 
-              {/* Career Recommendations (now on the side) */}
-              <div className="lg:col-span-1">
-                <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 yellow:from-orange-950/20 yellow:to-yellow-950/20 border border-orange-200/50 yellow:border-orange-800/50 flex flex-col justify-center h-full">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-lg">
-                      <Bot className="w-5 h-5 mr-2 text-orange-500" />
-                      Career Recommendations
-                    </CardTitle>
-                    <CardDescription>
-                      AI-powered recommendations to boost your profile
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {/* {aiRecommendations.slice(0, 2).map((rec, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-white/60 yellow:bg-gray-800/60 rounded-lg border border-orange-100/50 yellow:border-orange-800/50"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className={`w-2 h-2 rounded-full ${
-                                rec.priority === "high"
-                                  ? "bg-red-500"
-                                  : rec.priority === "medium"
-                                  ? "bg-yellow-500"
-                                  : "bg-green-500"
-                              }`}
-                            ></div>
-                            <span className="font-medium text-sm">
-                              {rec.title}
-                            </span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {rec.match}% match
-                          </Badge>
-                        </div>
-                      ))} */}
-                      <Button
-                        onClick={goToServices}
-                        size="sm"
-                        variant="outline"
-                        className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent"
-                      >
-                        <Compass className="w-4 h-4 mr-2" />
-                        View All Recommendations
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+    {/* Career Recommendations (Side Card) */}
+    <div className="lg:col-span-1">
+      <Card className="bg-gradient-to-br from-[#fff1ed]/70 to-[#fff1ed]/30 border border-[#fff1ed] flex flex-col justify-center h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-lg">
+            <Bot className="w-5 h-5 mr-2 text-[#caa057]" />
+            Career Recommendations
+          </CardTitle>
+          <CardDescription>
+            AI-powered recommendations to boost your profile
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {/* Example Recommendations List */}
+            {/* Uncomment this if you want to show AI recommendations */}
+            {/* {aiRecommendations.slice(0, 2).map((rec, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-white/70 rounded-lg border border-[#fff1ed] hover:bg-[#fff1ed]/90 transition-colors duration-300"
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      rec.priority === "high"
+                        ? "bg-red-500"
+                        : rec.priority === "medium"
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                  ></div>
+                  <span className="font-medium text-sm">{rec.title}</span>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-[#caa057]/20 text-[#caa057]"
+                >
+                  {rec.match}% match
+                </Badge>
               </div>
-            </div>
-          </TabsContent>
+            ))} */}
+
+            {/* Button to view all recommendations */}
+            <Button
+              onClick={goToServices}
+              size="sm"
+              variant="outline"
+              className="w-full border-[#caa057] text-[#caa057] hover:bg-[#fff1ed] transition-colors duration-300 bg-transparent"
+            >
+              <Compass className="w-4 h-4 mr-2" />
+              View All Recommendations
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</TabsContent>
+
 
           <TabsContent value="Skills" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {SkillAssessments.map((skill, index) => (
                 <Card
                   key={index}
-                  className="hover:shadow-lg transition-shadow border-orange-200/50 yellow:border-orange-800/50"
+                  className="hover:shadow-lg transition-shadow border-[#fff1ed]"
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1216,14 +1248,14 @@ const ProfilePage = () => {
                         {skill.verified && (
                           <Badge
                             variant="secondary"
-                            className="bg-orange-100 text-orange-800 yellow:bg-orange-900 yellow:text-orange-200"
+                            className="bg-[#fff1ed] text-[#caa057]"
                           >
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Verified
                           </Badge>
                         )}
                         {skill.trending && (
-                          <Badge className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
+                          <Badge className="bg-gradient-to-r from-[#caa057] to-[#caa057] text-white">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             Trending
                           </Badge>
@@ -1235,10 +1267,10 @@ const ProfilePage = () => {
                             onClick={() =>
                               handleEdit(`skill-${index}`, skill.Skill)
                             }
-                            className="p-1 rounded-md hover:bg-orange-50"
+                            className="p-1 rounded-md hover:bg-[#fff1ed]"
                             title="Edit Skill"
                           >
-                            <Edit3 className="w-4 h-4 text-orange-600" />
+                            <Edit3 className="w-4 h-4 text-[#caa057]" />
                           </button>
                         )}
 
@@ -1257,7 +1289,7 @@ const ProfilePage = () => {
               ))}
             </div>
 
-            <Card className="border-2 border-dashed border-orange-300/50 hover:border-orange-500 transition-colors yellow:border-orange-700/50 yellow:hover:border-orange-400">
+            <Card className="border-2 border-dashed border-[#caa057] hover:border-[#caa057] transition-colors">
               <CardContent className="p-8 text-center">
                 {isAddingSkill ? (
                   <div className="flex flex-col items-center">
@@ -1274,7 +1306,7 @@ const ProfilePage = () => {
                     <div className="flex space-x-2">
                       <Button
                         onClick={handleAddSkill}
-                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                        className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Save Skill
@@ -1285,7 +1317,7 @@ const ProfilePage = () => {
                           setIsAddingSkill(false);
                           setNewSkillName("");
                         }}
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                       >
                         Cancel
                       </Button>
@@ -1293,16 +1325,16 @@ const ProfilePage = () => {
                   </div>
                 ) : (
                   <>
-                    <Target className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                    <Target className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">
                       Add New Skill
                     </h3>
-                    <p className="text-gray-500 yellow:text-gray-400 mb-4">
+                    <p className="text-gray-500 mb-4">
                       Showcase more of your expertise
                     </p>
                     <Button
                       onClick={() => setIsAddingSkill(true)}
-                      className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                      className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                     >
                       <Zap className="w-4 h-4 mr-2" />
                       Add Skill
@@ -1334,13 +1366,10 @@ const ProfilePage = () => {
                 description: "Your last company worked for",
               },
             ].map((field) => (
-              <Card
-                key={field.key}
-                className="border-orange-200/50 yellow:border-orange-800/50"
-              >
+              <Card key={field.key} className="border-[#fff1ed]">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <field.icon className="w-5 h-5 mr-2 text-orange-500" />
+                    <field.icon className="w-5 h-5 mr-2 text-[#caa057]" />
                     {field.title}
                   </CardTitle>
                   <CardDescription>{field.description}</CardDescription>
@@ -1368,7 +1397,7 @@ const ProfilePage = () => {
                         onClick={() =>
                           handleEdit(field.key, profile[field.key])
                         }
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                       >
                         <Edit3 className="w-4 h-4 mr-2" />
                         Edit
@@ -1376,16 +1405,14 @@ const ProfilePage = () => {
                     </div>
                   ) : (
                     <div className="text-center py-8 sm:py-12">
-                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
+                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">
                         Add Your {field.title}
                       </h3>
-                      <p className="text-gray-500 yellow:text-gray-400 mb-6">
-                        {field.description}
-                      </p>
+                      <p className="text-gray-500 mb-6">{field.description}</p>
                       <Button
                         onClick={() => handleEdit(field.key, "")}
-                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                        className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                       >
                         <ChevronRight className="w-4 h-4 mr-2" />
                         Get Started
@@ -1398,10 +1425,10 @@ const ProfilePage = () => {
           </TabsContent>
 
           <TabsContent value="portfolio" className="space-y-6">
-            <Card className="bg-gradient-to-br from-orange-50/5 to-yellow-50/5 border-2 border-orange-200/50 yellow:border-orange-800/50">
+            <Card className="bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] border-2 border-[#fff1ed]">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-orange-500" />
+                  <FileText className="w-5 h-5 mr-2 text-[#caa057]" />
                   Resume & Documents
                 </CardTitle>
                 <CardDescription>
@@ -1411,10 +1438,10 @@ const ProfilePage = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Resume Upload and Preview Section */}
-                  <div className="text-center p-8 border-2 border-dashed border-orange-300/50 rounded-lg hover:border-orange-500 transition-colors yellow:border-orange-700/50 yellow:hover:border-orange-400">
-                    <Upload className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                  <div className="text-center p-8 border-2 border-dashed border-[#caa057] rounded-lg hover:border-[#caa057] transition-colors">
+                    <Upload className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
                     <h3 className="font-semibold mb-2">Upload Resume</h3>
-                    <p className="text-sm text-gray-500 yellow:text-gray-400 mb-4">
+                    <p className="text-sm text-gray-500 mb-4">
                       PDF, DOC, or DOCX (Max 5MB)
                     </p>
 
@@ -1429,7 +1456,7 @@ const ProfilePage = () => {
                     <div className="flex flex-col items-center space-y-4">
                       {/* Choose File Button */}
                       <Button
-                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg w-full max-w-xs"
+                        className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg w-full max-w-xs"
                         onClick={() =>
                           document.getElementById("resumeInput").click()
                         }
@@ -1446,7 +1473,7 @@ const ProfilePage = () => {
                           rel="noopener noreferrer"
                           className="w-full max-w-xs"
                         >
-                          <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full border-orange-300 text-orange-600 hover:bg-orange-50 yellow:border-orange-700 yellow:text-orange-400 yellow:hover:bg-orange-900/20 bg-transparent">
+                          <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full border-[#caa057] text-[#caa057] hover:bg-[#fff1ed] bg-transparent">
                             <Eye className="w-4 h-4 mr-2" />
                             Preview Resume
                           </div>
@@ -1456,7 +1483,7 @@ const ProfilePage = () => {
                   </div>
 
                   {/* UPDATED: Portfolio Links */}
-                  <div className="text-center p-8 border-2 border-dashed border-yellow-300/50 rounded-lg hover:border-yellow-500 transition-colors cursor-pointer yellow:border-yellow-700/50 yellow:hover:border-yellow-400">
+                  <div className="text-center p-8 border-2 border-dashed border-[#caa057] rounded-lg hover:border-[#caa057] transition-colors cursor-pointer">
                     {isAddingPortfolio ? (
                       <div className="flex flex-col items-center">
                         <h3 className="font-semibold mb-2">
@@ -1472,7 +1499,7 @@ const ProfilePage = () => {
                         <div className="flex space-x-2">
                           <Button
                             onClick={handlePortfolioSave}
-                            className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
+                            className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
                             Save Link
@@ -1483,7 +1510,7 @@ const ProfilePage = () => {
                               setIsAddingPortfolio(false);
                               setNewPortfolioLink("");
                             }}
-                            className="border-yellow-300 text-yellow-600 hover:bg-yellow-50"
+                            className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                           >
                             Cancel
                           </Button>
@@ -1491,9 +1518,9 @@ const ProfilePage = () => {
                       </div>
                     ) : (
                       <>
-                        <Lightbulb className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                        <Lightbulb className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
                         <h3 className="font-semibold mb-2">Portfolio Links</h3>
-                        <p className="text-sm text-gray-500 yellow:text-gray-400 mb-4">
+                        <p className="text-sm text-gray-500 mb-4">
                           GitHub, Behance, Personal Website
                         </p>
                         {profile.portfioliolink && (
@@ -1501,7 +1528,7 @@ const ProfilePage = () => {
                             href={profile.portfioliolink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block mb-4 text-orange-500 hover:underline"
+                            className="block mb-4 text-[#caa057] hover:underline"
                           >
                             <ExternalLink className="w-4 h-4 inline-block mr-2" />
                             View Portfolio
@@ -1510,7 +1537,7 @@ const ProfilePage = () => {
                         <Button
                           variant="secondary"
                           onClick={() => setIsAddingPortfolio(true)}
-                          className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
+                          className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
                           {profile.portfioliolink ? "Edit Link" : "Add Links"}
@@ -1537,13 +1564,10 @@ const ProfilePage = () => {
                 description: "Professional Certificates and achievements",
               },
             ].map((field) => (
-              <Card
-                key={field.key}
-                className="border-orange-200/50 yellow:border-orange-800/50"
-              >
+              <Card key={field.key} className="border-[#fff1ed]">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <field.icon className="w-5 h-5 mr-2 text-orange-500" />
+                    <field.icon className="w-5 h-5 mr-2 text-[#caa057]" />
                     {field.title}
                   </CardTitle>
                   <CardDescription>{field.description}</CardDescription>
@@ -1564,7 +1588,7 @@ const ProfilePage = () => {
                       <div className="flex space-x-2">
                         <Button
                           onClick={handleCertificateSave}
-                          className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                          className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Save Link
@@ -1575,7 +1599,7 @@ const ProfilePage = () => {
                             setIsAddingCert(false);
                             setNewCertLink("");
                           }}
-                          className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                          className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                         >
                           Cancel
                         </Button>
@@ -1595,17 +1619,15 @@ const ProfilePage = () => {
                     />
                   ) : profile[field.key] ? (
                     <div className="space-y-4">
-                      <div className="prose max-w-none">
-                        <p className="whitespace-pre-line text-sm sm:text-base">
-                          {profile[field.key]}
-                        </p>
-                      </div>
+                      <p className="whitespace-pre-line text-sm sm:text-base">
+                        {profile[field.key]}
+                      </p>
                       <Button
                         variant="outline"
                         onClick={() =>
                           handleEdit(field.key, profile[field.key])
                         }
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
                       >
                         <Edit3 className="w-4 h-4 mr-2" />
                         Edit
@@ -1613,13 +1635,11 @@ const ProfilePage = () => {
                     </div>
                   ) : (
                     <div className="text-center py-8 sm:py-12">
-                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 yellow:text-gray-400 mx-auto mb-4" />
+                      <field.icon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-500 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">
                         Add Your {field.title}
                       </h3>
-                      <p className="text-gray-500 yellow:text-gray-400 mb-6">
-                        {field.description}
-                      </p>
+                      <p className="text-gray-500 mb-6">{field.description}</p>
                       <Button
                         onClick={() => {
                           if (field.key === "certificationlink") {
@@ -1628,7 +1648,7 @@ const ProfilePage = () => {
                             handleEdit(field.key, "");
                           }
                         }}
-                        className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+                        className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
                       >
                         <ChevronRight className="w-4 h-4 mr-2" />
                         Get Started
@@ -1646,7 +1666,7 @@ const ProfilePage = () => {
           <Button
             size="lg"
             onClick={handleSaveAll}
-            className="px-8 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg"
+            className="px-8 bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
           >
             <CheckCircle className="w-5 h-5 mr-2" />
             Save All Changes
@@ -1654,45 +1674,43 @@ const ProfilePage = () => {
           <Button
             size="lg"
             variant="outline"
-            onClick={handleGenerateAndDownloadResume}
-            className="px-8 border-orange-300 text-orange-600 hover:bg-orange-50 yellow:border-orange-700 yellow:text-orange-400 yellow:hover:bg-orange-900/20 bg-transparent"
+            onClick={handleDownloadResume}
+            className="px-8 border-[#caa057] text-[#caa057] hover:bg-[#fff1ed] bg-transparent"
           >
             <Download className="w-5 h-5 mr-2" />
             Generate Resume
           </Button>
-          <ShareMenu>
+          {/* <ShareMenu>
             <Button
               size="lg"
-              className="px-8 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white shadow-lg"
+              className="px-8 bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg"
             >
               Share Profile
             </Button>
-          </ShareMenu>
+          </ShareMenu> */}
         </div>
       </div>
 
       {/* Custom Alert Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4">
-          <div className="bg-white yellow:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm relative border-2 border-orange-400">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm relative border-2 border-[#caa057]">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 yellow:text-gray-400 yellow:hover:text-gray-200"
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
             >
               <X className="w-5 h-5" />
             </button>
             <div className="flex items-center justify-center mb-4">
-              <Bell className="w-8 h-8 text-orange-500 mr-2" />
-              <h3 className="text-xl font-semibold text-gray-800 yellow:text-white">
+              <Bell className="w-8 h-8 text-[#caa057] mr-2" />
+              <h3 className="text-xl font-semibold text-gray-800">
                 Notification
               </h3>
             </div>
-            <p className="text-gray-700 yellow:text-gray-300 text-center mb-6">
-              {modalMessage}
-            </p>
+            <p className="text-gray-700 text-center mb-6">{modalMessage}</p>
             <Button
               onClick={() => setShowModal(false)}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full bg-[#caa057] hover:bg-[#b4924c] text-white"
             >
               OK
             </Button>

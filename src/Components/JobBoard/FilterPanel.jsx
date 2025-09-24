@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+"use client"
+
+import { useMemo, useState } from "react"
 import {
   Filter,
   Briefcase,
@@ -14,7 +16,7 @@ import {
   ChevronUp,
   Search,
   SlidersHorizontal,
-} from "lucide-react";
+} from "lucide-react"
 
 const SECTION_CLASSES =
   "rounded-xl border border-gray-200 bg-white shadow-sm p-4";
@@ -22,7 +24,7 @@ const SECTION_CLASSES =
 const chipBase =
   "px-3 py-1.5 text-xs rounded-full border transition cursor-pointer select-none";
 const chipOn =
-  "bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium shadow";
+  "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white font-medium shadow";
 const chipOff =
   "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50";
 
@@ -153,17 +155,6 @@ export default function FilterPanel({
     setSearch({ location: "", company: "", industry: "", experience: "" });
   };
 
-  const setMin = (val) => {
-    const v = Math.min(Number(val), salary.max);
-    setSalary((s) => ({ ...s, min: v }));
-    setFilters((p) => ({ ...p, salary: { ...p.salary, min: v } }));
-  };
-  const setMax = (val) => {
-    const v = Math.max(Number(val), salary.min);
-    setSalary((s) => ({ ...s, max: v }));
-    setFilters((p) => ({ ...p, salary: { ...p.salary, max: v } }));
-  };
-
   const applyNow = () => {
     onApply?.(filters);
     setOpenMobile(false);
@@ -185,12 +176,12 @@ export default function FilterPanel({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Filter size={18} className="text-yellow-500" />
+          <Filter size={18} className="text-[#caa057]" />
           <h2 className="text-base font-semibold text-gray-900">Filters</h2>
         </div>
         <button
           onClick={clearAll}
-          className="text-xs font-medium text-gray-600 hover:text-orange-600 flex items-center gap-1"
+          className="text-xs font-medium text-gray-600 hover:text-[#caa057] flex items-center gap-1"
         >
           <X size={14} /> Clear All
         </button>
@@ -200,12 +191,12 @@ export default function FilterPanel({
       <div className={SECTION_CLASSES}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-            <IndianRupee size={16} className="text-orange-500" />
+            <IndianRupee size={16} className="text-[#caa057]" />
             Salary
           </div>
           <button
             onClick={() => clearSection("salary")}
-            className="text-xs text-gray-500 hover:text-orange-600"
+            className="text-xs text-gray-500 hover:text-[#caa057]"
           >
             Reset
           </button>
@@ -218,7 +209,7 @@ export default function FilterPanel({
               max={salary.max}
               value={salary.min}
               onChange={(e) => setMin(e.target.value)}
-              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-[#caa057] outline-none"
             />
             <input
               type="number"
@@ -226,7 +217,7 @@ export default function FilterPanel({
               max={60}
               value={salary.max}
               onChange={(e) => setMax(e.target.value)}
-              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+              className="w-full border rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-[#caa057] outline-none"
             />
           </div>
           <p className="mt-2 text-xs text-gray-600">
@@ -254,12 +245,12 @@ export default function FilterPanel({
               className="w-full flex items-center justify-between"
             >
               <div className="flex items-center gap-2">
-                <Icon size={16} className="text-orange-500" />
+                <Icon size={16} className="text-[#caa057]" />
                 <span className="text-sm font-semibold text-gray-900">
                   {title}
                 </span>
                 {count > 0 && (
-                  <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                  <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#caa057] to-[#caa057] text-white">
                     {count}
                   </span>
                 )}
@@ -292,13 +283,13 @@ export default function FilterPanel({
                             addCustomValue(key, search[key]);
                           }
                         }}
-                        className="w-full border rounded-md pl-7 pr-2 py-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+                        className="w-full border rounded-md pl-7 pr-2 py-2 text-sm focus:ring-2 focus:ring-[#caa057] outline-none"
                       />
                     </div>
                     {custom && (
                       <button
                         onClick={() => addCustomValue(key, search[key])}
-                        className="px-3 py-1.5 text-xs font-medium text-orange-600 border border-orange-300 rounded-md hover:bg-orange-50"
+                        className="px-3 py-1.5 text-xs font-medium text-[#caa057] border border-[#caa057] rounded-md hover:bg-[#fff1ed]"
                       >
                         Add
                       </button>
@@ -330,7 +321,7 @@ export default function FilterPanel({
                 {count > 0 && (
                   <button
                     onClick={() => clearSection(key)}
-                    className="text-xs text-gray-500 hover:text-orange-600"
+                    className="text-xs text-gray-500 hover:text-[#caa057]"
                   >
                     Clear {title}
                   </button>
@@ -345,13 +336,13 @@ export default function FilterPanel({
       <div className="hidden md:flex gap-2">
         <button
           onClick={applyNow}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 shadow-md"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#caa057] to-[#caa057] text-white hover:from-[#b4924c] hover:to-[#b4924c] shadow-md"
         >
           <SlidersHorizontal size={16} /> Apply Filters
         </button>
         <button
           onClick={clearAll}
-          className="px-5 py-2.5 text-sm font-medium rounded-lg border border-orange-300 text-orange-600 hover:bg-orange-50"
+          className="px-5 py-2.5 text-sm font-medium rounded-lg border border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
         >
           Reset
         </button>
@@ -366,10 +357,10 @@ export default function FilterPanel({
         <button
           onClick={() => setOpenMobile(true)}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl 
-               bg-gradient-to-r from-yellow-400 to-orange-500 
-               text-white text-sm font-semibold shadow-md 
-               hover:from-yellow-500 hover:to-orange-600 
-               active:scale-95 transition-all duration-200"
+                 bg-gradient-to-r from-[#caa057] to-[#caa057] 
+                 text-white text-sm font-semibold shadow-md 
+                 hover:from-[#b4924c] hover:to-[#b4924c] 
+                 active:scale-95 transition-all duration-200"
         >
           <Filter size={18} className="text-white" />
           Filters
@@ -405,13 +396,13 @@ export default function FilterPanel({
             <div className="fixed bottom-0 left-0 w-full bg-white border-t p-3 flex gap-2">
               <button
                 onClick={applyNow}
-                className="flex-1 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow"
+                className="flex-1 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#caa057] to-[#caa057] text-white shadow"
               >
                 Apply
               </button>
               <button
                 onClick={clearAll}
-                className="px-5 py-3 text-sm font-medium rounded-lg border border-orange-300 text-orange-600"
+                className="px-5 py-3 text-sm font-medium rounded-lg border border-[#caa057] text-[#caa057]"
               >
                 Reset
               </button>

@@ -212,7 +212,7 @@ const CandidateView = ({ selectedJob }) => {
             filters.skills.length > 0 ||
             filters.customSkill ||
             filters.experience > 0) && (
-            <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">Active</span>
+            <span className="bg-[#fff1ed] text-[#caa057] text-xs px-2 py-1 rounded-full">Active</span>
           )}
         </div>
 
@@ -232,11 +232,11 @@ const CandidateView = ({ selectedJob }) => {
                   <Listbox.Option
                     key={loc}
                     value={loc}
-                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`}
+                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-[#fff1ed]" : ""}`}
                   >
                     {({ selected }) => (
                       <span className="flex items-center gap-2">
-                        {selected && <CheckIcon className="w-4 h-4 text-blue-600" />}
+                        {selected && <CheckIcon className="w-4 h-4 text-[#caa057]" />}
                         {loc}
                       </span>
                     )}
@@ -272,11 +272,11 @@ const CandidateView = ({ selectedJob }) => {
                   <Listbox.Option
                     key={q}
                     value={q}
-                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-blue-100" : ""}`}
+                    className={({ active }) => `cursor-pointer px-3 py-2 ${active ? "bg-[#fff1ed]" : ""}`}
                   >
                     {({ selected }) => (
                       <span className="flex items-center gap-2">
-                        {selected && <CheckIcon className="w-4 h-4 text-blue-600" />}
+                        {selected && <CheckIcon className="w-4 h-4 text-[#caa057]" />}
                         {q}
                       </span>
                     )}
@@ -304,6 +304,9 @@ const CandidateView = ({ selectedJob }) => {
             max={100}
             value={filters.distance}
             onChange={(val) => setFilters({ ...filters, distance: val })}
+            trackStyle={{ backgroundColor: '#caa057' }}
+            handleStyle={{ borderColor: '#caa057', borderWidth: 2 }}
+            railStyle={{ backgroundColor: '#fff1ed' }}
           />
         </div>
 
@@ -315,6 +318,9 @@ const CandidateView = ({ selectedJob }) => {
             max={20}
             value={filters.experience}
             onChange={(val) => setFilters({ ...filters, experience: val })}
+            trackStyle={{ backgroundColor: '#caa057' }}
+            handleStyle={{ borderColor: '#caa057', borderWidth: 2 }}
+            railStyle={{ backgroundColor: '#fff1ed' }}
           />
         </div>
 
@@ -329,7 +335,7 @@ const CandidateView = ({ selectedJob }) => {
                 onClick={() => toggleSkill(skill)}
                 className={`px-3 py-1 rounded-full text-sm border ${
                   filters.skills.includes(skill)
-                    ? "bg-blue-600 text-white"
+                    ? "bg-[#caa057] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -349,7 +355,7 @@ const CandidateView = ({ selectedJob }) => {
         {/* Clear Filters */}
         <button
           onClick={resetFilters}
-          className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          className="w-full bg-gradient-to-r from-[#caa057] to-[#caa057] text-white py-2 rounded-lg hover:bg-[#b4924c] transition-colors"
         >
           Clear Filters
         </button>
@@ -363,7 +369,7 @@ const CandidateView = ({ selectedJob }) => {
               key={t}
               className={`px-5 py-2 rounded-full font-medium shadow-sm transition-colors ${
                 tab === t
-                  ? "bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white"
+                  ? "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
               onClick={() => handleTabChange(t)}
@@ -377,7 +383,7 @@ const CandidateView = ({ selectedJob }) => {
 
         {loading && (
           <div className="flex items-center justify-center py-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#caa057]"></div>
             <p className="ml-3 text-gray-600">Loading candidates...</p>
           </div>
         )}
@@ -393,7 +399,7 @@ const CandidateView = ({ selectedJob }) => {
                     : "No candidates match your filters."}
                 </p>
                 {candidatesToShow.length > 0 && (
-                  <button onClick={resetFilters} className="text-orange-600 hover:text-orange-700 underline">
+                  <button onClick={resetFilters} className="text-[#caa057] hover:text-[#b4924c] underline">
                     Clear filters to see all candidates
                   </button>
                 )}

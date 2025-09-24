@@ -1,3 +1,5 @@
+"use client"
+
 function sanitizeHtml(dirty) {
   if (!dirty) return ""
 
@@ -64,11 +66,11 @@ const JobDescriptionBox = ({ job }) => {
   if (!job) return null
 
   return (
-    <div className="border rounded-xl p-6 shadow-md">
-      <h3 className="text-lg font-bold mb-4">Job Description</h3>
+    <div className="border rounded-xl p-6 shadow-md bg-white border-[#fff1ed]">
+      <h3 className="text-lg font-bold mb-4 text-[#caa057]">Job Description</h3>
 
       {Array.isArray(job.description) ? (
-        <ul className="list-disc list-inside space-y-2">
+        <ul className="list-disc list-inside space-y-2 text-gray-700">
           {job.description.map((point, index) => (
             <li key={index}>{point}</li>
           ))}

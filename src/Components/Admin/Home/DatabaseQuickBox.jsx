@@ -67,13 +67,13 @@ const DatabaseQuickBox = () => {
       title: "Applied",
       value: appliedCount,
       icon: Users,
-      color: "from-orange-400 to-red-500",
+      color: "from-[#caa057] to-[#caa057]",
     },
     {
       title: "Saved Candidates",
       value: savedCount,
       icon: Bookmark,
-      color: "from-blue-400 to-indigo-500",
+      color: "from-[pink] to-[orange]",
     },
   ]
 

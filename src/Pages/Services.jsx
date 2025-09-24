@@ -45,7 +45,7 @@ const Services = () => {
       features: ["3D Career Mapping", "AI Predictions", "Skill Gap Analysis", "Growth Timeline"],
       price: "Free",
       badge: "Revolutionary",
-      color: "from-yellow-400 to-orange-500",
+      color: "from-[#caa057] to-[#caa057]",
       popularity: 98,
     },
     {
@@ -58,7 +58,7 @@ const Services = () => {
       features: ["AI Video Editing", "Industry Templates", "Voice Coaching", "Background Removal"],
       price: "₹299/month",
       badge: "Trending",
-      color: "from-yellow-400 to-orange-500",
+      color: "from-[#caa057] to-[#caa057]",
       popularity: 94,
     },
     {
@@ -70,7 +70,7 @@ const Services = () => {
       features: ["Live Market Data", "Negotiation Scripts", "Success Tracking", "Industry Benchmarks"],
       price: "₹199/month",
       badge: "Exclusive",
-      color: "from-yellow-400 to-orange-500",
+      color: "from-[#caa057] to-[#caa057]",
       popularity: 91,
     },
     {
@@ -82,7 +82,7 @@ const Services = () => {
       features: ["AI Matchmaking", "Virtual Rooms", "Industry Leaders", "Live Chat"],
       price: "₹99/event",
       badge: "Live",
-      color: "from-yellow-400 to-orange-500",
+      color: "from-[#caa057] to-[#caa057]",
       popularity: 89,
     },
   ]
@@ -98,19 +98,19 @@ const Services = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff1ed] via-white to-[#fff1ed]">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50 animate-gradient-x"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#fff1ed] via-[#fff1ed] to-[#fff1ed] animate-gradient-x"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
           <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#fff1ed] text-[#caa057] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
               <Zap className="w-4 h-4" />
               Revolutionary Career Services
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">
               Power Up Your Career with
-              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#caa057] to-[#caa057] bg-clip-text text-transparent">
                 {" "}Expertz Services
               </span>
             </h1>
@@ -118,12 +118,12 @@ const Services = () => {
               We provide end-to-end career solutions – from resume building to skill development, interview prep, and job search assistance.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 group">
+              <button className="bg-gradient-to-r from-[#caa057] to-[#caa057] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:from-[#b4924c] hover:to-[#b4924c] transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 group">
                 <Play className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
                 Start Your Journey
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="border-2 border-orange-200 text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:bg-orange-50 transition-all duration-300">
+              <button className="border-2 border-[#fff1ed] text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg hover:bg-[#fff1ed] transition-all duration-300">
                 Watch Demo
               </button>
             </div>
@@ -134,9 +134,9 @@ const Services = () => {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white/70 backdrop-blur-sm border border-orange-100 rounded-2xl p-4 sm:p-6 text-center hover:bg-white transition-all duration-300"
+                className="bg-white/70 backdrop-blur-sm border border-[#fff1ed] rounded-2xl p-4 sm:p-6 text-center hover:bg-white transition-all duration-300"
               >
-                <div className="flex justify-center mb-2 sm:mb-3 text-orange-500">{stat.icon}</div>
+                <div className="flex justify-center mb-2 sm:mb-3 text-[#caa057]">{stat.icon}</div>
                 <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1">{stat.value}</div>
                 <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
               </div>
@@ -154,8 +154,8 @@ const Services = () => {
               onClick={() => setActiveCategory(category.id)}
               className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-medium transition-all duration-300 ${
                 activeCategory === category.id
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg shadow-orange-200"
-                  : "bg-white text-gray-700 hover:bg-orange-50 border border-orange-100"
+                  ? "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white shadow-lg shadow-[#fff1ed]"
+                  : "bg-white text-gray-700 hover:bg-[#fff1ed] border border-[#fff1ed]"
               }`}
             >
               {category.icon}
@@ -171,7 +171,7 @@ const Services = () => {
           {filteredServices.map((service) => (
             <div
               key={service.id}
-              className="group relative bg-white border border-orange-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8 hover:shadow-2xl hover:shadow-orange-100 transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
+              className="group relative bg-white border border-[#fff1ed] rounded-2xl sm:rounded-3xl p-6 sm:p-8 hover:shadow-2xl hover:shadow-[#fff1ed] transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
               onMouseEnter={() => setHoveredService(service.id)}
               onMouseLeave={() => setHoveredService(null)}
             >
@@ -197,7 +197,7 @@ const Services = () => {
               </div>
 
               {/* Content */}
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 group-hover:text-orange-600 transition-colors">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 group-hover:text-[#caa057] transition-colors">
                 {service.title}
               </h3>
               <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
@@ -208,7 +208,7 @@ const Services = () => {
               <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
                 {service.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#caa057] flex-shrink-0" />
                     <span className="text-gray-600">{feature}</span>
                   </div>
                 ))}
@@ -218,9 +218,9 @@ const Services = () => {
               <div className="mb-4 sm:mb-6">
                 <div className="flex justify-between items-center mb-1.5 sm:mb-2">
                   <span className="text-[10px] sm:text-xs text-gray-500">Popularity</span>
-                  <span className="text-[10px] sm:text-xs font-semibold text-orange-600">{service.popularity}%</span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-[#caa057]">{service.popularity}%</span>
                 </div>
-                <div className="w-full bg-orange-50 rounded-full h-1.5 sm:h-2">
+                <div className="w-full bg-[#fff1ed] rounded-full h-1.5 sm:h-2">
                   <div
                     className={`h-1.5 sm:h-2 rounded-full bg-gradient-to-r ${service.color} transition-all duration-1000`}
                     style={{ width: hoveredService === service.id ? `${service.popularity}%` : "0%" }}
@@ -232,7 +232,7 @@ const Services = () => {
               <div className="flex items-center justify-between">
                 <span className="text-lg sm:text-2xl font-bold text-gray-900">{service.price}</span>
                 <button
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r ${service.color} text-white text-xs sm:text-sm font-medium hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 shadow-md hover:shadow-lg group/btn`}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r ${service.color} text-white text-xs sm:text-sm font-medium hover:from-[#b4924c] hover:to-[#b4924c] transition-all duration-300 shadow-md hover:shadow-lg group/btn`}
                 >
                   Get Started
                   <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -244,7 +244,7 @@ const Services = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 py-16 sm:py-20">
+      <div className="bg-gradient-to-r from-[#caa057] to-[#caa057] py-16 sm:py-20">
         <div className="max-w-3xl sm:max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6">
             Ready to Transform Your Career?
@@ -253,7 +253,7 @@ const Services = () => {
             Join millions of professionals who've accelerated their careers with our revolutionary platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <button className="bg-white text-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 justify-center group">
+            <button className="bg-white text-[#caa057] px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 justify-center group">
               Start Free Trial
             </button>
             <button className="border-2 border-white/30 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-base sm:text-lg hover:bg-white/10 transition-all duration-300">

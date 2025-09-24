@@ -26,7 +26,7 @@ const CompanyPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-10">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl shadow-md border border-gray-100 p-8 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#fff1ed] to-[#fff1ed] rounded-2xl shadow-md border border-gray-100 p-8 relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start gap-6 relative z-10">
           {/* Logo */}
           <div className="flex-shrink-0">
@@ -50,7 +50,7 @@ const CompanyPage = () => {
             {company.rating && (
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="w-5 h-5 fill-[#caa057] text-[#caa057]" />
                   <span className="font-semibold text-gray-900">
                     {company.rating}
                   </span>
@@ -71,8 +71,8 @@ const CompanyPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Location */}
           <div className="flex items-center gap-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl hover:shadow-md transition">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-[#fff1ed] rounded-lg flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-[#caa057]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Location</p>
@@ -82,8 +82,8 @@ const CompanyPage = () => {
 
           {/* Website */}
           <div className="flex items-center gap-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl hover:shadow-md transition">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Globe className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-[#fff1ed] rounded-lg flex items-center justify-center">
+              <Globe className="w-6 h-6 text-[#caa057]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Website</p>
@@ -91,7 +91,7 @@ const CompanyPage = () => {
                 href={company.website}
                 target="_blank"
                 rel="noreferrer"
-                className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                className="font-semibold text-[#caa057] hover:text-[#b4924c] hover:underline transition-colors"
               >
                 Visit Website
               </a>
@@ -100,8 +100,8 @@ const CompanyPage = () => {
 
           {/* Size */}
           <div className="flex items-center gap-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl hover:shadow-md transition">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-[#fff1ed] rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-[#caa057]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Company Size</p>
@@ -111,8 +111,8 @@ const CompanyPage = () => {
 
           {/* Founded */}
           <div className="flex items-center gap-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl hover:shadow-md transition">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <CalendarDays className="w-6 h-6 text-orange-600" />
+            <div className="w-12 h-12 bg-[#fff1ed] rounded-lg flex items-center justify-center">
+              <CalendarDays className="w-6 h-6 text-[#caa057]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Founded</p>
@@ -121,9 +121,9 @@ const CompanyPage = () => {
           </div>
         </div>
       </div>
-            
+          
       <div className="text-center">
-        <button className="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300">
+        <button className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#caa057] to-[#caa057] text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300">
           View Open Jobs
         </button>
       </div>

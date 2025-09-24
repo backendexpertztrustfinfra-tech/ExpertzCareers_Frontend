@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import Cookies from "js-cookie";
 import { BASE_URL } from "../../../config";
@@ -93,16 +95,16 @@ const RelatedJobsBox = ({ jobId }) => {
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 sm:flex-none px-4 py-2 rounded-full text-sm sm:text-base font-medium whitespace-nowrap transition-all flex items-center justify-center gap-2 ${
                 activeTab === tab.key
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-yellow-50"
+                  ? "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-[#fff1ed]"
               }`}
             >
               {tab.label}
               <span
                 className={`px-2 py-0.5 text-xs rounded-full ${
                   activeTab === tab.key
-                    ? "bg-white text-yellow-700"
-                    : "bg-yellow-200 text-yellow-800"
+                    ? "bg-white text-[#caa057]"
+                    : "bg-[#fff1ed] text-[#caa057]"
                 }`}
               >
                 {count}
@@ -122,9 +124,9 @@ const RelatedJobsBox = ({ jobId }) => {
           {candidates[activeTab].map((candidate) => (
             <div
               key={candidate._id}
-              className="flex items-center gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-200 hover:shadow-md transition"
+              className="flex items-center gap-3 p-4 rounded-xl bg-[#fff1ed] border border-[#fff1ed] hover:shadow-md transition"
             >
-              <FaUserCircle className="text-yellow-600 text-3xl flex-shrink-0" />
+              <FaUserCircle className="text-[#caa057] text-3xl flex-shrink-0" />
               <div>
                 <p className="font-semibold text-gray-800 text-sm sm:text-base">
                   {candidate.name}

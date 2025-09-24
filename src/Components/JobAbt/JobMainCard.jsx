@@ -48,9 +48,9 @@ const JobMainCard = ({ job, setApplicationStatus }) => {
   }
 
   return (
-    <div className="border rounded-xl p-6 shadow-md space-y-4">
+    <div className="border border-[#fff1ed] rounded-xl p-6 shadow-md space-y-4">
       <div>
-        <h2 className="text-xl font-semibold">{job.title || job.jobTitle}</h2>
+        <h2 className="text-xl font-semibold text-gray-800">{job.title || job.jobTitle}</h2>
         <p className="text-gray-600">{job.company || job.companyName}</p>
         <p className="text-sm text-gray-700 mt-2">{job.location}</p>
         <p className="text-sm">
@@ -69,13 +69,15 @@ const JobMainCard = ({ job, setApplicationStatus }) => {
           onClick={handleApply}
           disabled={isApplied}
           className={`px-6 py-2 rounded-full font-semibold ${
-            isApplied ? "bg-white text-black border border-yellow-600" : "bg-yellow-600 text-white hover:bg-yellow-700"
+            isApplied ? "bg-white text-black border border-[#caa057]" : "bg-[#caa057] text-white hover:bg-[#b4924c]"
           }`}
         >
           {isApplied ? "✓ Applied" : "Apply Now"}
         </button>
 
-        <button className="border border-yellow-600 px-4 py-2 rounded-full">Share</button>
+        <button className="border border-[#caa057] px-4 py-2 rounded-full text-[#caa057] hover:bg-[#fff1ed]">
+          Share
+        </button>
       </div>
     </div>
   )
