@@ -694,16 +694,17 @@ export const fetchNotifications = async () => {
 
 
 
-export const sendNotification = async ({ token, title, message, userId, jobId }) => {
+export const sendNotification = async ({ token, title, message, userId, jobId, type }) => {
   try {
     const response = await fetch(`${BASE_URL}/notification/sentnotification`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // add Bearer here too for consistency
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         title,
+        type,
         description: message,
         userId,
         jobId,
@@ -713,11 +714,10 @@ export const sendNotification = async ({ token, title, message, userId, jobId })
     if (!response.ok) {
       throw new Error("Failed to send notification");
     }
-
+console.log(response)
     return await response.json();
   } catch (err) {
     console.error("❌ Notification error:", err);
     return null;
   }
 };
-

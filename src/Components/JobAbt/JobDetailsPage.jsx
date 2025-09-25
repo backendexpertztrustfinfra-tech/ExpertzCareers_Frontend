@@ -143,88 +143,88 @@ const JobDetails = () => {
   }, [job, token])
 
   // useEffect(() => {
-  //   if (!job) return
+  //   if (!job) return
 
-  //   const fetchRelatedJobs = async () => {
-  //     setLoadingRelated(true)
-  //     try {
-  //       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/getalllivejobs")
-  //       const data = await res.json()
+  //   const fetchRelatedJobs = async () => {
+  //     setLoadingRelated(true)
+  //     try {
+  //       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/getalllivejobs")
+  //       const data = await res.json()
 
-  //       let jobsArray = []
-  //       if (Array.isArray(data)) jobsArray = data
-  //       else if (data?.liveJobs && Array.isArray(data.liveJobs)) jobsArray = data.liveJobs
-  //       else if (data?.jobs && Array.isArray(data.jobs)) jobsArray = data.jobs
-  //       else if (data?.data && Array.isArray(data.data)) jobsArray = data.data
-  //       else if (data && typeof data === "object") {
-  //         const possibleArrays = Object.values(data).filter(Array.isArray)
-  //         if (possibleArrays.length > 0) jobsArray = possibleArrays[0]
-  //       }
+  //       let jobsArray = []
+  //       if (Array.isArray(data)) jobsArray = data
+  //       else if (data?.liveJobs && Array.isArray(data.liveJobs)) jobsArray = data.liveJobs
+  //       else if (data?.jobs && Array.isArray(data.jobs)) jobsArray = data.jobs
+  //       else if (data?.data && Array.isArray(data.data)) jobsArray = data.data
+  //       else if (data && typeof data === "object") {
+  //         const possibleArrays = Object.values(data).filter(Array.isArray)
+  //         if (possibleArrays.length > 0) jobsArray = possibleArrays[0]
+  //       }
 
-  //       const related = jobsArray
-  //         .filter((j) => {
-  //           const jId = j._id || j.id || j.jobId
-  //           if (jId === job.id) return false // Exclude current job
+  //       const related = jobsArray
+  //         .filter((j) => {
+  //           const jId = j._id || j.id || j.jobId
+  //           if (jId === job.id) return false // Exclude current job
 
-  //           const jobCategory = (j.category || j.jobCategory || "").toLowerCase()
-  //           const currentCategory = (job.category || job.jobCategory || "").toLowerCase()
+  //           const jobCategory = (j.category || j.jobCategory || "").toLowerCase()
+  //           const currentCategory = (job.category || job.jobCategory || "").toLowerCase()
 
-  //           const jobSkills = j.jobSkills || j.skills || j.keySkills || j.jobSkillsString || ""
-  //           const currentSkills = job.skills || job.jobSkills || []
+  //           const jobSkills = j.jobSkills || j.skills || j.keySkills || j.jobSkillsString || ""
+  //           const currentSkills = job.skills || job.jobSkills || []
 
-  //           const jobLocation = (j.location || "").toLowerCase()
-  //           const currentLocation = (job.location || "").toLowerCase()
+  //           const jobLocation = (j.location || "").toLowerCase()
+  //           const currentLocation = (job.location || "").toLowerCase()
 
-  //           // Match by category
-  //           if (jobCategory && currentCategory && jobCategory === currentCategory) return true
+  //           // Match by category
+  //           if (jobCategory && currentCategory && jobCategory === currentCategory) return true
 
-  //           // Match by skills
-  //           if (Array.isArray(currentSkills) && currentSkills.length > 0) {
-  //             const skillsArray = Array.isArray(jobSkills)
-  //               ? jobSkills
-  //               : typeof jobSkills === "string"
-  //                 ? jobSkills.split(",").map((s) => s.trim().toLowerCase())
-  //                 : []
+  //           // Match by skills
+  //           if (Array.isArray(currentSkills) && currentSkills.length > 0) {
+  //             const skillsArray = Array.isArray(jobSkills)
+  //               ? jobSkills
+  //               : typeof jobSkills === "string"
+  //                 ? jobSkills.split(",").map((s) => s.trim().toLowerCase())
+  //                 : []
 
-  //             const hasMatchingSkill = currentSkills.some((skill) =>
-  //               skillsArray.some((jSkill) => jSkill.includes(skill.toLowerCase())),
-  //             )
-  //             if (hasMatchingSkill) return true
-  //           }
+  //             const hasMatchingSkill = currentSkills.some((skill) =>
+  //               skillsArray.some((jSkill) => jSkill.includes(skill.toLowerCase())),
+  //             )
+  //             if (hasMatchingSkill) return true
+  //           }
 
-  //           // Match by location
-  //           if (jobLocation && currentLocation && jobLocation.includes(currentLocation)) return true
+  //           // Match by location
+  //           if (jobLocation && currentLocation && jobLocation.includes(currentLocation)) return true
 
-  //           return false
-  //         })
-  //         .slice(0, 6) // Limit to 6 related jobs
-  //         .map((j) => {
-  //           const id = j._id || j.id || j.jobId || Math.random().toString(36).slice(2)
-  //           const company = j.companyName || j.company || j.employerName || "Company Name"
+  //           return false
+  //         })
+  //         .slice(0, 6) // Limit to 6 related jobs
+  //         .map((j) => {
+  //           const id = j._id || j.id || j.jobId || Math.random().toString(36).slice(2)
+  //           const company = j.companyName || j.company || j.employerName || "Company Name"
 
-  //           return {
-  //             id,
-  //             title: j.jobTitle || j.title || "No Title",
-  //             company,
-  //             location: j.location || "Location",
-  //             type: j.jobType || j.type || "Full-time",
-  //             salary: j.salary || j.SalaryIncentive || "Not disclosed",
-  //             category: j.category || j.jobCategory || "General",
-  //             logo: j.companyLogo || "/placeholder.svg",
-  //             createdAt: j.createdAt || new Date().toISOString(),
-  //           }
-  //         })
+  //           return {
+  //             id,
+  //             title: j.jobTitle || j.title || "No Title",
+  //             company,
+  //             location: j.location || "Location",
+  //             type: j.jobType || j.type || "Full-time",
+  //             salary: j.salary || j.SalaryIncentive || "Not disclosed",
+  //             category: j.category || j.jobCategory || "General",
+  //             logo: j.companyLogo || "/placeholder.svg",
+  //             createdAt: j.createdAt || new Date().toISOString(),
+  //           }
+  //         })
 
-  //       setRelatedJobs(related)
-  //     } catch (err) {
-  //       console.error("[JobDetails] fetch related jobs error:", err)
-  //       setRelatedJobs([])
-  //     } finally {
-  //       setLoadingRelated(false)
-  //     }
-  //   }
+  //       setRelatedJobs(related)
+  //     } catch (err) {
+  //       console.error("[JobDetails] fetch related jobs error:", err)
+  //       setRelatedJobs([])
+  //     } finally {
+  //       setLoadingRelated(false)
+  //     }
+  //   }
 
-  //   fetchRelatedJobs()
+  //   fetchRelatedJobs()
   // }, [job])
 
   if (!job) {
@@ -453,6 +453,22 @@ const JobDetails = () => {
     )
   }
 
+  const getCompanyName = (jobData) => {
+    return (
+      jobData.jobCreatedby?.recruterCompany ||
+      jobData.company ||
+      jobData.companyName ||
+      jobData.raw?.jobCreatedby?.recruterCompany ||
+      jobData.jobCreatedby?.company ||
+      jobData.jobCreatedby?.name ||
+      jobData.raw?.companyName ||
+      jobData.raw?.company ||
+      jobData.raw?.jobCreatedby?.company ||
+      jobData.raw?.jobCreatedby?.name ||
+      "Company Name"
+    )
+  }
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed]">
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -473,13 +489,13 @@ const JobDetails = () => {
               <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-white border border-[#fff1ed] shadow-sm">
                 <img
                   src={job.logo || "/placeholder.svg"}
-                  alt={job.company || job.companyName}
+                  alt={getCompanyName(job)}
                   className="w-10 h-10 object-contain"
                 />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{job.title || job.jobTitle}</h2>
-                <p className="text-sm text-gray-600">{job.company || job.companyName}</p>
+                <p className="text-sm text-gray-600">{getCompanyName(job)}</p>
                 <p className="text-xs text-gray-500 mt-1">{job.category || job.jobCategory}</p>
               </div>
             </div>
@@ -538,7 +554,7 @@ const JobDetails = () => {
                         key={relatedJob.id}
                         onClick={() => handleRelatedJobClick(relatedJob)}
                         className="cursor-pointer bg-white/90 backdrop-blur rounded-xl p-4 border border-gray-100 
-                                     hover:border-orange-300 hover:shadow-md transition-all duration-200"
+                                      hover:border-orange-300 hover:shadow-md transition-all duration-200"
                       >
                         <div className="flex items-start gap-3">
                           <img
@@ -578,7 +594,7 @@ const JobDetails = () => {
                 <Building2 size={18} className="text-[#caa057]" /> Company Info
               </h3>
               <div className="space-y-3">
-                <InfoItem label="Company" value={job.company || job.companyName} />
+                <InfoItem label="Company" value={getCompanyName(job)} />
                 <InfoItem label="Location" value={job.location} />
                 <InfoItem label="Address" value={job.address} />
                 <InfoItem label="Industry" value={job.industry || job.recruterIndustry} />

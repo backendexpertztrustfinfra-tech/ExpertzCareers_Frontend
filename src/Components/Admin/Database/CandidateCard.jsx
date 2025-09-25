@@ -12,12 +12,12 @@ import {
   FaFilePdf,
   FaExternalLinkAlt,
 } from "react-icons/fa"
-import { IoMdSend } from "react-icons/io"
+import { IoMdSend } from "react-icons/io";
+import { sendNotification } from "../../../services/apis";
 import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md"
 
-const CandidateCard = ({ candidate, onSave, isSaved }) => {
+const CandidateCard = ({candidate, onSave, onReject, onShortlist, isSaved, selectedJob, token }) => {
   const [showPhone, setShowPhone] = useState(false)
-
   const {
     _id,
     username,
@@ -52,14 +52,36 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
     }
   }
 
-  const handleWhatsAppInvite = () => {
+  // const handleWhatsAppInvite = () => {
+  //   if (phonenumber) {
+  //     const encodedMessage = encodeURIComponent(inviteMessage)
+  //     window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
+  //   }
+  // }
+
+const handleWhatsAppInvite = async () => {
     if (phonenumber) {
       const encodedMessage = encodeURIComponent(inviteMessage)
       window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
-    }
-  }
 
-  const handleSaveClick = (e) => {
+      // ✅ Send "Shortlisted" notification to jobseeker
+      if (token && selectedJob) {
+        try {
+          await sendNotification({
+            token,
+            title: "Shortlisted 🎉",
+            description: `You have been shortlisted for ${selectedJob.title || "the job"}!`,
+            type: "SHORTLISTED",
+            isRead: false,
+            userId: _id,
+            jobId: selectedJob.id || selectedJob._id,
+          })
+          console.log("✅ Shortlist notification sent")
+        } catch (err) {
+          console.error("❌ Failed to send shortlist notification:", err)
+        }}}}
+
+  const handleSaveClick = (e) => { 
     e.stopPropagation()
     onSave(_id)
   }
@@ -94,7 +116,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
                 <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">NEW</span>
               )}
               {isSaved && (
-                <span className="bg-[#fff1ed] text-[#caa057] text-xs font-medium px-2 py-0.5 rounded-full">Saved</span>
+                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Saved</span>
               )}
             </div>
             <div className="flex flex-wrap gap-4 mt-2 text-gray-600 text-sm">
@@ -116,7 +138,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             Applied: {lastActive || "Recently"}
           </span>
           {!isSaved && (
-            <button onClick={handleSaveClick} className="text-[#caa057] text-sm hover:underline flex items-center gap-1">
+            <button onClick={handleSaveClick} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
               <MdPersonAdd /> Save
             </button>
           )}
@@ -158,7 +180,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
                 href={resume}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[#caa057] hover:underline"
+                className="flex items-center gap-1 text-blue-600 hover:underline"
               >
                 <FaExternalLinkAlt className="w-3 h-3" /> Resume
               </a>
@@ -170,7 +192,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
                 href={certificationlink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[#caa057] hover:underline"
+                className="flex items-center gap-1 text-blue-600 hover:underline"
               >
                 <FaExternalLinkAlt className="w-3 h-3" /> Certificates
               </a>
@@ -191,7 +213,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
               href={portfioliolink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[#caa057] hover:underline"
+              className="flex items-center gap-1 text-blue-600 hover:underline"
             >
               <FaExternalLinkAlt className="w-3 h-3" /> View Portfolio
             </a>
@@ -205,7 +227,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
       {introvideo && (
         <div className="mt-6">
           <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <FaPlayCircle className="text-[#caa057]" />
+            <FaPlayCircle className="text-red-500" />
             Video Intro
           </h3>
           <video src={introvideo} className="w-full max-w-lg rounded-lg shadow-sm border" controls />
@@ -219,7 +241,7 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
             setShowPhone(true)
             handleCall()
           }}
-          className="flex items-center justify-center gap-2 bg-[#caa057] hover:bg-[#b4924c] text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
         >
           <FaPhoneAlt /> {showPhone ? phonenumber : "View Phone"}
         </button>
@@ -237,6 +259,12 @@ const CandidateCard = ({ candidate, onSave, isSaved }) => {
         >
           <MdPersonAdd /> WhatsApp Invite
         </button>
+        <button
+    onClick={() => onReject(_id)}
+    className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
+  >
+    ❌ Reject
+  </button>
       </div>
     </div>
   )

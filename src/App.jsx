@@ -148,6 +148,7 @@ import Vision from "./Pages/Vision.jsx"
 import Terms from "./Pages/Terms.jsx"
 import PrivacyPolicy from "./Pages/PrivacyPolicy"
 import Notifications from "../src/Pages/Notifications"
+import ResetPassword from "./Pages/ResetPassword"
 
 const LoadingScreen = () => (
   <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-100 flex items-center justify-center">
@@ -184,6 +185,7 @@ const AppContent = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/notification" element={<Notifications/>}/>
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/my-jobs"
@@ -217,7 +219,7 @@ const AppContent = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute allowedtype={["recruter"]}>
+          <ProtectedRoute allowedtype={["recruter", "recruiter"]}>
             <Admin />
           </ProtectedRoute>
         }

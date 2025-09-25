@@ -632,6 +632,8 @@
 
 // export default Hero;
 
+
+
 "use client"
 
 import React, { useState, forwardRef, useImperativeHandle, useContext, useEffect } from "react"
@@ -654,6 +656,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
   const loginSectionRef = React.useRef(null)
+
 
   const [loading, setLoading] = useState(false)
 
@@ -845,7 +848,7 @@ const googleProvider = new GoogleAuthProvider();
 
       const checkRes = await fetch(`${BASE_URL}/user/finduser/${encodeURIComponent(useremail)}`);
       const checkData = await checkRes.json();
-      console.log("User check result:", checkData);
+//       console.log("User check result:", checkData);
 
       if (checkData.userFound) {
         const loginRes = await fetch(`${BASE_URL}/user/login`, {
@@ -1165,7 +1168,7 @@ const googleProvider = new GoogleAuthProvider();
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
+{/*                   <div className="flex justify-end">
                     <button
                       type="button"
                       className="text-sm text-[#caa057] hover:text-[#b4924c] font-medium transition-colors"
@@ -1173,7 +1176,13 @@ const googleProvider = new GoogleAuthProvider();
                     >
                       Forgot Password?
                     </button>
-                  </div>
+                  </div> */}
+
+<p className="text-sm text-right mt-2">
+  <a href="/reset-password" className="text-blue-600 hover:underline">
+    Forgot Password?
+  </a>
+</p>
 
                   <button
                     type="submit"
@@ -1249,4 +1258,4 @@ const googleProvider = new GoogleAuthProvider();
   )
 })
 
-export default Hero
+export default Hero;

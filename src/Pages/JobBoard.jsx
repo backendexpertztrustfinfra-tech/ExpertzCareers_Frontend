@@ -78,11 +78,11 @@ const JobBoard = () => {
               : []
 
           const company =
-            j.companyName ||
-            j.company ||
-            j.employerName ||
-            (j.jobCreatedby && (j.jobCreatedby.company || j.jobCreatedby.name)) ||
-            "Company Name"
+              j.jobCreatedby?.recruterCompany ||
+              j.companyName ||
+              j.company ||
+              j.employerName ||
+              "Company Name"
 
           return {
             id,
@@ -261,4 +261,4 @@ const JobBoard = () => {
   )
 }
 
-export default JobBoard;
+export default JobBoard

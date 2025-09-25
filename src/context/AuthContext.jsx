@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }) => {
         // Only redirect if we're on the home page or signup page
         if (usertype && (currentPath === "/" || currentPath === "/signup")) {
           setTimeout(() => {
-            if (usertype === "recruter") {
+            if (usertype === "recruter" || usertype === "recruiter") {
               window.location.href = "/admin"
             } else if (usertype === "jobseeker") {
               window.location.href = "/jobs"
@@ -279,7 +279,7 @@ export const AuthProvider = ({ children }) => {
 
       if (usertype) {
         setTimeout(() => {
-          if (usertype === "recruter") {
+          if (usertype === "recruter" || usertype === "recruiter") {
             window.location.href = "/admin"
           } else if (usertype === "jobseeker") {
             window.location.href = "/jobs"
