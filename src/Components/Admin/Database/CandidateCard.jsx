@@ -16,7 +16,7 @@ import { IoMdSend } from "react-icons/io";
 import { sendNotification } from "../../../services/apis";
 import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md"
 
-const CandidateCard = ({candidate, onSave, onReject, onShortlist, isSaved, selectedJob, token }) => {
+const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, selectedJob, token }) => {
   const [showPhone, setShowPhone] = useState(false)
   const {
     _id,
@@ -52,36 +52,34 @@ const CandidateCard = ({candidate, onSave, onReject, onShortlist, isSaved, selec
     }
   }
 
-  // const handleWhatsAppInvite = () => {
-  //   if (phonenumber) {
-  //     const encodedMessage = encodeURIComponent(inviteMessage)
-  //     window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
-  //   }
-  // }
-
-const handleWhatsAppInvite = async () => {
+  const handleWhatsAppInvite = async () => {
     if (phonenumber) {
       const encodedMessage = encodeURIComponent(inviteMessage)
       window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
 
-      // ✅ Send "Shortlisted" notification to jobseeker
       if (token && selectedJob) {
         try {
           await sendNotification({
             token,
-            title: "Shortlisted 🎉",
-            description: `You have been shortlisted for ${selectedJob.title || "the job"}!`,
-            type: "SHORTLISTED",
-            isRead: false,
-            userId: _id,
-            jobId: selectedJob.id || selectedJob._id,
-          })
+            type: "SHORTLISTED", // or VIEWED / SHORTLISTED
+            userId: candidate._id,
+            extraData: {
+              jobId: selectedJob.id || selectedJob._id,
+              username: selectedJob?.username || "Recruiter",
+              title: selectedJob?.title || "Job",
+            },
+          });
+
           console.log("✅ Shortlist notification sent")
         } catch (err) {
           console.error("❌ Failed to send shortlist notification:", err)
-        }}}}
+        }
+      }
+    }
+  }
 
-  const handleSaveClick = (e) => { 
+
+  const handleSaveClick = (e) => {
     e.stopPropagation()
     onSave(_id)
   }
@@ -260,11 +258,12 @@ const handleWhatsAppInvite = async () => {
           <MdPersonAdd /> WhatsApp Invite
         </button>
         <button
-    onClick={() => onReject(_id)}
-    className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
-  >
-    ❌ Reject
-  </button>
+          onClick={() => onReject(_id)}
+          className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
+        >
+          ❌ Reject
+        </button>
+
       </div>
     </div>
   )

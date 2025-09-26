@@ -5,7 +5,7 @@ import Cookies from "js-cookie"
 import { postJob, updateJob, sendNotification } from "../../../services/apis"
 import { indianStates } from "../../Admin/Location/locations"
 import { toast } from "react-toastify"
-
+ 
 function RichTextEditor({
   label = "Description",
   value,
@@ -185,8 +185,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       weekend: job.weekend || "",
       startTime: startTime,
       endTime: endTime,
-      status: job.status || "",
-      closedDate: job.closedDate || "",
     }
   }
 
@@ -310,127 +308,259 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
     setStep(2)
   }
 
-  // ---- Submit ----
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formEl = e.currentTarget;
+  //   if (formEl && !formEl.checkValidity()) {
+  //     formEl.reportValidity();
+  //     return;
+  //   }
+  //   const descText = getDescriptionText();
+  //   if (!descText) {
+  //     toast.error("Job Description is required.");
+  //     return scrollToField("#description");
+  //   }
+  //   if (formData.category === "Other" && !otherCategory.trim()) {
+  //     toast.error("Please enter a custom category.");
+  //     return scrollToField("#otherCategory");
+  //   }
+  //   if (formData.salaryType === "salary" && !salaryAmount) {
+  //     toast.error("Please enter Salary amount.");
+  //     return;
+  //   }
+  //   if (formData.salaryType === "salary+incentives" && (!salaryAmount || !incentiveAmount || !totalSalary)) {
+  //     toast.error("Please enter Salary, Incentives and ensure Total is calculated.");
+  //     return;
+  //   }
+  //   if (!formData.workingDaysFrom || !formData.workingDaysTo) {
+  //     toast.error("Please select Working Days range.");
+  //     return;
+  //   }
+  //   if (!formData.startTime || !formData.endTime) {
+  //     toast.error("Please set Timing (start and end).");
+  //     return;
+  //   }
 
-    const formEl = e.currentTarget
-    if (formEl && !formEl.checkValidity()) {
-      formEl.reportValidity()
-      return
-    }
+  //   setLoading(true);
 
-    const descText = getDescriptionText()
-    if (!descText) {
-      toast.error("Job Description is required.")
-      return scrollToField("#description")
-    }
-    if (formData.category === "Other" && !otherCategory.trim()) {
-      toast.error("Please enter a custom category.")
-      return scrollToField("#otherCategory")
-    }
-    if (formData.salaryType === "salary" && !salaryAmount) {
-      toast.error("Please enter Salary amount.")
-      return
-    }
-    if (formData.salaryType === "salary+incentives" && (!salaryAmount || !incentiveAmount || !totalSalary)) {
-      toast.error("Please enter Salary, Incentives and ensure Total is calculated.")
-      return
-    }
-    if (!formData.workingDaysFrom || !formData.workingDaysTo) {
-      toast.error("Please select Working Days range.")
-      return
-    }
-    if (!formData.startTime || !formData.endTime) {
-      toast.error("Please set Timing (start and end).")
-      return
-    }
+  //   const salaryValue =
+  //     formData.salaryType === "salary+incentives" ? `${salaryAmount} + ${incentiveAmount}` : salaryAmount;
 
-    setLoading(true)
+  //   const payload = {
+  //     jobTitle: formData.title,
+  //     jobCategory: otherCategory || formData.category,
+  //     description: formData.description,
+  //     noofOpening: formData.openings,
+  //     jobType: formData.type,
+  //     location: formData.location,
+  //     address: formData.address,
+  //     gender: formData.gender,
+  //     Qualification: formData.qualification,
+  //     totalExperience: formData.totalExp,
+  //     relevantExperience: formData.relevantExp,
+  //     SalaryIncentive: salaryValue,
+  //     salaryType: formData.salaryType,
+  //     jobBenefits: formData.benefits.join(","),
+  //     jobSkills: formData.skills.join(","),
+  //     documentRequired: formData.documents.join(","),
+  //     workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
+  //     weekend: formData.weekend,
+  //     timing: `${formData.startTime} - ${formData.endTime}`,
+  //     shift: formData.shift,
+  //     status: formData.status,
+  //     ClosedDate: formData.closedDate,
+  //   };
 
-    const salaryValue =
-      formData.salaryType === "salary+incentives" ? `${salaryAmount} + ${incentiveAmount}` : salaryAmount
+  //   try {
+  //     const token = Cookies.get("userToken");
+  //     const userId = Cookies.get("userId");
 
-    const payload = {
-      jobTitle: formData.title,
-      jobCategory: otherCategory || formData.category,
-      description: formData.description,
-      noofOpening: formData.openings,
-      jobType: formData.type,
-      location: formData.location,
-      address: formData.address,
-      gender: formData.gender,
-      Qualification: formData.qualification,
-      totalExperience: formData.totalExp,
-      relevantExperience: formData.relevantExp,
-      SalaryIncentive: salaryValue,
-      salaryType: formData.salaryType,
-      jobBenefits: formData.benefits.join(","),
-      jobSkills: formData.skills.join(","),
-      documentRequired: formData.documents.join(","),
-      workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
-      weekend: formData.weekend,
-      timing: `${formData.startTime} - ${formData.endTime}`,
-      shift: formData.shift,
-      status: formData.status,
-      ClosedDate: formData.closedDate,
-    }
+  //     let data;
+  //     if (initialData) {
+  //       data = await updateJob(token, initialData.id, payload);
+  //       if (!data) throw new Error("Failed to update job");
+  //       toast.success("✅ Job Updated Successfully");
+  //       if (onSubmit) onSubmit(data.UpdatedData);
 
-    try {
-      const token = Cookies.get("userToken")
-      const userId = Cookies.get("userId")
+  //       // Send notification for updated job
+  //       await sendNotification({
+  //         token,
+  //         title: "Job updated",
+  //         description: `A new job "${payload.jobTitle}" has been posted.`,
+  //         userId,
+  //         type: "NEW_JOB",
+  //         targetScreen: "JobDetails",
+  //         isRead: false,
+  //         jobId: data.job.id, // optional, if backend uses it
+  //       });
 
-      let data
-      if (initialData) {
-        data = await updateJob(token, initialData.id, payload)
-        if (!data) throw new Error("Failed to update job")
-        toast.success("✅ Job Updated Successfully")
-        if (onSubmit) onSubmit(data.UpdatedData)
 
-        await sendNotification({
-          token,
-          title: "Job Updated",
-          message: `The job "${payload.jobTitle}" has been updated successfully.`,
-          userId,
-          jobId: initialData?.id,
-        })
-      } else {
-        data = await postJob(token, payload, userId)
-        if (!data) throw new Error("Failed to post job")
-        toast.success("Job Posted Successfully")
-        if (onSubmit) onSubmit(data.job)
+  //     } else {
+  //       data = await postJob(token, payload, userId);
+  //       if (!data) throw new Error("Failed to post job");
+  //       toast.success("Job Posted Successfully");
+  //       if (onSubmit) onSubmit(data.job);
 
-        await sendNotification({
-          title: "New Job Posted",
-          message: `A new job "${payload.jobTitle}" has been posted.`,
-          userId,
-        })
-      }
-      onClose && onClose()
-    } catch (err) {
-      console.error("❌ Error saving job:", err)
-      alert(err.message || "Something went wrong while saving the job.")
-    } finally {
-      setLoading(false)
-    }
+  //       // Send notification for new job
+  //       await sendNotification({
+  //         token,
+  //         title: "New Job Posted",
+  //         description: `A new job "${payload.jobTitle}" has been posted.`,
+  //         userId,
+  //         type: "NEW_JOB",
+  //         targetScreen: "JobDetails",
+  //         isRead: false,
+  //         jobId: data.job.id, 
+  //       });
+
+
+  //     }
+
+  //     onClose && onClose();
+  //   } catch (err) {
+  //     console.error("❌ Error saving job:", err);
+  //     alert(err.message || "Something went wrong while saving the job.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+
+  if (formEl && !formEl.checkValidity()) {
+    formEl.reportValidity();
+    return;
   }
 
-  const inputClass =
-    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#caa057] bg-white"
+  const descText = getDescriptionText();
+  if (!descText) {
+    toast.error("Job Description is required.");
+    return scrollToField("#description");
+  }
 
+  if (formData.category === "Other" && !otherCategory.trim()) {
+    toast.error("Please enter a custom category.");
+    return scrollToField("#otherCategory");
+  }
+
+  if (formData.salaryType === "salary" && !salaryAmount) {
+    toast.error("Please enter Salary amount.");
+    return;
+  }
+
+  if (
+    formData.salaryType === "salary+incentives" &&
+    (!salaryAmount || !incentiveAmount || !totalSalary)
+  ) {
+    toast.error(
+      "Please enter Salary, Incentives and ensure Total is calculated."
+    );
+    return;
+  }
+
+  if (!formData.workingDaysFrom || !formData.workingDaysTo) {
+    toast.error("Please select Working Days range.");
+    return;
+  }
+
+  if (!formData.startTime || !formData.endTime) {
+    toast.error("Please set Timing (start and end).");
+    return;
+  }
+
+  setLoading(true);
+
+  const salaryValue =
+    formData.salaryType === "salary+incentives"
+      ? `${salaryAmount} + ${incentiveAmount}`
+      : salaryAmount;
+
+  const payload = {
+    jobTitle: formData.title,
+    jobCategory: otherCategory || formData.category,
+    description: formData.description,
+    noofOpening: formData.openings,
+    jobType: formData.type,
+    location: formData.location,
+    address: formData.address,
+    gender: formData.gender,
+    Qualification: formData.qualification,
+    totalExperience: formData.totalExp,
+    relevantExperience: formData.relevantExp,
+    SalaryIncentive: salaryValue,
+    salaryType: formData.salaryType,
+    jobBenefits: formData.benefits.join(","),
+    jobSkills: formData.skills.join(","), // ✅ used for matching in backend
+    documentRequired: formData.documents.join(","),
+    workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
+    weekend: formData.weekend,
+    timing: `${formData.startTime} - ${formData.endTime}`,
+    shift: formData.shift,
+    status: formData.status,
+    ClosedDate: formData.closedDate,
+  };
+
+  try {
+    const token = Cookies.get("userToken");
+    const userId = Cookies.get("userId");
+
+    let data;
+    if (initialData) {
+      // ✅ Update Job
+      data = await updateJob(token, initialData.id, payload);
+      if (!data) throw new Error("Failed to update job");
+
+      toast.success("✅ Job Updated Successfully");
+      if (onSubmit) onSubmit(data.UpdatedData);
+
+      // ❌ No NEW_JOB notification on update (skip)
+    } else {
+      // ✅ Create New Job
+      data = await postJob(token, payload, userId);
+      if (!data) throw new Error("Failed to post job");
+
+      toast.success("🎉 Job Posted Successfully");
+      if (onSubmit) onSubmit(data.job);
+
+      // 🔔 Notify jobseekers with matching skills
+      await sendNotification({
+        token,
+        type: "NEW_JOB",
+        extraData: {
+          jobId: data.job.id || data.job._id,
+          title: payload.jobTitle,
+        },
+      });
+    }
+
+    onClose && onClose();
+  } catch (err) {
+    console.error("❌ Error saving job:", err);
+    toast.error(err.message || "Something went wrong while saving the job.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+  const inputClass =
+    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6 px-3 md:py-10 md:px-6 overflow-y-auto bg-transparent">
       <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 w-full max-w-4xl">
         {/* Header */}
         <div className="px-6 md:px-8 pt-6 pb-4 border-b">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#caa057]">{initialData ? "Edit Job" : "Post a Job"}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{initialData ? "Edit Job" : "Post a Job"}</h2>
           <p className="text-sm text-gray-500 mt-1">
             Fill the details below. Fields marked with * are required. Mobile responsive and accessible.
           </p>
 
           <div className="mt-4 flex items-center gap-3" aria-hidden="true">
-            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#caa057]" : "bg-gray-200"}`} />
-            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#caa057]" : "bg-gray-200"}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
           </div>
           <div className="mt-2 flex justify-between text-xs text-gray-500">
             <span>Job Details</span>
@@ -640,7 +770,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="bg-[#caa057] text-white px-5 py-2 rounded-lg hover:brightness-95"
+                  className="bg-[#D4AF37] text-white px-5 py-2 rounded-lg hover:brightness-95"
                 >
                   Next
                 </button>
@@ -795,7 +925,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             benefits: [...prev.benefits, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
                       >
                         {s}
                       </button>
@@ -845,7 +975,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             skills: [...prev.skills, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
                       >
                         {s}
                       </button>
@@ -895,7 +1025,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                             documents: [...prev.documents, s],
                           }))
                         }
-                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#caa057] hover:text-white"
+                        className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
                       >
                         {s}
                       </button>
@@ -1032,12 +1162,12 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <button type="button" onClick={() => setStep(1)} className="text-[#caa057] hover:underline">
+                <button type="button" onClick={() => setStep(1)} className="text-[#D4AF37] hover:underline">
                   Back
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#caa057] text-white px-6 py-2 rounded-lg hover:brightness-95 disabled:opacity-60"
+                  className="bg-[#D4AF37] text-white px-6 py-2 rounded-lg hover:brightness-95 disabled:opacity-60"
                   disabled={loading}
                 >
                   {loading ? "Saving..." : initialData ? "Update" : "Submit"}

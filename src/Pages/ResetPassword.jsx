@@ -75,7 +75,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
       const res = await resetPassword(useremail, newPassword)
       setMessage(res.message || "Password reset successful! Redirecting...")
       setTimeout(() => {
-        navigate("/") // ✅ React Router redirect
+        navigate("/") 
       }, 1500)
     } catch (err) {
       setError(err.message || "Failed to reset password. Try again.")

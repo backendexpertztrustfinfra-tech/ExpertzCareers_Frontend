@@ -1,14 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PostJobForm from "../Job/PostJobForm";
+import Navbar from "../../Home/Navbar/Navbar"; 
+import { AuthContext } from "../../../context/AuthContext"; 
 
 const PostJobPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useContext(AuthContext);
   const returnTo = location.state?.returnTo || "/my-jobs";
   const initialData = location.state?.initialData || null;
+
+  // 👈 Add a variable to check if the user is a job seeker
+  const isJobSeeker = user?.type === "jobseeker";
 
   const handleSubmitted = (job) => {
     try {
@@ -25,51 +31,55 @@ const PostJobPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff1ed] flex items-start justify-center px-3 sm:px-6 py-6 sm:py-10">
-      <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg sm:rounded-2xl p-4 sm:p-6 md:p-10">
-        {/* Back Button */}
-        <button
-          onClick={() =>
-            typeof returnTo === "string"
-              ? navigate(returnTo)
-              : navigate("/admin", { state: returnTo })
-          }
-          className="mb-6 inline-flex items-center justify-center gap-2 
-             px-4 py-2 rounded-full 
-             text-sm sm:text-base font-medium 
-             text-[#caa057] border border-[#caa057] 
-             hover:bg-[#caa057] hover:text-white 
-             focus:ring-2 focus:ring-[#caa057]/50 focus:outline-none
-             transition-all duration-300"
-        >
-          <span className="text-base sm:text-lg">←</span>
-          <span>Back</span>
-        </button>
-
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-            Post a <span className="text-[#caa057]">New Job</span>
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-            Fill out the details below to publish your job listing.
-          </p>
-        </div>
-
-        {/* Form Container */}
-        <div className="w-full">
-          <PostJobForm
-            onSubmit={handleSubmitted}
-            onClose={() =>
+    <>
+      {/* 👈 Conditionally render the Navbar */}
+      {isJobSeeker && <Navbar />}
+      <div className="min-h-screen bg-[#fff1ed] flex items-start justify-center px-3 sm:px-6 py-6 sm:py-10">
+        <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg sm:rounded-2xl p-4 sm:p-6 md:p-10">
+          {/* Back Button */}
+          <button
+            onClick={() =>
               typeof returnTo === "string"
                 ? navigate(returnTo)
                 : navigate("/admin", { state: returnTo })
             }
-            initialData={initialData}
-          />
+            className="mb-6 inline-flex items-center justify-center gap-2 
+              px-4 py-2 rounded-full 
+              text-sm sm:text-base font-medium 
+              text-[#caa057] border border-[#caa057] 
+              hover:bg-[#caa057] hover:text-white 
+              focus:ring-2 focus:ring-[#caa057]/50 focus:outline-none
+              transition-all duration-300"
+          >
+            <span className="text-base sm:text-lg">←</span>
+            <span>Back</span>
+          </button>
+
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+              Post a <span className="text-[#caa057]">New Job</span>
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-md mx-auto">
+              Fill out the details below to publish your job listing.
+            </p>
+          </div>
+
+          {/* Form Container */}
+          <div className="w-full">
+            <PostJobForm
+              onSubmit={handleSubmitted}
+              onClose={() =>
+                typeof returnTo === "string"
+                  ? navigate(returnTo)
+                  : navigate("/admin", { state: returnTo })
+              }
+              initialData={initialData}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

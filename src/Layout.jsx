@@ -1,16 +1,20 @@
 import React from "react";
+import { useLocation, Outlet } from "react-router-dom"; 
 import Navbar from "./Components/Home/Navbar/Navbar";
 import Footer from "./Components/Home/Footer";
-import { Outlet } from "react-router-dom";
 
 const Layout = () => {
+  const location = useLocation();
+  const isJobPostPage = location.pathname === "/post-job";
+
   return (
     <>
-      <Navbar />
+      {!isJobPostPage && <Navbar />}
+
       <main className="min-h-screen">
         <Outlet />
       </main>
-      <Footer />
+      {!isJobPostPage && <Footer />}
     </>
   );
 };

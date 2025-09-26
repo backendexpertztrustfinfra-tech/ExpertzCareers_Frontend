@@ -107,34 +107,35 @@ const CandidateView = ({ selectedJob }) => {
     setActiveCandidate(null) // Reset detail view when changing tab
     if (t === "Saved") handleFetchSaved()
   }
-  const handleRejectCandidate = async (candidateId) => {
-    try {
-      // Find candidate details
-      const candidate = appliedCandidates.find((c) => c._id === candidateId);
-      if (!candidate) return;
+  // const handleRejectCandidate = async (candidateId) => {
+  //   try {
+  //     // Find candidate details
+  //     const candidate = appliedCandidates.find((c) => c._id === candidateId);
+  //     if (!candidate) return;
 
-      // Send reject notification
-      await sendNotification({
-        token,
-        type: "REJECTED",
-        userId: candidate._id,
-        jobId: selectedJob.id || selectedJob._id,
-      });
+  //     // Send reject notification
+  //     await sendNotification({
+  //       token,
+  //       type: "REJECTED",
+  //       userId: candidate._id,
+  //       extraData: { jobId: selectedJob.id || selectedJob._id },
+  //     });
 
-      // Remove from applied list
-      setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId));
 
-      // If detail card open, close it
-      if (activeCandidate?._id === candidateId) {
-        setActiveCandidate(null);
-      }
+  //     // Remove from applied list
+  //     setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId));
 
-      console.log(`✅ Candidate ${candidate.username} rejected.`);
-    } catch (err) {
-      console.error("❌ Error rejecting candidate:", err);
-      setError(`Failed to reject candidate: ${err.message}`);
-    }
-  };
+  //     // If detail card open, close it
+  //     if (activeCandidate?._id === candidateId) {
+  //       setActiveCandidate(null);
+  //     }
+
+  //     console.log(`✅ Candidate ${candidate.username} rejected.`);
+  //   } catch (err) {
+  //     console.error("❌ Error rejecting candidate:", err);
+  //     setError(`Failed to reject candidate: ${err.message}`);
+  //   }
+  // };
   const resetFilters = useCallback(() => {
     setFilters({
       location: "",
@@ -203,17 +204,55 @@ const CandidateView = ({ selectedJob }) => {
     }))
   }
 
+  const handleRejectCandidate = async (candidateId) => {
+    try {
+      const candidate = appliedCandidates.find((c) => c._id === candidateId);
+      if (!candidate) return;
+
+      await sendNotification({
+        token,
+        type: "REJECTED", // or VIEWED / SHORTLISTED
+        userId: candidate._id,
+        extraData: {
+          jobId: selectedJob.id || selectedJob._id,
+          username: selectedJob?.username || "Recruiter",
+          title: selectedJob?.title || "Job",
+        },
+      });
+      setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId));
+      if (activeCandidate?._id === candidateId) {
+        setActiveCandidate(null);
+      }
+
+      console.log("📩 Sending notification:", {
+        type: "REJECTED",
+        userId: candidate._id,
+        extraData: {
+          jobId: selectedJob.id || selectedJob._id,
+          username: selectedJob?.username || "Recruiter",
+          title: selectedJob?.title || "Job",
+        },
+      });
+
+    } catch (err) {
+      console.error("❌ Error rejecting candidate:", err);
+      setError(`Failed to reject candidate: ${err.message}`);
+    }
+  };
+
   const handleMiniCardClick = async (candidate) => {
-    setActiveCandidate(candidate)
+    setActiveCandidate(candidate);
+
     if (token && selectedJob) {
       await sendNotification({
         token,
-        title: "Application Viewed",
-        description: `Your Application has been viewed by a recruiter.`,
         type: "VIEWED",
-        isRead: true,
         userId: candidate._id,
-        jobId: selectedJob.id || selectedJob._id,
+        extraData: {
+          jobId: selectedJob.id || selectedJob._id,
+          username: selectedJob?.username || "Recruiter",
+          title: selectedJob?.title || selectedJob?.title || "Job",
+        },
       });
     }
   };
@@ -404,9 +443,11 @@ const CandidateView = ({ selectedJob }) => {
                   onSave={() => handleSaveCandidate(activeCandidate)}
                   onReject={handleRejectCandidate}
                   isSaved={savedCandidates.some((c) => c._id === activeCandidate._id)}
-                    selectedJob={selectedJob}   // ✅ pass job details
-  token={token} 
+                  selectedJob={selectedJob}
+                  token={token}
                 />
+
+
               </div>
             ) : filteredCandidates.length === 0 ? (
               <div className="text-center py-10 text-gray-500">
@@ -434,4 +475,4 @@ const CandidateView = ({ selectedJob }) => {
   )
 }
 
-export default CandidateView;
+export default CandidateView

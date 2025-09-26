@@ -655,46 +655,99 @@ export const applyForJob = async (token, jobId) => {
   }
 };
 
-
-
 // ---------------------------------------------------------------Notification-------------------------------
 
+// export const fetchNotifications = async ({ token }) => {
+//   try {
 
-export const fetchNotifications = async () => {
-    try {
-        const token = Cookies.get("userToken"); 
+//     if (!token) {
+//       console.error("No token found. User might not be authenticated.");
+//       return;
+//     }
 
-        if (!token) {
-            console.error("No token found. User might not be authenticated.");
-            return;
-        }
+//     // Add query params for userId and userType
+//     const url = new URL(`${BASE_URL}/notification/getnotifications`);
+//     const response = await fetch(url.toString(), {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
 
-        const response = await fetch(`${BASE_URL}/notification/getnotifications`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`  
-            }
-        });
+//     const data = await response.json();
 
-        const data = await response.json();
+//     if (!response.ok) {
+//       console.error("Error fetching notifications:", data.msg || data.message);
+//       return;
+//     }
 
-        if (!response.ok) {
-            console.error("Error fetching notifications:", data.msg);
-            return;
-        }
+//     console.log("Notifications:", data.notifications);
+//     return data.notifications;
 
-        console.log("Notifications:", data.notifications);
-        return data.notifications;
+//   } catch (err) {
+//     console.error("Request failed:", err);
+//   }
+// };
 
-    } catch (err) {
-        console.error("Request failed:", err);
+// export const sendNotification = async ({ token, userId, jobId, type }) => {
+//   try {
+//     const response = await fetch(`${BASE_URL}/notification/sentnotification`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//       body: JSON.stringify({
+//         type,
+//         userId,
+//         extraData: { jobId },   
+//       }),
+//     });
+
+//     if (!response.ok) {
+//       throw new Error("Failed to send notification");
+//     }
+
+//     return await response.json();
+//   } catch (err) {
+//     console.error("❌ Notification error:", err);
+//     return null;
+//   }
+// };
+
+// ✅ Fetch all notifications for logged-in user
+export const fetchNotifications = async ({ token }) => {
+  try {
+    if (!token) {
+      console.error("No token found. User might not be authenticated.");
+      return;
     }
-}
 
+    const response = await fetch(`${BASE_URL}/notification/getnotifications`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
+    const data = await response.json();
 
-export const sendNotification = async ({ token, title, message, userId, jobId, type }) => {
+    if (!response.ok) {
+      console.error("Error fetching notifications:", data.msg || data.message);
+      return [];
+    }
+
+    return data.notifications;
+  } catch (err) {
+    console.error("❌ Request failed:", err);
+    return [];
+  }
+};
+
+// ✅ Send a new notification (works for single or multiple users depending on backend logic)
+export const sendNotification = async ({ token, userId, type, extraData = {}  }) => {
   try {
     const response = await fetch(`${BASE_URL}/notification/sentnotification`, {
       method: "POST",
@@ -703,21 +756,21 @@ export const sendNotification = async ({ token, title, message, userId, jobId, t
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        title,
         type,
-        description: message,
-        userId,
-        jobId,
+        userId, 
+        extraData,
       }),
     });
 
     if (!response.ok) {
       throw new Error("Failed to send notification");
     }
-console.log(response)
+
     return await response.json();
   } catch (err) {
     console.error("❌ Notification error:", err);
     return null;
   }
 };
+
+

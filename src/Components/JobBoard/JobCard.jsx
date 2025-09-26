@@ -125,7 +125,7 @@ const JobCard = ({
     raw: job.raw || job,
   }
 
-  // 🔥 Reset cache instantly when user changes (login/logout)
+  // Reset cache instantly when user changes (login/logout)
   useEffect(() => {
     const resetCache = () => {
       window.__SAVED_IDS = {}
