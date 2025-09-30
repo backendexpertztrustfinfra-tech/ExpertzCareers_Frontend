@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/Components/ui/button";
 import { Bell, X } from "lucide-react"
 
 export default function MessageModal({ open, title = "Notification", message, onClose }) {
