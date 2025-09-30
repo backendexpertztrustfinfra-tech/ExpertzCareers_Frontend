@@ -172,7 +172,7 @@ const ProfilePage = ({ onUpdate }) => {
     username: "",
     useremail: "",
     recruterPhone: "",
-    designation: "",
+
     profilphotoUrl: "",
     profilphotoFile: null,
     recruterCompany: "",
@@ -206,7 +206,6 @@ const ProfilePage = ({ onUpdate }) => {
             username: user.user.username || "",
             useremail: user.user.useremail || "",
             recruterPhone: user.user.recruterPhone || "",
-            designation: user.user.designation || "",
             profilphotoUrl: user.user.profilphoto || "",
             recruterCompany: user.user.recruterCompany || "",
             recruterCompanyType: user.user.recruterCompanyType || "",
@@ -359,14 +358,14 @@ const ProfilePage = ({ onUpdate }) => {
             isEditing={isEditing}
             onChange={handleChange}
           />
-          <InfoItem
+          {/* <InfoItem
             icon={<FaBriefcase />}
             label="Designation"
             name="designation"
             value={formData.designation}
             isEditing={isEditing}
             onChange={handleChange}
-          />
+          /> */}
           <InfoItem
             icon={<FaBuilding />}
             label="Company"
@@ -466,22 +465,22 @@ const ProfilePage = ({ onUpdate }) => {
               isEditing={isEditing}
               onChange={handleChange}
             />
-            <InfoItem
+            {/* <InfoItem
               icon={<FaGlobe />}
               label="Website"
               name="companyWebsite"
               value={formData.companyWebsite}
               isEditing={isEditing}
               onChange={handleChange}
-            />
-            <InfoItem
+            /> */}
+            {/* <InfoItem
               icon={<FaLinkedin />}
               label="LinkedIn"
               name="companyLinkedIn"
               value={formData.companyLinkedIn}
               isEditing={isEditing}
               onChange={handleChange}
-            />
+            /> */}
 
             {/* Document Upload */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

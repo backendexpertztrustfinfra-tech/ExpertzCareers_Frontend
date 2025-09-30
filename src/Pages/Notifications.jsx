@@ -74,7 +74,7 @@ useEffect(() => {
       if (!token) return;
 
       const url = `${BASE_URL}/notification/getnotifications`;
-      console.log("Fetching notifications from:", url);
+      // console.log("Fetching notifications from:", url);
 
       const response = await fetch(url, {
         method: "GET",
@@ -90,7 +90,7 @@ useEffect(() => {
       }
 
       const data = await response.json();
-      console.log("Fetched Notifications:", data);
+      // console.log("Fetched Notifications:", data);
 
       setNotifications(data.notifications || []);
     } catch (error) {

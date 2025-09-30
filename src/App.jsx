@@ -104,20 +104,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-"use client"
-
 import { useContext } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider, AuthContext } from "./context/AuthContext"
@@ -149,6 +135,9 @@ import Terms from "./Pages/Terms.jsx"
 import PrivacyPolicy from "./Pages/PrivacyPolicy"
 import Notifications from "../src/Pages/Notifications"
 import ResetPassword from "./Pages/ResetPassword"
+import EmailVerification from "./Pages/emailverification"
+import { ToastContainer } from "react-toastify"
+import 'react-toastify/dist/ReactToastify.css'
 
 const LoadingScreen = () => (
   <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-100 flex items-center justify-center">
@@ -186,6 +175,7 @@ const AppContent = () => {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/notification" element={<Notifications/>}/>
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/emailverification" element={<EmailVerification/>}/>
 
         <Route
           path="/my-jobs"
@@ -227,20 +217,33 @@ const AppContent = () => {
     </Routes>
   )
 }
-
 function App() {
   return (
-    <SearchProvider>
-      <AuthProvider>
-        <SavedJobsProvider>
-          <Router>
+    <Router>
+      <SearchProvider>
+        <AuthProvider>
+          <SavedJobsProvider>
             <ScrollToTop />
             <AppContent />
-          </Router>
-        </SavedJobsProvider>
-      </AuthProvider>
-    </SearchProvider>
+              <ToastContainer
+              position="top-right"
+              autoClose={2000}        // 2 seconds
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </SavedJobsProvider>
+        </AuthProvider>
+      </SearchProvider>
+    </Router>
   )
 }
 
+
 export default App
+

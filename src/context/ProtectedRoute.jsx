@@ -1,15 +1,23 @@
-// src/utils/ProtectedRoute.jsx
-import React from "react";
-import { Navigate } from "react-router-dom";
-import Cookies from "js-cookie";
 
+import React, { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, allowedtype }) => {
-  const token = Cookies.get("userToken");
-  const usertype = Cookies.get("usertype");
+  const { user, userToken, isLoading } = useContext(AuthContext);
 
-  if (!token || !allowedtype.includes(usertype)) {
-    return <Navigate to="/unauthorized" />;
+  // Still loading user → don’t render yet
+  if (isLoading) return null;
+
+  // If no token → force login
+  if (!userToken) return <Navigate to="/login" replace />;
+
+  // If not verified → force email verification
+  if (!user?.isVerified) return <Navigate to="/emailverification" replace />;
+
+  // If role mismatch → unauthorized
+  if (allowedtype && !allowedtype.includes(user?.usertype)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

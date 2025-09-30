@@ -4,7 +4,7 @@ import { BASE_URL } from "../config";
 export const sendOtp = async (useremail) => {
   try {
     const res = await fetch(`${BASE_URL}/user/send-otp`, {
-      method: "POST", 
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -13,14 +13,14 @@ export const sendOtp = async (useremail) => {
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Failed to send OTP");
-    return data; 
+    return data;
   } catch (err) {
     console.error("❌ sendOtp Error:", err.message);
     throw err;
   }
 };
 
-// ✅ Verify OTP
+
 export const verifyOtp = async (useremail, otp) => {
   try {
     const res = await fetch(`${BASE_URL}/user/verify-otp`, {
@@ -32,11 +32,19 @@ export const verifyOtp = async (useremail, otp) => {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to verify OTP");
-    return data; 
+    if (!res.ok) throw new Error(data.msg || "Failed to verify OTP");
+
+    return {
+      success: true,
+      msg: data.msg || "OTP verified successfully",
+      ...data,
+    };
   } catch (err) {
     console.error("❌ verifyOtp Error:", err.message);
-    throw err;
+    return {
+      success: false,
+      msg: err.message || "Failed to verify OTP",
+    };
   }
 };
 
