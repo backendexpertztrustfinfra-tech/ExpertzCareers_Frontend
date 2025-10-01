@@ -12,90 +12,137 @@ import {
   FaFilePdf,
   FaExternalLinkAlt,
 } from "react-icons/fa"
-import { IoMdSend } from "react-icons/io";
-import { sendNotification } from "../../../services/apis";
+import { IoMdSend } from "react-icons/io"
+import { sendNotification } from "../../../services/apis"
 import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md"
 
 const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, selectedJob, token }) => {
   const [showPhone, setShowPhone] = useState(false)
+
+  if (!candidate) {
+    console.warn("CandidateCard: No candidate data provided")
+    return (
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 w-full max-w-5xl mx-auto">
+        <p className="text-gray-500 text-center">No candidate data available</p>
+      </div>
+    )
+  }
+
   const {
     _id,
-    username,
-    qualification,
-    skills,
-    location,
-    expectedSalary,
-    lastActive,
-    experience,
-    phonenumber,
-    previousCompany,
-    introvideo,
-    resume,
-    portfioliolink,
-    certificationlink,
-    profilePhoto,
-    appliedDate,
-  } = candidate || {}
+    username = "Unknown",
+    qualification = "Not Provided",
+    skills = [],
+    location = "Not Provided",
+    expectedSalary = "N/A",
+    lastActive = "Recently",
+    experience = 0,
+    phonenumber = "Not Provided",
+    previousCompany = "Not Provided",
+    introvideo = null,
+    resume = null,
+    portfioliolink = null,
+    certificationlink = null,
+    profilePhoto = null,
+    appliedDate = null,
+  } = candidate
 
-  const recruiterCompany = "Expertz Trust Finfra Pvt Ltd"
-  const inviteMessage = `Hello ${username}, this side ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`
+  const skillsArray = Array.isArray(skills) ? skills : []
+
+  const recruiterCompany = selectedJob?.recruterCompany || "Our Company"
+  const inviteMessage = `Hello ${username}, this is ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`
 
   const handleCall = () => {
-    if (phonenumber) {
+    if (phonenumber && phonenumber !== "Not Provided") {
       window.open(`tel:${phonenumber}`, "_self")
+    } else {
+      alert("Phone number not available")
     }
   }
 
   const handleSMS = () => {
-    if (phonenumber) {
+    if (phonenumber && phonenumber !== "Not Provided") {
       window.open(`sms:${phonenumber}?body=Hello ${username}, you are shortlisted for the interview.`, "_self")
+    } else {
+      alert("Phone number not available")
     }
   }
 
   const handleWhatsAppInvite = async () => {
-    if (phonenumber) {
-      const encodedMessage = encodeURIComponent(inviteMessage)
-      window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
+    if (!phonenumber || phonenumber === "Not Provided") {
+      alert("Phone number not available")
+      return
+    }
 
-      if (token && selectedJob) {
-        try {
-          await sendNotification({
-            token,
-            type: "SHORTLISTED", // or VIEWED / SHORTLISTED
-            userId: candidate._id,
-            extraData: {
-              jobId: selectedJob.id || selectedJob._id,
-              username: selectedJob?.username || "Recruiter",
-              title: selectedJob?.title || "Job",
-            },
-          });
+    const encodedMessage = encodeURIComponent(inviteMessage)
+    window.open(`https://wa.me/${phonenumber}?text=${encodedMessage}`)
 
-          console.log("✅ Shortlist notification sent")
-        } catch (err) {
-          console.error("❌ Failed to send shortlist notification:", err)
-        }
+    if (token && selectedJob && _id) {
+      try {
+        await sendNotification({
+          token,
+          type: "SHORTLISTED",
+          userId: _id,
+          extraData: {
+            jobId: selectedJob._id || selectedJob.id,
+            username: selectedJob.username || "Recruiter",
+            title: selectedJob.title || "Job Position",
+          },
+        })
+        console.log("✅ Shortlist notification sent")
+      } catch (err) {
+        console.error("❌ Failed to send shortlist notification:", err)
       }
     }
   }
 
-
   const handleSaveClick = (e) => {
     e.stopPropagation()
-    onSave(_id)
+    if (_id) {
+      onSave(_id)
+    } else {
+      console.error("Cannot save candidate: Missing candidate ID")
+    }
+  }
+
+  const formatAppliedDate = (dateStr) => {
+    if (!dateStr) return "Recently"
+
+    try {
+      const date = new Date(dateStr)
+      const now = new Date()
+      const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+
+      if (diffInHours < 1) return "Just now"
+      if (diffInHours < 24) return `${diffInHours} hours ago`
+      if (diffInHours < 48) return "Yesterday"
+
+      const diffInDays = Math.floor(diffInHours / 24)
+      if (diffInDays < 7) return `${diffInDays} days ago`
+
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    } catch (err) {
+      return "Recently"
+    }
   }
 
   const isAppliedToday = (dateStr) => {
     if (!dateStr) return false
-    const today = new Date()
-    const date = new Date(dateStr)
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    )
+    try {
+      const today = new Date()
+      const date = new Date(dateStr)
+      return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      )
+    } catch (err) {
+      return false
+    }
   }
 
   const appliedToday = isAppliedToday(appliedDate)
+  const appliedTimeText = formatAppliedDate(appliedDate)
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 w-full max-w-5xl mx-auto hover:shadow-lg transition">
@@ -104,12 +151,15 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
         <div className="flex items-start gap-4 w-full">
           <img
             src={profilePhoto || "https://cdn-icons-png.flaticon.com/512/219/219969.png"}
-            alt={`${username || "Candidate"}'s avatar`}
+            alt={`${username}'s avatar`}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border object-cover"
+            onError={(e) => {
+              e.target.src = "https://cdn-icons-png.flaticon.com/512/219/219969.png"
+            }}
           />
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{username || "Unknown"}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{username}</h2>
               {appliedToday && (
                 <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">NEW</span>
               )}
@@ -119,13 +169,13 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
             </div>
             <div className="flex flex-wrap gap-4 mt-2 text-gray-600 text-sm">
               <span className="flex items-center gap-1">
-                <FaRupeeSign /> {expectedSalary || "N/A"}
+                <FaRupeeSign /> {expectedSalary}
               </span>
               <span className="flex items-center gap-1">
-                <FaGraduationCap /> {qualification || "Not Provided"}
+                <FaGraduationCap /> {qualification}
               </span>
               <span className="flex items-center gap-1">
-                <FaMapMarkerAlt /> {location || "Not Provided"}
+                <FaMapMarkerAlt /> {location}
               </span>
             </div>
           </div>
@@ -133,7 +183,7 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
 
         <div className="flex flex-col items-end gap-2">
           <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-            Applied: {lastActive || "Recently"}
+            Applied: {appliedTimeText}
           </span>
           {!isSaved && (
             <button onClick={handleSaveClick} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
@@ -151,9 +201,7 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
             <FaBriefcase className="text-gray-500" />
             Skills
           </h3>
-          <p className="text-gray-600">
-            {Array.isArray(skills) && skills.length > 0 ? skills.join(", ") : "Not Provided"}
-          </p>
+          <p className="text-gray-600">{skillsArray.length > 0 ? skillsArray.join(", ") : "Not Provided"}</p>
         </div>
 
         {/* Experience */}
@@ -163,7 +211,9 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
             Experience
           </h3>
           <p className="text-gray-600">{experience ? `${experience} years` : "Not Provided"}</p>
-          {previousCompany && <p className="text-gray-500 text-xs mt-1">at {previousCompany}</p>}
+          {previousCompany && previousCompany !== "Not Provided" && (
+            <p className="text-gray-500 text-xs mt-1">at {previousCompany}</p>
+          )}
         </div>
 
         {/* Documents */}
@@ -241,7 +291,7 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
           }}
           className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
         >
-          <FaPhoneAlt /> {showPhone ? phonenumber : "View Phone"}
+          <FaPhoneAlt /> {showPhone && phonenumber !== "Not Provided" ? phonenumber : "View Phone"}
         </button>
 
         <button
@@ -257,13 +307,15 @@ const CandidateCard = ({ candidate, onSave, onReject, onShortlist, isSaved, sele
         >
           <MdPersonAdd /> WhatsApp Invite
         </button>
-        <button
-          onClick={() => onReject(_id)}
-          className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
-        >
-          ❌ Reject
-        </button>
 
+        {onReject && (
+          <button
+            onClick={() => onReject(_id)}
+            className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
+          >
+            ❌ Reject
+          </button>
+        )}
       </div>
     </div>
   )

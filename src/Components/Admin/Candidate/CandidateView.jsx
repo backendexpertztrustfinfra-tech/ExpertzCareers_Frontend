@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Cookies from "js-cookie"
 import CandidateCard from "../Database/CandidateCard"
 import CandidateMiniCard from "../Database/CandidateMiniCard"
-import { getAppliedUser, getSavedCandidates, saveCandidate } from "../../../services/apis"
-import { sendNotification } from "../../../services/apis"
+import { getAppliedUser, getSavedCandidates, saveCandidate, rejectCandidate, sendNotification } from "../../../services/apis"
 import { Listbox } from "@headlessui/react"
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid"
 import Slider from "rc-slider"
@@ -19,10 +18,11 @@ const CandidateView = ({ selectedJob }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [activeCandidate, setActiveCandidate] = useState(null)
+
   const locations = ["Remote", "Onsite", "Hybrid"]
   const qualifications = ["B.Tech", "MBA", "MCA", "Diploma", "Other"]
   const skillsList = ["React", "Node.js", "Python", "Java", "SQL", "AWS"]
-  const candidatesToShow = tab === "Applied" ? appliedCandidates : savedCandidates
+
   const [filters, setFilters] = useState({
     location: "",
     qualification: "",
@@ -32,38 +32,60 @@ const CandidateView = ({ selectedJob }) => {
     customSkill: "",
     experience: 0,
   })
+
   const transformCandidateData = useCallback((candidatesArray) => {
-    return candidatesArray.map((user) => ({
-      _id: user._id,
-      username: user.username || "No Name",
-      useremail: user.useremail || "No Email",
-      designation: user.designation || "No Designation",
-      qualification: user.qualification || "No Info",
-      skills: Array.isArray(user.Skill)
-        ? user.Skill
-        : user.Skill
-          ? user.Skill.split(",").map((s) => s.trim())
-          : [],
-      location: user.location || "Not Provided",
-      expectedSalary: user.salaryExpectation || "N/A",
-      lastActive: user.lastActive || "Recently",
-      experience: user.yearsofExperience || 0,
-      distance: user.distance || null,
-      phonenumber: user.phonenumber || "Not Provided",
-      previousCompany: user.previousCompany || "Not Provided",
-      introvideo: user.introvideo || null,
-      resume: user.resume || null,
-      portfioliolink: user.portfioliolink || null,
-      certificationlink: user.certificationlink || null,
-      profilePhoto: user.profilphoto || user.profilePhoto || null,
-      profileStrength: user.profileStrength || 0,
-      appliedDate: user.appliedDate || new Date().toISOString(),
-    }))
+    if (!Array.isArray(candidatesArray)) {
+      console.error("Expected array, got:", typeof candidatesArray, candidatesArray)
+      return []
+    }
+
+    return candidatesArray.map((item) => {
+      const user = item.userId || item
+      const applicationData = item.userId ? item : {}
+
+      let skillsArray = []
+      if (Array.isArray(user.Skill)) {
+        skillsArray = user.Skill
+      } else if (typeof user.Skill === "string" && user.Skill.trim()) {
+        skillsArray = user.Skill.split(",").map((s) => s.trim()).filter(Boolean)
+      } else if (Array.isArray(user.skills)) {
+        skillsArray = user.skills
+      } else if (typeof user.skills === "string" && user.skills.trim()) {
+        skillsArray = user.skills.split(",").map((s) => s.trim()).filter(Boolean)
+      }
+
+      const transformed = {
+        _id: user._id || user.id,
+        username: user.username || "No Name",
+        useremail: user.useremail || "No Email",
+        designation: user.designation || "No Designation",
+        qualification: user.qualification || "Not Provided",
+        skills: skillsArray,
+        location: user.location || "Not Provided",
+        expectedSalary: user.salaryExpectation || user.expectedSalary || "N/A",
+        lastActive: user.lastActive || "Recently",
+        experience: user.Experience || user.experience || user.yearsofExperience || "0",
+        distance: user.distance || null,
+        phonenumber: user.phonenumber || "Not Provided",
+        previousCompany: user.previousCompany || "Not Provided",
+        introvideo: user.introvideo || null,
+        resume: user.resume || null,
+        portfioliolink: user.portfioliolink || user.portfoliolink || null,
+        certificationlink: user.certificationlink || null,
+        profilePhoto: user.profilphoto || user.profilePhoto || null,
+        profileStrength: user.profileStrength || 0,
+        appliedDate: applicationData.appliedAt || user.appliedDate || user.createdAt || new Date().toISOString(),
+        status: applicationData.status || "applied",
+      }
+
+      return transformed
+    })
   }, [])
+
   const fetchCandidates = useCallback(
     async (apiCall, setter, jobId = null) => {
       if (!token) {
-        setError("Authentication token not found")
+        setError("Please log in to view candidates")
         return
       }
 
@@ -72,12 +94,22 @@ const CandidateView = ({ selectedJob }) => {
 
       try {
         const data = await apiCall(token, jobId)
-        const candidatesArray = data?.candidatesApplied || data?.savedCandidates || []
+        let candidatesArray = []
+        if (data?.candidatesApplied && Array.isArray(data.candidatesApplied)) {
+          candidatesArray = data.candidatesApplied
+        } else if (data?.savedCandidates && Array.isArray(data.savedCandidates)) {
+          candidatesArray = data.savedCandidates
+        } else if (Array.isArray(data)) {
+          candidatesArray = data
+        } else {
+          console.warn("Unexpected response structure:", data)
+        }
+
         const transformedCandidates = transformCandidateData(candidatesArray)
         setter(transformedCandidates)
       } catch (err) {
         console.error("Error fetching candidates:", err)
-        setError(`Failed to fetch candidates: ${err.message}`)
+        setError(`Failed to load candidates: ${err.message}`)
         setter([])
       } finally {
         setLoading(false)
@@ -85,57 +117,123 @@ const CandidateView = ({ selectedJob }) => {
     },
     [token, transformCandidateData],
   )
+
+  const handleFetchApplied = useCallback(() => {
+    if (selectedJob && selectedJob._id) {
+      fetchCandidates(getAppliedUser, setAppliedCandidates, selectedJob._id)
+    }
+  }, [selectedJob, fetchCandidates])
+
   const handleFetchSaved = useCallback(() => {
     fetchCandidates(getSavedCandidates, setSavedCandidates)
   }, [fetchCandidates])
-  const handleSaveCandidate = async (candidate) => {
+
+  const handleSaveCandidate = async (candidateId) => {
+    if (!candidateId) {
+      console.error("Cannot save candidate: Missing candidate ID")
+      setError("Cannot save candidate: Invalid candidate data")
+      return
+    }
+
     try {
-      if (!savedCandidates.some((c) => c._id === candidate._id)) {
-        setSavedCandidates((prev) => [...prev, candidate])
-      }
-      const response = await saveCandidate(token, candidate._id)
-      console.log("✅ Candidate Saved:", response)
+      console.log("Saving candidate with ID:", candidateId)
+      const response = await saveCandidate(token, candidateId)
+      console.log("Candidate Saved:", response)
+      // Only re-fetch the saved list after a successful save
+      await handleFetchSaved()
+      // You can also optimistically add the candidate if you prefer faster UI,
+      // but ensure you roll back if the API fails. Re-fetching is safer.
     } catch (error) {
-      console.error("❌ Error saving candidate:", error)
-      setSavedCandidates((prev) => prev.filter((c) => c._id !== candidate._id))
-      setError(`Failed to save candidate: ${error.message}`)
+      console.error("Error saving candidate:", error)
+      if (error.message.includes("Already saved")) {
+        setError("This candidate is already saved")
+      } else {
+        setError(`Failed to save candidate: ${error.message}`)
+      }
     }
   }
+
   const handleTabChange = (t) => {
     setTab(t)
     setError(null)
-    setActiveCandidate(null) // Reset detail view when changing tab
-    if (t === "Saved") handleFetchSaved()
+    setActiveCandidate(null)
+    if (t === "Saved") {
+      handleFetchSaved()
+    } else if (t === "Applied") {
+      handleFetchApplied()
+    }
   }
-  // const handleRejectCandidate = async (candidateId) => {
-  //   try {
-  //     // Find candidate details
-  //     const candidate = appliedCandidates.find((c) => c._id === candidateId);
-  //     if (!candidate) return;
 
-  //     // Send reject notification
-  //     await sendNotification({
-  //       token,
-  //       type: "REJECTED",
-  //       userId: candidate._id,
-  //       extraData: { jobId: selectedJob.id || selectedJob._id },
-  //     });
+  const handleRejectCandidate = async (candidateId) => {
+    if (!candidateId) {
+      console.error("Cannot reject candidate: Missing candidate ID")
+      return
+    }
 
+    try {
+      const candidate = appliedCandidates.find((c) => c._id === candidateId)
+      if (!candidate) {
+        throw new Error("Candidate not found in applied list")
+      }
 
-  //     // Remove from applied list
-  //     setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId));
+      const jobId = selectedJob._id || selectedJob.id
 
-  //     // If detail card open, close it
-  //     if (activeCandidate?._id === candidateId) {
-  //       setActiveCandidate(null);
-  //     }
+      await rejectCandidate(token, candidateId, jobId)
+      console.log(`Candidate ${candidate.username} rejected and persisted`)
 
-  //     console.log(`✅ Candidate ${candidate.username} rejected.`);
-  //   } catch (err) {
-  //     console.error("❌ Error rejecting candidate:", err);
-  //     setError(`Failed to reject candidate: ${err.message}`);
-  //   }
-  // };
+      if (token && selectedJob) {
+        await sendNotification({
+          token,
+          type: "REJECTED",
+          userId: candidateId,
+          extraData: {
+            jobId: jobId,
+            username: selectedJob.username || "Recruiter",
+            title: selectedJob.title || "Job Position",
+          },
+        })
+        console.log("Rejection notification sent")
+      }
+
+      // Update local state to remove the rejected candidate immediately
+      setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
+
+      if (activeCandidate?._id === candidateId) {
+        setActiveCandidate(null)
+      }
+    } catch (err) {
+      console.error("Error rejecting candidate:", err)
+      setError(`Failed to reject candidate: ${err.message}`)
+    }
+  }
+
+  const handleMiniCardClick = async (candidate) => {
+    if (!candidate || !candidate._id) {
+      console.error("Invalid candidate data")
+      return
+    }
+
+    setActiveCandidate(candidate)
+
+    if (token && selectedJob) {
+      try {
+        await sendNotification({
+          token,
+          type: "VIEWED",
+          userId: candidate._id,
+          extraData: {
+            jobId: selectedJob._id || selectedJob.id,
+            username: selectedJob.username || "Recruiter",
+            title: selectedJob.title || "Job Position",
+          },
+        })
+        console.log("View notification sent")
+      } catch (err) {
+        console.error("Failed to send view notification:", err)
+      }
+    }
+  }
+
   const resetFilters = useCallback(() => {
     setFilters({
       location: "",
@@ -147,20 +245,24 @@ const CandidateView = ({ selectedJob }) => {
       experience: 0,
     })
   }, [])
-  useEffect(() => {
-    if (selectedJob && token) {
-      const jobId = selectedJob.id || selectedJob._id
-      if (jobId) {
-        fetchCandidates(getAppliedUser, setAppliedCandidates, jobId)
+
+  const toggleSkill = (skill) => {
+    setFilters((prev) => {
+      if (prev.skills.includes(skill)) {
+        return { ...prev, skills: prev.skills.filter((s) => s !== skill) }
       } else {
-        setError("Invalid job selection. Please try selecting the job again.")
+        return { ...prev, skills: [...prev.skills, skill] }
       }
-    }
-  }, [selectedJob, token, fetchCandidates])
+    })
+  }
 
   useEffect(() => {
-    if (token) handleFetchSaved()
-  }, [token, handleFetchSaved])
+    if (selectedJob && token) {
+      handleFetchApplied()
+    } else {
+      console.log("Missing requirements:", { hasSelectedJob: !!selectedJob, hasToken: !!token })
+    }
+  }, [selectedJob, token, handleFetchApplied])
 
   if (!selectedJob) {
     return (
@@ -172,19 +274,27 @@ const CandidateView = ({ selectedJob }) => {
     )
   }
 
+  const candidatesToShow = tab === "Applied" ? appliedCandidates : savedCandidates
+
   const filteredCandidates = candidatesToShow.filter((c) => {
     const skillsMatch =
       !filters.skills.length ||
       filters.skills.every((s) => c.skills?.some((skill) => skill.toLowerCase().includes(s.toLowerCase())))
+
     const customSkillMatch =
       !filters.customSkill || c.skills?.some((s) => s.toLowerCase().includes(filters.customSkill.toLowerCase()))
+
     const locationMatch = !filters.location || c.location?.toLowerCase().includes(filters.location.toLowerCase())
+
     const qualificationMatch =
       !filters.qualification || c.qualification?.toLowerCase().includes(filters.qualification.toLowerCase())
+
     const customQualificationMatch =
       !filters.customQualification || c.qualification?.toLowerCase().includes(filters.customQualification.toLowerCase())
+
     const experienceMatch = !filters.experience || Number(c.experience || 0) >= Number(filters.experience)
-    const distanceMatch = !filters.distance || Number(c.distance || 999) <= Number(filters.distance)
+
+    const distanceMatch = filters.distance === 0 || Number(c.distance || 999) <= Number(filters.distance)
 
     return (
       locationMatch &&
@@ -197,71 +307,9 @@ const CandidateView = ({ selectedJob }) => {
     )
   })
 
-  const toggleSkill = (skill) => {
-    setFilters((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(skill) ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill],
-    }))
-  }
-
-  const handleRejectCandidate = async (candidateId) => {
-    try {
-      const candidate = appliedCandidates.find((c) => c._id === candidateId);
-      if (!candidate) return;
-
-      await sendNotification({
-        token,
-        type: "REJECTED", // or VIEWED / SHORTLISTED
-        userId: candidate._id,
-        extraData: {
-          jobId: selectedJob.id || selectedJob._id,
-          username: selectedJob?.username || "Recruiter",
-          title: selectedJob?.title || "Job",
-        },
-      });
-      setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId));
-      if (activeCandidate?._id === candidateId) {
-        setActiveCandidate(null);
-      }
-
-      console.log("📩 Sending notification:", {
-        type: "REJECTED",
-        userId: candidate._id,
-        extraData: {
-          jobId: selectedJob.id || selectedJob._id,
-          username: selectedJob?.username || "Recruiter",
-          title: selectedJob?.title || "Job",
-        },
-      });
-
-    } catch (err) {
-      console.error("❌ Error rejecting candidate:", err);
-      setError(`Failed to reject candidate: ${err.message}`);
-    }
-  };
-
-  const handleMiniCardClick = async (candidate) => {
-    setActiveCandidate(candidate);
-
-    if (token && selectedJob) {
-      await sendNotification({
-        token,
-        type: "VIEWED",
-        userId: candidate._id,
-        extraData: {
-          jobId: selectedJob.id || selectedJob._id,
-          username: selectedJob?.username || "Recruiter",
-          title: selectedJob?.title || selectedJob?.title || "Job",
-        },
-      });
-    }
-  };
-
   return (
     <div className="flex gap-6 flex-col md:flex-row">
-      {/* Filter Sidebar */}
       <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-5 space-y-6">
-        {/* ... Filters Code (unchanged) ... */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
           {(filters.location ||
@@ -271,11 +319,10 @@ const CandidateView = ({ selectedJob }) => {
             filters.skills.length > 0 ||
             filters.customSkill ||
             filters.experience > 0) && (
-              <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">Active</span>
-            )}
+            <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">Active</span>
+          )}
         </div>
 
-        {/* Location Listbox */}
         <div>
           <label className="block text-sm mb-1">Location</label>
           <Listbox value={filters.location} onChange={(value) => setFilters({ ...filters, location: value })}>
@@ -306,7 +353,6 @@ const CandidateView = ({ selectedJob }) => {
           </Listbox>
         </div>
 
-        {/* Qualification */}
         <div>
           <label className="block text-sm mb-1">Qualification</label>
           <Listbox
@@ -355,19 +401,26 @@ const CandidateView = ({ selectedJob }) => {
           )}
         </div>
 
-        {/* Distance */}
         <div>
           <label className="block text-sm mb-1">Max Distance: {filters.distance} km</label>
-          <Slider min={0} max={100} value={filters.distance} onChange={(val) => setFilters({ ...filters, distance: val })} />
+          <Slider
+            min={0}
+            max={100}
+            value={filters.distance}
+            onChange={(val) => setFilters({ ...filters, distance: val })}
+          />
         </div>
 
-        {/* Experience */}
         <div>
           <label className="block text-sm mb-1">Min Experience: {filters.experience} years</label>
-          <Slider min={0} max={20} value={filters.experience} onChange={(val) => setFilters({ ...filters, experience: val })} />
+          <Slider
+            min={0}
+            max={20}
+            value={filters.experience}
+            onChange={(val) => setFilters({ ...filters, experience: val })}
+          />
         </div>
 
-        {/* Skills */}
         <div>
           <label className="block text-sm mb-1">Skills</label>
           <div className="flex flex-wrap gap-2">
@@ -376,10 +429,11 @@ const CandidateView = ({ selectedJob }) => {
                 key={skill}
                 type="button"
                 onClick={() => toggleSkill(skill)}
-                className={`px-3 py-1 rounded-full text-sm border ${filters.skills.includes(skill)
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`px-3 py-1 rounded-full text-sm border ${
+                  filters.skills.includes(skill)
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 {skill}
               </button>
@@ -394,7 +448,6 @@ const CandidateView = ({ selectedJob }) => {
           />
         </div>
 
-        {/* Clear Filters */}
         <button
           onClick={resetFilters}
           className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
@@ -402,16 +455,17 @@ const CandidateView = ({ selectedJob }) => {
           Clear Filters
         </button>
       </div>
-      {/* Candidates List */}
+
       <div className="w-full md:w-3/4">
         <div className="flex gap-3 mb-6">
           {["Applied", "Saved"].map((t) => (
             <button
               key={t}
-              className={`px-5 py-2 rounded-full font-medium shadow-sm transition-colors ${tab === t
-                ? "bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              className={`px-5 py-2 rounded-full font-medium shadow-sm transition-colors ${
+                tab === t
+                  ? "bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
               onClick={() => handleTabChange(t)}
             >
               {t} Candidates ({tab === "Applied" ? appliedCandidates.length : savedCandidates.length})
@@ -420,6 +474,7 @@ const CandidateView = ({ selectedJob }) => {
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">{error}</div>}
+
         {loading && (
           <div className="flex items-center justify-center py-10">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -431,23 +486,17 @@ const CandidateView = ({ selectedJob }) => {
           <div className="space-y-4">
             {activeCandidate ? (
               <div>
-                {/* Detail CandidateCard */}
-                <button
-                  onClick={() => setActiveCandidate(null)}
-                  className="mb-4 text-sm text-blue-600 hover:underline"
-                >
+                <button onClick={() => setActiveCandidate(null)} className="mb-4 text-sm text-blue-600 hover:underline">
                   ← Back to list
                 </button>
                 <CandidateCard
                   candidate={activeCandidate}
-                  onSave={() => handleSaveCandidate(activeCandidate)}
+                  onSave={() => handleSaveCandidate(activeCandidate._id)}
                   onReject={handleRejectCandidate}
                   isSaved={savedCandidates.some((c) => c._id === activeCandidate._id)}
                   selectedJob={selectedJob}
                   token={token}
                 />
-
-
               </div>
             ) : filteredCandidates.length === 0 ? (
               <div className="text-center py-10 text-gray-500">

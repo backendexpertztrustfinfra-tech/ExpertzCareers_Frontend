@@ -1,11 +1,11 @@
-import { BASE_URL } from "../config";
-import Cookies from "js-cookie";
+import { BASE_URL } from "../config"
+import Cookies from "js-cookie"
 
 // ------------------------------------------------------------------- USER -----------------------------------------------
 
 // Get user profile
 export const fetchUserProfile = async (token) => {
-  if (!token) return null;
+  if (!token) return null
   try {
     const res = await fetch(`${BASE_URL}/user/getUser`, {
       method: "GET",
@@ -14,13 +14,12 @@ export const fetchUserProfile = async (token) => {
         Authorization: `Bearer ${token}`,
       },
       credentials: "include",
-    });
+    })
 
-    const text = await res.text();
-    const data = JSON.parse(text);
+    const text = await res.text()
+    const data = JSON.parse(text)
 
-    if (!res.ok)
-      throw new Error(data.msg || data.message || "Failed to fetch user");
+    if (!res.ok) throw new Error(data.msg || data.message || "Failed to fetch user")
 
     return {
       name: data.user.username || "No Name",
@@ -31,16 +30,16 @@ export const fetchUserProfile = async (token) => {
       recruterGstIn: data.user.recruterGstIn || "",
       recruterIndustry: data.user.recruterIndustry || "",
       usertype: data.usertype || "",
-    };
+    }
   } catch (err) {
-    console.error("❌ GetUser Error:", err.message);
-    return null;
+    console.error("❌ GetUser Error:", err.message)
+    return null
   }
-};
+}
 
 // udate user
 export const updateUserProfile = async (token, formData, login) => {
-  if (!token) return null;
+  if (!token) return null
 
   try {
     const payload = {
@@ -59,7 +58,7 @@ export const updateUserProfile = async (token, formData, login) => {
         recruterIndustry: formData.recruterIndustry,
       }),
       ...(formData.usertype && { usertype: formData.usertype }),
-    };
+    }
 
     const res = await fetch(`${BASE_URL}/user/update`, {
       method: "PUT",
@@ -69,26 +68,26 @@ export const updateUserProfile = async (token, formData, login) => {
       },
       credentials: "include",
       body: JSON.stringify(payload),
-    });
+    })
 
     if (!res.ok) {
-      const errMsg = await res.text();
-      throw new Error(errMsg || "Profile update failed");
+      const errMsg = await res.text()
+      throw new Error(errMsg || "Profile update failed")
     }
 
-    const data = await res.json();
-    console.log("✅ Profile Updated:", data);
+    const data = await res.json()
+    console.log("✅ Profile Updated:", data)
 
     if (data.token && login) {
-      login(data.token);
+      login(data.token)
     }
 
-    return data;
+    return data
   } catch (err) {
-    console.error("Update Profile Error:", err.message);
-    return null;
+    console.error("Update Profile Error:", err.message)
+    return null
   }
-};
+}
 
 // Dshboard count
 export const getDashboardStats = async (token) => {
@@ -99,53 +98,52 @@ export const getDashboardStats = async (token) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!res.ok) {
-      throw new Error(`Failed: ${res.status}`);
+      throw new Error(`Failed: ${res.status}`)
     }
 
-    const data = await res.json();
-    console.log("✅ Dashboard Stats:", data);
-    return data;
+    const data = await res.json()
+    console.log("✅ Dashboard Stats:", data)
+    return data
   } catch (error) {
-    console.error("❌ Error fetching dashboard stats:", error);
-    return null;
+    console.error("❌ Error fetching dashboard stats:", error)
+    return null
   }
-};
+}
 
-// -------------------------------------------------------------------  new api USER -----------------------------------------------
+// -------------------------------------------------------------------  new api USER -----------------------------------------------
 
 // Get recuiter profile
 export const getRecruiterProfile = async () => {
   try {
-    const token = Cookies.get("userToken"); // ✅ fixed key
+    const token = Cookies.get("userToken")
 
     const response = await fetch(`${BASE_URL}/recruiter/getRecruiterProfile`, {
-      // ✅ fixed URL
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Error ${response.status}: ${text}`);
+      const text = await response.text()
+      throw new Error(`Error ${response.status}: ${text}`)
     }
 
-    const data = await response.json();
-    return data;
+    const data = await response.json()
+    return data
   } catch (err) {
-    console.error("API Error:", err);
-    throw err;
+    console.error("API Error:", err)
+    throw err
   }
-};
+}
 
 // ✅ CORRECTED: updateRecruiterProfile function to handle FormData
 export const updateRecruiterProfile = async (token, formData) => {
-  if (!token) return null;
+  if (!token) return null
 
   try {
     const res = await fetch(`${BASE_URL}/recruiter/updateRecruiterProfile`, {
@@ -154,49 +152,45 @@ export const updateRecruiterProfile = async (token, formData) => {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
-    });
-    console.log("send data: ", FormData);
+    })
+    console.log("send data: ", FormData)
     if (!res.ok) {
-      const errMsg = await res.text();
-      throw new Error(errMsg || "Profile update failed");
+      const errMsg = await res.text()
+      throw new Error(errMsg || "Profile update failed")
     }
-    const data = await res.json();
-    return data;
+    const data = await res.json()
+    return data
   } catch (err) {
-    console.error("Update Profile Error:", err.message);
-    return null;
+    console.error("Update Profile Error:", err.message)
+    return null
   }
-};
+}
 
 // ------------------------------------------------------------ SAVED CANDIDATES -----------------------------------------------
 
 // Save a candidate
 export const saveCandidate = async (token, candidateId) => {
   try {
-    const res = await fetch(
-      `${BASE_URL}/recruiter/savecandidate/${candidateId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`${BASE_URL}/recruiter/savecandidate/${candidateId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    })
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        errorData.message || `Failed to save candidate: ${res.status}`
-      );
+      const errorData = await res.json().catch(() => ({ message: "Failed to save candidate" }))
+      throw new Error(errorData.message || `Failed to save candidate: ${res.status}`)
     }
 
-    return await res.json(); // ✅ Returns { message, user }
+    return await res.json()
   } catch (error) {
-    console.error("❌ SaveCandidate API Error:", error);
-    throw error;
+    console.error("❌ SaveCandidate API Error:", error)
+    throw error
   }
-};
+}
 
 // Get saved candidate
 export const getSavedCandidates = async (token) => {
@@ -207,52 +201,92 @@ export const getSavedCandidates = async (token) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+      credentials: "include",
+    })
+
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        errorData.message || `Failed to get saved candidate: ${res.status}`
-      );
+      const errorData = await res.json().catch(() => ({}))
+      throw new Error(errorData.message || `Failed to get saved candidate: ${res.status}`)
     }
-    return await res.json();
+
+    const result = await res.json()
+
+    // Normalize response format
+    return {
+      savedCandidates: result.savedCandidates || result.candidates || result.data || [],
+    }
   } catch (error) {
-    console.error("Saved candidate API error", error);
-    throw error;
+    console.error("Saved candidate API error", error)
+    throw error
   }
-};
+}
 
 // Get Applied candidate
 export const getAppliedUser = async (token, jobId) => {
   try {
+    if (!jobId) {
+      throw new Error("Job ID is required")
+    }
+
     const res = await fetch(`${BASE_URL}/recruiter/getapplieduser/${jobId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+      credentials: "include",
+    })
+
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        errorData.message || `Failed to get Applied candidate: ${res.status}`
-      );
+      const errorData = await res.json().catch(() => ({}))
+      throw new Error(errorData.message || `Failed to get Applied candidate: ${res.status}`)
     }
 
-    // const result = await res.json();
-    //   console.log("Applied candidate result:", result);
+    const result = await res.json()
 
-    return await res.json(); // will contain { candidatesApplied, count }
+    // Normalize response format
+    return {
+      candidatesApplied: result.candidatesApplied || result.candidates || result.data || [],
+    }
   } catch (error) {
-    console.error("get applied candidate API error", error);
-    throw error;
+    console.error("get applied candidate API error", error)
+    throw error
   }
-};
+}
+
+// Reject a candidate - uses /updateapplyjobstatus endpoint
+export const rejectCandidate = async (token, candidateId, jobId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/recruiter/updateapplyjobstatus/${jobId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        candidateId,
+        status: "rejected",
+      }),
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({ message: "Failed to reject candidate" }))
+      throw new Error(errorData.message || `Failed to reject candidate: ${res.status}`)
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error("Reject candidate API error:", error)
+    throw error
+  }
+}
 
 // ------------------------------------------------------------ JOBS -----------------------------------------------------------
 
 //post a job
 export const postJob = async (token, jobData) => {
-  if (!token) return null;
+  if (!token) return null
 
   try {
     const res = await fetch(`${BASE_URL}/recruiter/postjob`, {
@@ -264,24 +298,24 @@ export const postJob = async (token, jobData) => {
       body: JSON.stringify({
         ...jobData,
       }),
-    });
+    })
 
     if (!res.ok) {
-      const errMsg = await res.text();
-      throw new Error(errMsg || "Failed to post job");
+      const errMsg = await res.text()
+      throw new Error(errMsg || "Failed to post job")
     }
 
-    const data = await res.json();
-    return data;
+    const data = await res.json()
+    return data
   } catch (err) {
-    console.error("❌ Post Job Error:", err.message);
-    return null;
+    console.error("❌ Post Job Error:", err.message)
+    return null
   }
-};
+}
 
-//update  job
+//update  job
 export const updateJob = async (token, jobId, formData) => {
-  if (!token) return null;
+  if (!token) return null
 
   try {
     const res = await fetch(`${BASE_URL}/recruiter/updatejob/${jobId}`, {
@@ -291,21 +325,21 @@ export const updateJob = async (token, jobId, formData) => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(formData),
-    });
+    })
 
     if (!res.ok) {
-      const errMsg = await res.text();
-      throw new Error(errMsg || "Job update failed");
+      const errMsg = await res.text()
+      throw new Error(errMsg || "Job update failed")
     }
 
-    const data = await res.json();
-    console.log("✅ Job Updated:", data);
-    return data;
+    const data = await res.json()
+    console.log("✅ Job Updated:", data)
+    return data
   } catch (err) {
-    console.error("Update Job Error:", err.message);
-    return null;
+    console.error("Update Job Error:", err.message)
+    return null
   }
-};
+}
 
 // Fetch jobs created by the recruiter
 export const getCreatedJobs = async (token) => {
@@ -314,17 +348,17 @@ export const getCreatedJobs = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
-    if (!res.ok) throw new Error("Failed to fetch jobs");
+    if (!res.ok) throw new Error("Failed to fetch jobs")
 
-    const data = await res.json();
-    return data.jobs;
+    const data = await res.json()
+    return data.jobs
   } catch (err) {
-    console.error("Error in getCreatedJobs:", err.message);
-    return [];
+    console.error("Error in getCreatedJobs:", err.message)
+    return []
   }
-};
+}
 
 //Get live job
 export const getLiveJobs = async (token) => {
@@ -335,19 +369,19 @@ export const getLiveJobs = async (token) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Failed to fetch live jobs");
+      const errorData = await res.json()
+      throw new Error(errorData.message || "Failed to fetch live jobs")
     }
 
-    return await res.json();
+    return await res.json()
   } catch (error) {
-    console.error("❌ Error fetching live jobs:", error);
-    throw error;
+    console.error("❌ Error fetching live jobs:", error)
+    throw error
   }
-};
+}
 
 // Get pending jobs
 export const getPendingJobs = async (token) => {
@@ -358,26 +392,24 @@ export const getPendingJobs = async (token) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        errorData.message || `Failed to fetch pending jobs: ${res.status}`
-      );
+      const errorData = await res.json()
+      throw new Error(errorData.message || `Failed to fetch pending jobs: ${res.status}`)
     }
 
-    return await res.json();
+    return await res.json()
   } catch (error) {
-    console.error("Pending jobs API error:", error);
-    throw error;
+    console.error("Pending jobs API error:", error)
+    throw error
   }
-};
+}
 
 // Get closed job
 export const getClosedJobs = async () => {
   try {
-    const token = Cookies.get("userToken");
+    const token = Cookies.get("userToken")
     const response = await fetch(`${BASE_URL}/recruiter/getclosedjobs`, {
       method: "GET",
       headers: {
@@ -385,20 +417,20 @@ export const getClosedJobs = async () => {
         Authorization: `Bearer ${token}`,
       },
       credentials: "include",
-    });
+    })
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to fetch closed jobs");
+      const errorData = await response.json()
+      throw new Error(errorData.message || "Failed to fetch closed jobs")
     }
 
-    const data = await response.json();
-    return data.jobs;
+    const data = await response.json()
+    return data.jobs
   } catch (error) {
-    console.error("Error fetching closed jobs:", error);
-    return [];
+    console.error("Error fetching closed jobs:", error)
+    return []
   }
-};
+}
 
 //Delete a job
 export async function deleteJob(jobId, token) {
@@ -409,19 +441,19 @@ export async function deleteJob(jobId, token) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.msg || "Failed to delete job");
+      const errorData = await response.json()
+      throw new Error(errorData.msg || "Failed to delete job")
     }
 
-    const data = await response.json();
-    console.log("Job deleted successfully:", data);
-    return data;
+    const data = await response.json()
+    console.log("Job deleted successfully:", data)
+    return data
   } catch (error) {
-    console.error("Error deleting job:", error);
-    throw error;
+    console.error("Error deleting job:", error)
+    throw error
   }
 }
 
@@ -430,7 +462,7 @@ export async function deleteJob(jobId, token) {
 // ✅ Create Razorpay order
 export const createOrder = async (amount) => {
   try {
-    const token = Cookies.get("userToken");
+    const token = Cookies.get("userToken")
     const res = await fetch(`${BASE_URL}/recruiter/create-order`, {
       method: "POST",
       headers: {
@@ -438,21 +470,21 @@ export const createOrder = async (amount) => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ amount }),
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create order");
-    return data; // { order_id, amount, currency, userDetails }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to create order")
+    return data
   } catch (err) {
-    console.error("❌ CreateOrder API Error:", err.message);
-    throw err;
+    console.error("❌ CreateOrder API Error:", err.message)
+    throw err
   }
-};
+}
 
 // ✅ Verify payment after Razorpay callback
 export const verifyPayment = async (paymentResponse) => {
   try {
-    const token = Cookies.get("userToken");
+    const token = Cookies.get("userToken")
     const res = await fetch(`${BASE_URL}/recruiter/payment-success`, {
       method: "POST",
       headers: {
@@ -460,48 +492,21 @@ export const verifyPayment = async (paymentResponse) => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(paymentResponse),
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Payment verification failed");
-    return data; // { success, subscription, billing }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Payment verification failed")
+    return data
   } catch (err) {
-    console.error("❌ VerifyPayment API Error:", err.message);
-    throw err;
+    console.error("❌ VerifyPayment API Error:", err.message)
+    throw err
   }
-};
-
-// ✅ Get active subscription (for gating job posting, etc.)
-// export const getActiveSubscription = async () => {
-//   try {
-//     const token = Cookies.get("userToken");
-//     const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     const data = await res.json();
-//     if (!res.ok)
-//       throw new Error(data.message || "Failed to fetch active subscription");
-//     // return data;
-//     return {
-//       planName: data?.planName || null,
-//       remainingJobs: data?.remainingJobs ?? 0,
-//     };
-//   } catch (err) {
-//     console.error("❌ getActiveSubscription API Error:", err.message);
-//     // throw err;
-//     return { planName: null, remainingJobs: 0 };
-//   }
-// };
+}
 
 export const getActiveSubscription = async () => {
   try {
-    const token = Cookies.get("userToken");
-    if (!token) throw new Error("Authentication token not found.");
+    const token = Cookies.get("userToken")
+    if (!token) throw new Error("Authentication token not found.")
 
     const res = await fetch(`${BASE_URL}/recruiter/getActiveSubscription`, {
       method: "GET",
@@ -509,63 +514,60 @@ export const getActiveSubscription = async () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
-    const data = await res.json();
+    const data = await res.json()
 
-    if (!res.ok)
-      throw new Error(data.message || "Failed to fetch active subscription");
+    if (!res.ok) throw new Error(data.message || "Failed to fetch active subscription")
 
-    // ✅ Return the full subscription object
-    return data.subscription || null;
+    return data.subscription || null
   } catch (err) {
-    console.error("❌ getActiveSubscription API Error:", err.message);
-    return null;
+    console.error("❌ getActiveSubscription API Error:", err.message)
+    return null
   }
-};
+}
 
 // ✅ (Optional) Get recruiter billing history
 export const getPaymentHistory = async () => {
   try {
-    const token = Cookies.get("userToken");
+    const token = Cookies.get("userToken")
     const res = await fetch(`${BASE_URL}/recruiter/getPaymentHistory`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok)
-      throw new Error(data.message || "Failed to fetch billing history");
-    return data; // { billing: [...] }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to fetch billing history")
+    return data
   } catch (err) {
-    console.error("❌ getPaymentHistory API Error:", err.message);
-    throw err;
+    console.error("❌ getPaymentHistory API Error:", err.message)
+    throw err
   }
-};
+}
 
 // Get recruiter DB points (like user points, credits, etc.)
 export const getDbPointUser = async () => {
   try {
-    const token = Cookies.get("userToken");
+    const token = Cookies.get("userToken")
     const res = await fetch(`${BASE_URL}/recruiter/dbpointUser`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch DB points");
-    return data; // { points: number, details: {...} }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to fetch DB points")
+    return data
   } catch (err) {
-    console.error("❌ getDbPointUser API Error:", err.message);
-    throw err;
+    console.error("❌ getDbPointUser API Error:", err.message)
+    throw err
   }
-};
+}
 
 // ------------------------------------------------------------ JOBSEEKER JOBS -----------------------------------------------------------
 
@@ -575,16 +577,16 @@ export const saveJob = async (token, jobId) => {
     const res = await fetch(`${BASE_URL}/jobseeker/savejob/${jobId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to save job");
-    return data; // { message, savedJobs }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to save job")
+    return data
   } catch (err) {
-    console.error("❌ Save Job Error:", err.message);
-    throw err;
+    console.error("❌ Save Job Error:", err.message)
+    throw err
   }
-};
+}
 
 // ❌ Remove saved job
 export const removeSavedJob = async (token, jobId) => {
@@ -592,16 +594,16 @@ export const removeSavedJob = async (token, jobId) => {
     const res = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${jobId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to remove saved job");
-    return data; // { message, savedJobs }
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to remove saved job")
+    return data
   } catch (err) {
-    console.error("❌ Remove Saved Job Error:", err.message);
-    throw err;
+    console.error("❌ Remove Saved Job Error:", err.message)
+    throw err
   }
-};
+}
 
 // 📂 Get saved jobs
 export const getSavedJobs = async (token) => {
@@ -609,16 +611,16 @@ export const getSavedJobs = async (token) => {
     const res = await fetch(`${BASE_URL}/jobseeker/getSavedJobs`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch saved jobs");
-    return data;
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to fetch saved jobs")
+    return data
   } catch (err) {
-    console.error("❌ Get Saved Jobs Error:", err.message);
-    throw err;
+    console.error("❌ Get Saved Jobs Error:", err.message)
+    throw err
   }
-};
+}
 
 // 📂 Get applied jobs
 export const getAppliedJobs = async (token) => {
@@ -626,17 +628,16 @@ export const getAppliedJobs = async (token) => {
     const res = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok)
-      throw new Error(data.message || "Failed to fetch applied jobs");
-    return data;
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to fetch applied jobs")
+    return data
   } catch (err) {
-    console.error("❌ Get Applied Jobs Error:", err.message);
-    throw err;
+    console.error("❌ Get Applied Jobs Error:", err.message)
+    throw err
   }
-};
+}
 
 // 📝 Apply for a job
 export const applyForJob = async (token, jobId) => {
@@ -644,84 +645,25 @@ export const applyForJob = async (token, jobId) => {
     const res = await fetch(`${BASE_URL}/jobseeker/applyforjob/${jobId}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-    });
+    })
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to apply for job");
-    return data;
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || "Failed to apply for job")
+    return data
   } catch (err) {
-    console.error("❌ Apply Job Error:", err.message);
-    throw err;
+    console.error("❌ Apply Job Error:", err.message)
+    throw err
   }
-};
+}
 
 // ---------------------------------------------------------------Notification-------------------------------
-
-// export const fetchNotifications = async ({ token }) => {
-//   try {
-
-//     if (!token) {
-//       console.error("No token found. User might not be authenticated.");
-//       return;
-//     }
-
-//     // Add query params for userId and userType
-//     const url = new URL(`${BASE_URL}/notification/getnotifications`);
-//     const response = await fetch(url.toString(), {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     const data = await response.json();
-
-//     if (!response.ok) {
-//       console.error("Error fetching notifications:", data.msg || data.message);
-//       return;
-//     }
-
-//     console.log("Notifications:", data.notifications);
-//     return data.notifications;
-
-//   } catch (err) {
-//     console.error("Request failed:", err);
-//   }
-// };
-
-// export const sendNotification = async ({ token, userId, jobId, type }) => {
-//   try {
-//     const response = await fetch(`${BASE_URL}/notification/sentnotification`, {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//       body: JSON.stringify({
-//         type,
-//         userId,
-//         extraData: { jobId },   
-//       }),
-//     });
-
-//     if (!response.ok) {
-//       throw new Error("Failed to send notification");
-//     }
-
-//     return await response.json();
-//   } catch (err) {
-//     console.error("❌ Notification error:", err);
-//     return null;
-//   }
-// };
 
 // ✅ Fetch all notifications for logged-in user
 export const fetchNotifications = async ({ token }) => {
   try {
     if (!token) {
-      console.error("No token found. User might not be authenticated.");
-      return;
+      console.error("No token found. User might not be authenticated.")
+      return []
     }
 
     const response = await fetch(`${BASE_URL}/notification/getnotifications`, {
@@ -730,24 +672,24 @@ export const fetchNotifications = async ({ token }) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
-      console.error("Error fetching notifications:", data.msg || data.message);
-      return [];
+      console.error("Error fetching notifications:", data.msg || data.message)
+      return []
     }
 
-    return data.notifications;
+    return data.notifications
   } catch (err) {
-    console.error("❌ Request failed:", err);
-    return [];
+    console.error("❌ Request failed:", err)
+    return []
   }
-};
+}
 
 // ✅ Send a new notification (works for single or multiple users depending on backend logic)
-export const sendNotification = async ({ token, userId, type, extraData = {}  }) => {
+export const sendNotification = async ({ token, userId, type, extraData = {} }) => {
   try {
     const response = await fetch(`${BASE_URL}/notification/sentnotification`, {
       method: "POST",
@@ -757,20 +699,18 @@ export const sendNotification = async ({ token, userId, type, extraData = {}  })
       },
       body: JSON.stringify({
         type,
-        userId, 
+        userId,
         extraData,
       }),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Failed to send notification");
+      throw new Error("Failed to send notification")
     }
 
-    return await response.json();
+    return await response.json()
   } catch (err) {
-    console.error("❌ Notification error:", err);
-    return null;
+    console.error("❌ Notification error:", err)
+    return null
   }
-};
-
-
+}

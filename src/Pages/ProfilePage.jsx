@@ -811,7 +811,6 @@ const ProfilePage = () => {
       }
 
       const payload = buildBackendPayload(profile);
-      // ✅ Add validation for phone number before saving all changes
       if (payload.phonenumber && payload.phonenumber.length > 10) {
         setModalMessage("Phone number cannot be more than 10 digits.");
         setShowModal(true);
