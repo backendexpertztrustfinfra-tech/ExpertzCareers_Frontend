@@ -120,16 +120,22 @@ const handleLogin = async (e) => {
 
     // 👇 backend sends varification, not isVerified
     const { token, usertype, varification, username, useremail } = data;
-    console.log("User Token:", token);
+    // console.log("User Token:", token);
 
     if (token && usertype) {
-      login(token, usertype, varification); // 👈 pass correct flag
+      login(token, usertype, varification);
 
       setShowSuccessAnimation(true);
       setTimeout(() => {
         setShowSuccessAnimation(false);
-        onlogin?.();
-      }, 2000);
+       if (usertype === "recruiter") {
+            navigate("/admin", { replace: true });
+          } else if (usertype === "jobseeker") {
+            navigate("/", { replace: true });
+          }
+
+          onlogin?.();
+        }, 2000);
     }
   } catch (err) {
     setModalMessage(err.message || "Login error");

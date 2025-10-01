@@ -79,7 +79,20 @@ const EditableField = ({
         ) : (
           <input
             value={tempValue}
-            onChange={(e) => onTempChange(e.target.value)}
+            // ✅ Only allow numbers for the phone field
+            onChange={(e) => {
+                // If it's the phone field, only accept digits and limit to 10
+                if (field === 'phone') {
+                    const numberValue = e.target.value.replace(/[^0-9]/g, '');
+                    if (numberValue.length <= 10) {
+                        onTempChange(numberValue);
+                    }
+                } else {
+                    onTempChange(e.target.value);
+                }
+            }}
+            // ✅ Add maxLength for the phone field
+            maxLength={field === 'phone' ? 10 : undefined}
             className={`bg-transparent border-b-2 border-orange-500 outline-none ${className}`}
           />
         )}
@@ -472,7 +485,18 @@ const ProfilePage = () => {
     const fieldToUpdate = uiToBackendMap[editingField];
 
     if (fieldToUpdate) {
-      updatedBackendPayload[fieldToUpdate] = tempValue;
+        // ✅ Add validation for phone number before saving
+        if (editingField === 'phone') {
+            const numericValue = tempValue.replace(/[^0-9]/g, '');
+            if (numericValue.length > 10) {
+                setModalMessage("Phone number cannot be more than 10 digits.");
+                setShowModal(true);
+                return;
+            }
+            updatedBackendPayload[fieldToUpdate] = numericValue;
+        } else {
+            updatedBackendPayload[fieldToUpdate] = tempValue;
+        }
     } else {
       console.warn(
         `Attempted to save an unmapped UI field: ${editingField}. Data might not persist.`
@@ -711,24 +735,28 @@ const ProfilePage = () => {
       icon: MapPin,
       value: profile.location,
       color: "text-[#caa057]",
+      editable: true,
     },
     {
       key: "phone",
       icon: Phone,
       value: profile.phone,
       color: "text-yellow-500",
+      editable: true,
     },
     {
       key: "email",
       icon: Mail,
       value: profile.email,
       color: "text-orange-600",
+      editable: false,
     },
     {
       key: "experience",
       icon: Briefcase,
       value: profile.experience,
       color: "text-yellow-600",
+      editable: true,
     },
     // {
     //  key: "availability",
@@ -783,6 +811,13 @@ const ProfilePage = () => {
       }
 
       const payload = buildBackendPayload(profile);
+      // ✅ Add validation for phone number before saving all changes
+      if (payload.phonenumber && payload.phonenumber.length > 10) {
+        setModalMessage("Phone number cannot be more than 10 digits.");
+        setShowModal(true);
+        return;
+      }
+
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
@@ -944,7 +979,7 @@ const ProfilePage = () => {
                         onClick={() => {
                           setPreviewVideo(null);
                           setVideoFile(null);
-                          setProfile((prev) => ({ ...prev, videoIntro: null }));
+                          handleVideoDelete(); // Call the async function to delete from backend
                         }}
                         className="absolute bottom-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded-md shadow hover:bg-red-600"
                       >
@@ -995,7 +1030,6 @@ const ProfilePage = () => {
                     )}
                   </h1>
 
-
                   <p className="text-base sm:text-xl text-gray-600 mt-1 sm:mt-2">
                     <EditableField
                       field="designation"
@@ -1012,23 +1046,30 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {contactInfo.map(({ key, icon: Icon, value, color }) => (
+                  {contactInfo.map(({ key, icon: Icon, value, color, editable }) => (
                     <div
                       key={key}
                       className="flex items-center space-x-3 p-3 rounded-xl bg-white/60 hover:bg-[#fff1ed] transition-all duration-300 group border border-[#fff1ed] hover:border-[#caa057] hover:shadow-lg"
                     >
                       <Icon className={`w-5 h-5 ${color}`} />
-                      <EditableField
-                        field={key}
-                        value={value}
-                        isEditing={editingField === key}
-                        tempValue={tempValue}
-                        onEdit={handleEdit}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                        onTempChange={setTempValue}
-                        className="flex-1 group-hover:text-[#caa057] transition-colors text-sm sm:text-base font-medium"
-                      />
+                      {editable ? (
+                        <EditableField
+                          field={key}
+                          value={value}
+                          isEditing={editingField === key}
+                          tempValue={tempValue}
+                          onEdit={handleEdit}
+                          onSave={handleSave}
+                          onCancel={handleCancel}
+                          onTempChange={setTempValue}
+                          className="flex-1 group-hover:text-[#caa057] transition-colors text-sm sm:text-base font-medium"
+                        />
+                      ) : (
+                        // ✅ Display non-editable field directly
+                        <span className="flex-1 text-gray-500 text-sm sm:text-base font-medium">
+                          {value || `Enter your ${key}`}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

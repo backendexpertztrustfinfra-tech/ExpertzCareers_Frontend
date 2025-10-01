@@ -170,7 +170,7 @@ const SignUp = () => {
         login(data.token);
         Cookies.set("usertype", payload.usertype, { expires: 7 });
         alert("Signup successful!");
-        navigate(payload.usertype === "jobseeker" ? "/reg" : "/rec");
+        navigate(payload.usertype === "jobseeker" ? "/emailverification" : "/emailverification");
       }
     } catch (err) {
       console.error("❌ Signup error:", err);

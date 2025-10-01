@@ -248,6 +248,10 @@
 
 
 
+
+
+
+
 import React, { useEffect, useState, useContext } from "react";
 import Cookies from "js-cookie";
 import { AuthContext } from "../../../context/AuthContext";
@@ -259,7 +263,7 @@ const creditPlans = {
   "1 Month": [
     { name: "Free Plan", price: "Free", details: ["6 Jobs", "0 DB Points", "Job Live 15 days", "Validity 30 days"] },
     { name: "Basic", price: "Rs 599", details: ["1 Job", "50 DB Points", "Job Live 15 days", "Validity 30 days"] },
-    { name: "Basic Plus", price: "Rs 799", details: ["2 Jobs", "90 DB Points", "Job Live 15 days", "Validity 30 days"] },
+    { name: "Basic+", price: "Rs 799", details: ["2 Jobs", "90 DB Points", "Job Live 15 days", "Validity 30 days"] },
   ],
   "3 Month": [
     { name: "Standard", price: "Rs 2999", details: ["5 Jobs", "150 DB Points", "Job Live 15 days", "Validity 90 days"] },
@@ -384,7 +388,7 @@ const CreditPlanCard = () => {
           email: orderData.userDetails?.email || "guest@example.com",
           contact: orderData.userDetails?.contact || "9999999999",
         },
-        theme: { color: "#caa057" },
+        theme: { color: "#f59e0b" },
       };
 
       const rzp = new window.Razorpay(options);
@@ -425,10 +429,11 @@ const CreditPlanCard = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-full font-semibold ${activeTab === tab
-                ? "bg-[#caa057] text-white shadow-lg"
+            className={`px-4 py-2 rounded-full font-semibold ${
+              activeTab === tab
+                ? "bg-yellow-500 text-white shadow-lg"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              } transition`}
+            } transition`}
           >
             {tab}
           </button>
@@ -450,17 +455,17 @@ const CreditPlanCard = () => {
               }`}
             >
               <div className="mb-4 text-center">
-                <h3 className="text-2xl font-extrabold bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] bg-clip-text text-transparent">
+                <h3 className="text-2xl font-extrabold bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 bg-clip-text text-transparent">
                   {plan.name}
                 </h3>
-                <p className="mt-2 text-2xl font-bold bg-gradient-to-r from-[#caa057] to-[#caa057] bg-clip-text text-transparent">
+                <p className="mt-2 text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
                   {plan.price}
                 </p>
               </div>
               <ul className="flex-1 flex flex-col gap-3 mb-6">
                 {plan.details.map((line, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white rounded-full text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white rounded-full text-sm font-bold">
                       ✓
                     </span>
                     <span className="text-gray-700 font-medium text-sm">{line}</span>
@@ -468,7 +473,7 @@ const CreditPlanCard = () => {
                 ))}
               </ul>
 
-              {isActivePlan ? (
+              {/* {isActivePlan ? (
                 <button
                   disabled
                   className="w-full py-3 rounded-xl font-semibold text-white bg-green-500 cursor-not-allowed shadow-md"
@@ -479,9 +484,26 @@ const CreditPlanCard = () => {
                 <button
                   onClick={() => handleBuyNow(plan)}
                   disabled={paymentLoading}
-                  className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] shadow-md hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600 shadow-md hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {paymentLoading ? "Processing..." : "Buy Now"}
+                </button>
+              )} */}
+
+
+              {isActivePlan ? (
+                <button
+                  disabled
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-green-500 cursor-not-allowed shadow-md"
+                >
+                  Active Plan
+                </button>
+              ) : plan.price === "Free" ? null : (
+                <button
+                  onClick={() => handleBuyNow(plan)}
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-500 hover:to-orange-600 shadow-md hover:shadow-lg transition"
+                >
+                  Buy Now
                 </button>
               )}
             </div>
