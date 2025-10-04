@@ -126,7 +126,7 @@ const Footer = () => {
             <SocialIcon Icon={FaLinkedinIn} href="https://www.linkedin.com" />
           </div>
           <p className="text-xs sm:text-sm font-medium text-[#caa057] text-center order-3 w-full md:w-auto mt-4 md:mt-0">
-            Made with ❤️ by <span className="font-semibold">Expertz Team</span> | Powered by Innovation ✨
+            Powered by <span className="font-semibold">Expertz Group</span>
           </p>
         </div>
       </div>

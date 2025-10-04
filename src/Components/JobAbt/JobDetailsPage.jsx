@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   MapPin,
   Briefcase,
@@ -21,18 +21,19 @@ import {
   Gift,
   Code,
   CheckCircle,
-} from "lucide-react"
-import Cookies from "js-cookie"
-import { BASE_URL } from "../../config"
+} from "lucide-react";
+import Cookies from "js-cookie";
+import { useParams } from "react-router-dom";
+import { BASE_URL } from "../../config";
 
 /**
  * Sanitize job description HTML
  */
 function sanitizeHtml(dirty) {
-  if (!dirty) return ""
+  if (!dirty) return "";
 
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(dirty, "text/html")
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(dirty, "text/html");
 
   const whitelist = {
     P: [],
@@ -46,186 +47,103 @@ function sanitizeHtml(dirty) {
     OL: [],
     LI: [],
     A: ["href"],
-  }
+  };
 
   function cleanNode(node) {
-    if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent)
-    if (node.nodeType !== Node.ELEMENT_NODE) return null
+    if (node.nodeType === Node.TEXT_NODE)
+      return document.createTextNode(node.textContent);
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
 
-    const tag = node.tagName.toUpperCase()
+    const tag = node.tagName.toUpperCase();
     if (!whitelist[tag]) {
-      const frag = document.createDocumentFragment()
+      const frag = document.createDocumentFragment();
       node.childNodes.forEach((child) => {
-        const cleaned = cleanNode(child)
-        if (cleaned) frag.appendChild(cleaned)
-      })
-      return frag
+        const cleaned = cleanNode(child);
+        if (cleaned) frag.appendChild(cleaned);
+      });
+      return frag;
     }
 
-    const el = document.createElement(tag.toLowerCase())
+    const el = document.createElement(tag.toLowerCase());
     if (tag === "A") {
-      const href = node.getAttribute("href")
+      const href = node.getAttribute("href");
       if (href && /^(https?:|mailto:|tel:)/i.test(href)) {
-        el.setAttribute("href", href)
-        el.setAttribute("target", "_blank")
-        el.setAttribute("rel", "noopener noreferrer")
+        el.setAttribute("href", href);
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer");
       }
     }
     node.childNodes.forEach((child) => {
-      const cleaned = cleanNode(child)
-      if (cleaned) el.appendChild(cleaned)
-    })
-    return el
+      const cleaned = cleanNode(child);
+      if (cleaned) el.appendChild(cleaned);
+    });
+    return el;
   }
 
-  const frag = document.createDocumentFragment()
+  const frag = document.createDocumentFragment();
   doc.body.childNodes.forEach((child) => {
-    const c = cleanNode(child)
-    if (c) frag.appendChild(c)
-  })
+    const c = cleanNode(child);
+    if (c) frag.appendChild(c);
+  });
 
-  const container = document.createElement("div")
-  container.appendChild(frag)
-  return container.innerHTML
+  const container = document.createElement("div");
+  container.appendChild(frag);
+  return container.innerHTML;
 }
 
 const JobDetails = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { job } = location.state || {}
-  const token = Cookies.get("userToken")
-
-  const [saved, setSaved] = useState(false)
-  const [applied, setApplied] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [relatedJobs, setRelatedJobs] = useState([])
-  const [loadingRelated, setLoadingRelated] = useState(false)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { job } = location.state || {};
+  const token = Cookies.get("userToken");
+  const { id } = useParams();
+  const [saved, setSaved] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [relatedJobs, setRelatedJobs] = useState([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState(null);
 
   useEffect(() => {
-    if (!job || !token) return
+    if (!job || !token) return;
 
     const fetchStatus = async () => {
       try {
         // saved
         const savedResp = await fetch(`${BASE_URL}/jobseeker/getsavedJobs`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
+        });
         if (savedResp.ok) {
-          const d = await savedResp.json()
-          const ids = (d.savedJobs || []).map((j) => j._id || j.id)
-          setSaved(ids.includes(job.id))
+          const d = await savedResp.json();
+          const ids = (d.savedJobs || []).map((j) => j._id || j.id);
+          setSaved(ids.includes(job.id));
           // cache
-          window.__SAVED_IDS = ids
+          window.__SAVED_IDS = ids;
         } else {
-          setSaved(false)
-          window.__SAVED_IDS = window.__SAVED_IDS || []
+          setSaved(false);
+          window.__SAVED_IDS = window.__SAVED_IDS || [];
         }
 
         // applied
         const appliedResp = await fetch(`${BASE_URL}/jobseeker/appliedjobs`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
+        });
         if (appliedResp.ok) {
-          const d2 = await appliedResp.json()
-          const ids2 = (d2.appliedJobs || []).map((j) => j._id || j.id)
-          setApplied(ids2.includes(job.id))
-          window.__APPLIED_IDS = ids2
+          const d2 = await appliedResp.json();
+          const ids2 = (d2.appliedJobs || []).map((j) => j._id || j.id);
+          setApplied(ids2.includes(job.id));
+          window.__APPLIED_IDS = ids2;
         } else {
-          setApplied(false)
-          window.__APPLIED_IDS = window.__APPLIED_IDS || []
+          setApplied(false);
+          window.__APPLIED_IDS = window.__APPLIED_IDS || [];
         }
       } catch (err) {
-        console.error("fetchStatus:", err)
+        console.error("fetchStatus:", err);
       }
-    }
+    };
 
-    fetchStatus()
-  }, [job, token])
-
-  // useEffect(() => {
-  //   if (!job) return
-
-  //   const fetchRelatedJobs = async () => {
-  //     setLoadingRelated(true)
-  //     try {
-  //       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/getalllivejobs")
-  //       const data = await res.json()
-
-  //       let jobsArray = []
-  //       if (Array.isArray(data)) jobsArray = data
-  //       else if (data?.liveJobs && Array.isArray(data.liveJobs)) jobsArray = data.liveJobs
-  //       else if (data?.jobs && Array.isArray(data.jobs)) jobsArray = data.jobs
-  //       else if (data?.data && Array.isArray(data.data)) jobsArray = data.data
-  //       else if (data && typeof data === "object") {
-  //         const possibleArrays = Object.values(data).filter(Array.isArray)
-  //         if (possibleArrays.length > 0) jobsArray = possibleArrays[0]
-  //       }
-
-  //       const related = jobsArray
-  //         .filter((j) => {
-  //           const jId = j._id || j.id || j.jobId
-  //           if (jId === job.id) return false // Exclude current job
-
-  //           const jobCategory = (j.category || j.jobCategory || "").toLowerCase()
-  //           const currentCategory = (job.category || job.jobCategory || "").toLowerCase()
-
-  //           const jobSkills = j.jobSkills || j.skills || j.keySkills || j.jobSkillsString || ""
-  //           const currentSkills = job.skills || job.jobSkills || []
-
-  //           const jobLocation = (j.location || "").toLowerCase()
-  //           const currentLocation = (job.location || "").toLowerCase()
-
-  //           // Match by category
-  //           if (jobCategory && currentCategory && jobCategory === currentCategory) return true
-
-  //           // Match by skills
-  //           if (Array.isArray(currentSkills) && currentSkills.length > 0) {
-  //             const skillsArray = Array.isArray(jobSkills)
-  //               ? jobSkills
-  //               : typeof jobSkills === "string"
-  //                 ? jobSkills.split(",").map((s) => s.trim().toLowerCase())
-  //                 : []
-
-  //             const hasMatchingSkill = currentSkills.some((skill) =>
-  //               skillsArray.some((jSkill) => jSkill.includes(skill.toLowerCase())),
-  //             )
-  //             if (hasMatchingSkill) return true
-  //           }
-
-  //           // Match by location
-  //           if (jobLocation && currentLocation && jobLocation.includes(currentLocation)) return true
-
-  //           return false
-  //         })
-  //         .slice(0, 6) // Limit to 6 related jobs
-  //         .map((j) => {
-  //           const id = j._id || j.id || j.jobId || Math.random().toString(36).slice(2)
-  //           const company = j.companyName || j.company || j.employerName || "Company Name"
-
-  //           return {
-  //             id,
-  //             title: j.jobTitle || j.title || "No Title",
-  //             company,
-  //             location: j.location || "Location",
-  //             type: j.jobType || j.type || "Full-time",
-  //             salary: j.salary || j.SalaryIncentive || "Not disclosed",
-  //             category: j.category || j.jobCategory || "General",
-  //             logo: j.companyLogo || "/placeholder.svg",
-  //             createdAt: j.createdAt || new Date().toISOString(),
-  //           }
-  //         })
-
-  //       setRelatedJobs(related)
-  //     } catch (err) {
-  //       console.error("[JobDetails] fetch related jobs error:", err)
-  //       setRelatedJobs([])
-  //     } finally {
-  //       setLoadingRelated(false)
-  //     }
-  //   }
-
-  //   fetchRelatedJobs()
-  // }, [job])
+    fetchStatus();
+  }, [job, token]);
 
   if (!job) {
     return (
@@ -238,85 +156,98 @@ const JobDetails = () => {
           Go Back
         </button>
       </div>
-    )
+    );
   }
 
   const handleApply = async () => {
-    if (applied) return alert("✅ Already applied!")
+    if (applied) return alert("✅ Already applied!");
     if (!token) {
-      alert("❌ Please log in to apply.")
-      return
+      alert("❌ Please log in to apply.");
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const resp = await fetch(`${BASE_URL}/jobseeker/applyforjob/${job.id}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({}),
-      })
-      const data = await resp.json().catch(() => ({}))
-      if (!resp.ok) throw new Error(data.message || "Failed to apply")
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.message || "Failed to apply");
 
       // Update cache & state (no localStorage)
-      window.__APPLIED_IDS = window.__APPLIED_IDS || []
-      if (!window.__APPLIED_IDS.includes(job.id)) window.__APPLIED_IDS.push(job.id)
-      setApplied(true)
+      window.__APPLIED_IDS = window.__APPLIED_IDS || [];
+      if (!window.__APPLIED_IDS.includes(job.id))
+        window.__APPLIED_IDS.push(job.id);
+      setApplied(true);
 
-      window.dispatchEvent(new Event("appliedJobsUpdated"))
-      alert("✅ Application submitted!")
+      window.dispatchEvent(new Event("appliedJobsUpdated"));
+      alert("✅ Application submitted!");
     } catch (err) {
-      console.error(err)
-      alert("❌ " + (err.message || "Failed"))
+      console.error(err);
+      alert("❌ " + (err.message || "Failed"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSave = async () => {
     if (!token) {
-      alert("❌ Please log in to save jobs.")
-      return
+      alert("❌ Please log in to save jobs.");
+      return;
     }
     try {
       if (!saved) {
         const resp = await fetch(`${BASE_URL}/jobseeker/savejob/${job.id}`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await resp.json().catch(() => ({}))
-        if (!resp.ok) throw new Error(data.message || "Failed to save")
-        window.__SAVED_IDS = window.__SAVED_IDS || []
-        if (!window.__SAVED_IDS.includes(job.id)) window.__SAVED_IDS.push(job.id)
-        setSaved(true)
-        window.dispatchEvent(new Event("savedJobsUpdated"))
-        alert("⭐ Job saved!")
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to save");
+        window.__SAVED_IDS = window.__SAVED_IDS || [];
+        if (!window.__SAVED_IDS.includes(job.id))
+          window.__SAVED_IDS.push(job.id);
+        setSaved(true);
+        window.dispatchEvent(new Event("savedJobsUpdated"));
+        alert("⭐ Job saved!");
       } else {
-        const resp = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${job.id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await resp.json().catch(() => ({}))
-        if (!resp.ok) throw new Error(data.message || "Failed to unsave")
-        window.__SAVED_IDS = (window.__SAVED_IDS || []).filter((id) => id !== job.id)
-        setSaved(false)
-        window.dispatchEvent(new Event("savedJobsUpdated"))
-        alert("❌ Removed from saved jobs")
+        const resp = await fetch(
+          `${BASE_URL}/jobseeker/removesavedjob/${job.id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.message || "Failed to unsave");
+        window.__SAVED_IDS = (window.__SAVED_IDS || []).filter(
+          (id) => id !== job.id
+        );
+        setSaved(false);
+        window.dispatchEvent(new Event("savedJobsUpdated"));
+        alert("❌ Removed from saved jobs");
       }
     } catch (err) {
-      console.error(err)
-      alert("❌ " + (err.message || "Failed"))
+      console.error(err);
+      alert("❌ " + (err.message || "Failed"));
     }
-  }
+  };
 
   const handleRelatedJobClick = (relatedJob) => {
     navigate("/job-details", {
       state: { job: relatedJob },
       replace: false,
-    })
-  }
+    });
+  };
 
   const renderDescription = () => {
-    if (!job.description) return <p className="text-sm text-gray-500">No job description provided.</p>
+    if (!job.description)
+      return (
+        <p className="text-sm text-gray-500">No job description provided.</p>
+      );
     if (Array.isArray(job.description)) {
       return (
         <ul className="list-disc list-inside space-y-2 text-gray-600">
@@ -324,94 +255,151 @@ const JobDetails = () => {
             <li key={idx}>{d}</li>
           ))}
         </ul>
-      )
+      );
     }
-    const cleaned = sanitizeHtml(job.description)
+    const cleaned = sanitizeHtml(job.description);
     return (
       <div
         className="prose prose-sm max-w-none text-gray-600 leading-relaxed"
         dangerouslySetInnerHTML={{ __html: cleaned }}
       />
-    )
-  }
+    );
+  };
+
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/jobseeker/job/${id}`);
+        const data = await res.json();
+        setJob(data.job);
+      } catch (err) {
+        console.error("Failed to fetch job:", err);
+      }
+    };
+
+    fetchJob();
+  }, [id]);
 
   const renderJobInfo = () => {
     const jobInfo = [
-      { icon: <MapPin size={16} />, label: "Location", value: job.location || job.address },
-      { icon: <Briefcase size={16} />, label: "Job Type", value: job.type || job.jobType },
-      { icon: <GraduationCap size={16} />, label: "Qualification", value: job.qualification || job.Qualification },
-      { icon: <IndianRupee size={16} />, label: "Salary", value: job.salary || job.SalaryIncentive },
-      { icon: <Users size={16} />, label: "Openings", value: job.openings || job.noofOpening },
+      {
+        icon: <MapPin size={16} />,
+        label: "Location",
+        value: job.location || job.address,
+      },
+      {
+        icon: <Briefcase size={16} />,
+        label: "Job Type",
+        value: job.type || job.jobType,
+      },
+      {
+        icon: <GraduationCap size={16} />,
+        label: "Qualification",
+        value: job.qualification || job.Qualification,
+      },
+      {
+        icon: <IndianRupee size={16} />,
+        label: "Salary",
+        value: job.salary || job.SalaryIncentive,
+      },
+      {
+        icon: <Users size={16} />,
+        label: "Openings",
+        value: job.openings || job.noofOpening,
+      },
       {
         icon: <Target size={16} />,
         label: "Experience",
         value: job.experience || job.totalExperience || job.relevantExperience,
       },
-      { icon: <UserCheck size={16} />, label: "Gender", value: job.gender || "Any" },
+      {
+        icon: <UserCheck size={16} />,
+        label: "Gender",
+        value: job.gender || "Any",
+      },
       { icon: <Settings size={16} />, label: "Shift", value: job.shift },
       {
         icon: <Calendar size={16} />,
         label: "Working Days",
-        value: job.workingDays || `${job.workingDaysFrom} - ${job.workingDaysTo}`,
+        value:
+          job.workingDays || `${job.workingDaysFrom} - ${job.workingDaysTo}`,
       },
-      { icon: <Clock size={16} />, label: "Timing", value: job.timing || `${job.startTime} - ${job.endTime}` },
+      {
+        icon: <Clock size={16} />,
+        label: "Timing",
+        value: job.timing || `${job.startTime} - ${job.endTime}`,
+      },
       { icon: <Calendar size={16} />, label: "Weekend", value: job.weekend },
-    ].filter((item) => item.value && item.value !== "undefined - undefined")
+    ].filter((item) => item.value && item.value !== "undefined - undefined");
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {jobInfo.map((item, index) => (
-          <Detail key={index} icon={item.icon} label={item.label} text={item.value} />
+          <Detail
+            key={index}
+            icon={item.icon}
+            label={item.label}
+            text={item.value}
+          />
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   const renderSkills = () => {
-    const skills = job.skills || job.jobSkills
-    if (!skills) return null
+    const skills = job.skills || job.jobSkills;
+    if (!skills) return null;
 
     const skillsArray = Array.isArray(skills)
       ? skills
       : typeof skills === "string"
-        ? skills
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s)
-        : []
+      ? skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s)
+      : [];
 
-    if (skillsArray.length === 0) return null
+    if (skillsArray.length === 0) return null;
 
     return (
-      <Section title="Required Skills" icon={<Code size={18} className="text-[#caa057]" />}>
+      <Section
+        title="Required Skills"
+        icon={<Code size={18} className="text-[#caa057]" />}
+      >
         <div className="flex flex-wrap gap-2">
           {skillsArray.map((skill, index) => (
-            <span key={index} className="px-3 py-1 bg-[#fff1ed] text-[#caa057] rounded-full text-sm font-medium">
+            <span
+              key={index}
+              className="px-3 py-1 bg-[#fff1ed] text-[#caa057] rounded-full text-sm font-medium"
+            >
               {skill}
             </span>
           ))}
         </div>
       </Section>
-    )
-  }
+    );
+  };
 
   const renderBenefits = () => {
-    const benefits = job.benefits || job.jobBenefits
-    if (!benefits) return null
+    const benefits = job.benefits || job.jobBenefits;
+    if (!benefits) return null;
 
     const benefitsArray = Array.isArray(benefits)
       ? benefits
       : typeof benefits === "string"
-        ? benefits
-            .split(",")
-            .map((b) => b.trim())
-            .filter((b) => b)
-        : []
+      ? benefits
+          .split(",")
+          .map((b) => b.trim())
+          .filter((b) => b)
+      : [];
 
-    if (benefitsArray.length === 0) return null
+    if (benefitsArray.length === 0) return null;
 
     return (
-      <Section title="Job Benefits" icon={<Gift size={18} className="text-green-500" />}>
+      <Section
+        title="Job Benefits"
+        icon={<Gift size={18} className="text-green-500" />}
+      >
         <div className="space-y-2">
           {benefitsArray.map((benefit, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -421,26 +409,29 @@ const JobDetails = () => {
           ))}
         </div>
       </Section>
-    )
-  }
+    );
+  };
 
   const renderDocuments = () => {
-    const documents = job.documents || job.documentRequired
-    if (!documents) return null
+    const documents = job.documents || job.documentRequired;
+    if (!documents) return null;
 
     const documentsArray = Array.isArray(documents)
       ? documents
       : typeof documents === "string"
-        ? documents
-            .split(",")
-            .map((d) => d.trim())
-            .filter((d) => d)
-        : []
+      ? documents
+          .split(",")
+          .map((d) => d.trim())
+          .filter((d) => d)
+      : [];
 
-    if (documentsArray.length === 0) return null
+    if (documentsArray.length === 0) return null;
 
     return (
-      <Section title="Documents Required" icon={<FileText size={18} className="text-blue-500" />}>
+      <Section
+        title="Documents Required"
+        icon={<FileText size={18} className="text-blue-500" />}
+      >
         <div className="space-y-2">
           {documentsArray.map((doc, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -450,8 +441,8 @@ const JobDetails = () => {
           ))}
         </div>
       </Section>
-    )
-  }
+    );
+  };
 
   const getCompanyName = (jobData) => {
     return (
@@ -466,8 +457,8 @@ const JobDetails = () => {
       jobData.raw?.jobCreatedby?.company ||
       jobData.raw?.jobCreatedby?.name ||
       "Company Name"
-    )
-  }
+    );
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed]">
@@ -494,14 +485,18 @@ const JobDetails = () => {
                 />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{job.title || job.jobTitle}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {job.title || job.jobTitle}
+                </h2>
                 <p className="text-sm text-gray-600">{getCompanyName(job)}</p>
-                <p className="text-xs text-gray-500 mt-1">{job.category || job.jobCategory}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {job.category || job.jobCategory}
+                </p>
               </div>
             </div>
 
             {/* Apply + Save */}
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <button
                 onClick={handleApply}
                 disabled={loading || applied}
@@ -513,6 +508,51 @@ const JobDetails = () => {
               >
                 {loading ? "Applying..." : applied ? "✅ Applied" : "Apply Now"}
               </button>
+              <button
+                onClick={handleSave}
+                className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
+                  saved
+                    ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {saved ? "⭐ Saved" : <Bookmark size={18} />}
+              </button>
+            </div> */}
+
+            <div className="flex gap-2">
+              {!applied ? (
+                <button
+                  onClick={handleApply}
+                  disabled={loading}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all bg-gradient-to-r from-[#caa057] to-[#caa057] text-white hover:opacity-90"
+                >
+                  {loading ? "Applying..." : "Apply Now"}
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className={`px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all ${
+                    applicationStatus === "REJECTED"
+                      ? "bg-red-500 text-white"
+                      : applicationStatus === "SHORTLISTED"
+                      ? "bg-blue-500 text-white"
+                      : applicationStatus === "VIEWED"
+                      ? "bg-yellow-500 text-white"
+                      : "bg-green-500 text-white"
+                  }`}
+                >
+                  {applicationStatus === "VIEWED"
+                    ? "Application Viewed"
+                    : applicationStatus === "SHORTLISTED"
+                    ? "Shortlisted"
+                    : applicationStatus === "REJECTED"
+                    ? "Rejected"
+                    : "Applied"}
+                </button>
+              )}
+
+              {/* Save button */}
               <button
                 onClick={handleSave}
                 className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
@@ -544,7 +584,10 @@ const JobDetails = () => {
 
             {/* Related Jobs section */}
             {relatedJobs.length > 0 && (
-              <Section title="Related Jobs" icon={<Briefcase size={18} className="text-purple-500" />}>
+              <Section
+                title="Related Jobs"
+                icon={<Briefcase size={18} className="text-purple-500" />}
+              >
                 {loadingRelated ? (
                   <p className="text-gray-500">Loading related jobs...</p>
                 ) : (
@@ -563,11 +606,17 @@ const JobDetails = () => {
                             className="w-10 h-10 object-contain rounded-lg bg-gray-50 p-1"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 text-sm truncate">{relatedJob.title}</h4>
-                            <p className="text-xs text-gray-600 truncate">{relatedJob.company}</p>
+                            <h4 className="font-semibold text-gray-900 text-sm truncate">
+                              {relatedJob.title}
+                            </h4>
+                            <p className="text-xs text-gray-600 truncate">
+                              {relatedJob.company}
+                            </p>
                             <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                               <MapPin size={12} />
-                              <span className="truncate">{relatedJob.location}</span>
+                              <span className="truncate">
+                                {relatedJob.location}
+                              </span>
                               <span>•</span>
                               <span>{relatedJob.type}</span>
                             </div>
@@ -597,7 +646,10 @@ const JobDetails = () => {
                 <InfoItem label="Company" value={getCompanyName(job)} />
                 <InfoItem label="Location" value={job.location} />
                 <InfoItem label="Address" value={job.address} />
-                <InfoItem label="Industry" value={job.industry || job.recruterIndustry} />
+                <InfoItem
+                  label="Industry"
+                  value={job.industry || job.recruterIndustry}
+                />
                 {job.website && (
                   <div>
                     <span className="font-medium text-gray-700">Website:</span>{" "}
@@ -623,13 +675,23 @@ const JobDetails = () => {
                   label="Posted"
                   value={
                     job.postedDate || job.createdAt
-                      ? new Date(job.postedDate || job.createdAt).toLocaleDateString()
+                      ? new Date(
+                          job.postedDate || job.createdAt
+                        ).toLocaleDateString()
                       : "Recently"
                   }
                 />
-                <InfoItem label="Applicants" value={`${job.applicants || 0} applied`} />
+                <InfoItem
+                  label="Applicants"
+                  value={`${job.applicants || 0} applied`}
+                />
                 <InfoItem label="Status" value={job.status || "Active"} />
-                {job.expiryDate && <InfoItem label="Expires" value={new Date(job.expiryDate).toLocaleDateString()} />}
+                {job.expiryDate && (
+                  <InfoItem
+                    label="Expires"
+                    value={new Date(job.expiryDate).toLocaleDateString()}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -658,15 +720,17 @@ const JobDetails = () => {
         <button
           onClick={handleSave}
           className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
-            saved ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+            saved
+              ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]"
+              : "border-gray-300 text-gray-600 hover:bg-gray-50"
           }`}
         >
           {saved ? "⭐ Saved" : <Bookmark size={18} />}
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Section = ({ title, children, icon }) => (
   <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-6 border border-[#fff1ed] hover:shadow-2xl transition">
@@ -675,7 +739,7 @@ const Section = ({ title, children, icon }) => (
     </h3>
     {children}
   </div>
-)
+);
 
 const Detail = ({ icon, label, text }) => (
   <div className="flex items-center gap-2 p-3 bg-white/90 backdrop-blur rounded-xl border text-gray-700 shadow hover:shadow-md transition">
@@ -685,13 +749,14 @@ const Detail = ({ icon, label, text }) => (
       <div className="text-sm font-semibold truncate">{text}</div>
     </div>
   </div>
-)
+);
 
 const InfoItem = ({ label, value }) =>
   value ? (
     <div className="text-sm">
-      <span className="font-medium text-gray-700">{label}:</span> <span className="text-gray-600">{value}</span>
+      <span className="font-medium text-gray-700">{label}:</span>{" "}
+      <span className="text-gray-600">{value}</span>
     </div>
-  ) : null
+  ) : null;
 
-export default JobDetails
+export default JobDetails;

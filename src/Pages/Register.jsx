@@ -1,908 +1,104 @@
-// import React, { useState } from "react";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import Cookies from "js-cookie";
-
-// const Register = () => {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-//   const signupData = location.state || {};
-
-//   const [formData, setFormData] = useState({
-//     username: signupData.username || "",
-//     useremail: signupData.useremail || "",
-//     phonenumber: "",
-//     designation: "",
-//     profilphoto: null,
-//     resume: null,
-//     Skill: [""],
-//   });
-
-//   // Qualification as array
-//   const [qualifications, setQualifications] = useState([
-//     {
-//       degree: "",
-//       institution: "",
-//       board: "",
-//       university: "",
-//       fieldOfStudy: "",
-//       startDate: "",
-//       endDate: "",
-//       pursuing: false,
-//     },
-//   ]);
-
-//   // Experience as array
-//   const [Experience, setExperience] = useState([
-//     {
-//       company: "",
-//       designation: "",
-//       startDate: "",
-//       endDate: "",
-//       currentlyWorking: false,
-//     },
-//   ]);
-
-//   // General input handler
-//   const handleChange = (e) => {
-//     const { name, value, files } = e.target;
-//     if (files) {
-//       setFormData((prev) => ({ ...prev, [name]: files[0] }));
-//     } else {
-//       setFormData((prev) => ({ ...prev, [name]: value }));
-//     }
-//   };
-
-//   // Submit handler
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const token = Cookies.get("userToken");
-//     if (!token) return alert("Please login again.");
-
-//     const payload = new FormData();
-
-//     // Append basic formData
-//     Object.entries(formData).forEach(([key, value]) => {
-//       if (value) {
-//         if (key === "Skill") payload.append(key, JSON.stringify(value));
-//         else payload.append(key, value);
-//       }
-//     });
-
-//     // Append qualifications & Experience as JSON
-//     payload.append("qualification", JSON.stringify(qualifications));
-//     payload.append("experience", JSON.stringify(Experience));
-
-//     try {
-//       const res = await fetch(
-//         "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
-//         {
-//           method: "PUT",
-//           headers: { Authorization: `Bearer ${token}` },
-//           body: payload,
-//         }
-//       );
-//       const data = await res.json();
-//       if (!res.ok) throw new Error(data.message || "Update failed");
-//       alert("✅ Profile updated!");
-//       navigate("/jobs");
-//     } catch (err) {
-//       console.error(err);
-//       alert("Something went wrong!");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-[#fff1ed] p-4">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-4xl space-y-6"
-//       >
-//         <h2 className="text-3xl font-bold text-[#caa057] text-center mb-6">
-//           Complete Your Profile
-//         </h2>
-
-//         {/* Basic Info */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//           <input
-//             type="text"
-//             name="username"
-//             value={formData.username}
-//             onChange={handleChange}
-//             placeholder="Full Name"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="email"
-//             name="useremail"
-//             value={formData.useremail}
-//             onChange={handleChange}
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="text"
-//             name="phonenumber"
-//             value={formData.phonenumber}
-//             onChange={handleChange}
-//             placeholder="Phone Number"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="text"
-//             name="designation"
-//             value={formData.designation}
-//             onChange={handleChange}
-//             placeholder="Designation"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//         </div>
-
-//         {/* Skills */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Skills</h3>
-//           {formData.Skill.map((skill, index) => (
-//             <div key={index} className="flex gap-2 mb-2 items-center">
-//               <input
-//                 type="text"
-//                 value={skill}
-//                 onChange={(e) => {
-//                   const newSkill = [...formData.Skill];
-//                   newSkill[index] = e.target.value;
-//                   setFormData((prev) => ({ ...prev, Skill: newSkill }));
-//                 }}
-//                 placeholder="Skill"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//               />
-//               {index > 0 && (
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     const newSkill = [...formData.Skill];
-//                     newSkill.splice(index, 1);
-//                     setFormData((prev) => ({ ...prev, Skill: newSkill }));
-//                   }}
-//                   className="text-red-500 font-bold"
-//                 >
-//                   X
-//                 </button>
-//               )}
-//             </div>
-//           ))}
-//           <button
-//             type="button"
-//             onClick={() =>
-//               setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }))
-//             }
-//             className="text-[#caa057] font-semibold mb-4"
-//           >
-//             + Add Skill
-//           </button>
-//         </div>
-
-//         {/* Qualifications */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Qualifications</h3>
-//           {qualifications.map((q, index) => (
-//             <div
-//               key={index}
-//               className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-//             >
-//               <input
-//                 type="text"
-//                 name="degree"
-//                 value={q.degree}
-//                 onChange={(e) => {
-//                   const updated = [...qualifications];
-//                   updated[index].degree = e.target.value;
-//                   setQualifications(updated);
-//                 }}
-//                 placeholder="Degree / Certification"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 required
-//               />
-//               <input
-//                 type="text"
-//                 name="institution"
-//                 value={q.institution}
-//                 onChange={(e) => {
-//                   const updated = [...qualifications];
-//                   updated[index].institution = e.target.value;
-//                   setQualifications(updated);
-//                 }}
-//                 placeholder="Institution"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 required
-//               />
-//               <div className="flex gap-2">
-//                 <input
-//                   type="date"
-//                   name="startDate"
-//                   value={q.startDate}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].startDate = e.target.value;
-//                     setQualifications(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 />
-//                 <input
-//                   type="date"
-//                   name="endDate"
-//                   value={q.endDate}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].endDate = e.target.value;
-//                     setQualifications(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                   disabled={q.pursuing}
-//                 />
-//               </div>
-//               <label className="flex items-center gap-2 mt-1">
-//                 <input
-//                   type="checkbox"
-//                   checked={q.pursuing}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].pursuing = e.target.checked;
-//                     if (e.target.checked) updated[index].endDate = "";
-//                     setQualifications(updated);
-//                   }}
-//                 />
-//                 Currently Pursuing
-//               </label>
-//               {index > 0 && (
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     const updated = [...qualifications];
-//                     updated.splice(index, 1);
-//                     setQualifications(updated);
-//                   }}
-//                   className="text-red-500 font-bold"
-//                 >
-//                   Remove
-//                 </button>
-//               )}
-//             </div>
-//           ))}
-//           <button
-//             type="button"
-//             onClick={() =>
-//               setQualifications((prev) => [
-//                 ...prev,
-//                 {
-//                   degree: "",
-//                   institution: "",
-//                   board: "",
-//                   university: "",
-//                   fieldOfStudy: "",
-//                   startDate: "",
-//                   endDate: "",
-//                   pursuing: false,
-//                 },
-//               ])
-//             }
-//             className="text-[#caa057] font-semibold mb-4"
-//           >
-//             + Add Qualification
-//           </button>
-//         </div>
-
-//         {/* Experience */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Experience</h3>
-//           {Experience.map((exp, index) => (
-//             <div
-//               key={index}
-//               className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-//             >
-//               <input
-//                 type="text"
-//                 name="company"
-//                 value={exp.company}
-//                 onChange={(e) => {
-//                   const updated = [...Experience];
-//                   updated[index].company = e.target.value;
-//                   setExperience(updated);
-//                 }}
-//                 placeholder="Company Name"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//               />
-//               <input
-//                 type="text"
-//                 name="designation"
-//                 value={exp.designation}
-//                 onChange={(e) => {
-//                   const updated = [...Experience];
-//                   updated[index].designation = e.target.value;
-//                   setExperience(updated);
-//                 }}
-//                 placeholder="Designation"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//               />
-//               <div className="flex gap-2">
-//                 <input
-//                   type="date"
-//                   name="startDate"
-//                   value={exp.startDate}
-//                   onChange={(e) => {
-//                     const updated = [...Experience];
-//                     updated[index].startDate = e.target.value;
-//                     setExperience(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 />
-//                 <input
-//                   type="date"
-//                   name="endDate"
-//                   value={exp.endDate}
-//                   onChange={(e) => {
-//                     const updated = [...Experience];
-//                     updated[index].endDate = e.target.value;
-//                     setExperience(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                   disabled={exp.currentlyWorking}
-//                 />
-//               </div>
-//               <label className="flex items-center gap-2 mt-1">
-//                 <input
-//                   type="checkbox"
-//                   checked={exp.currentlyWorking}
-//                   onChange={(e) => {
-//                     const updated = [...Experience];
-//                     updated[index].currentlyWorking = e.target.checked;
-//                     if (e.target.checked) updated[index].endDate = "";
-//                     setExperience(updated);
-//                   }}
-//                 />
-//                 Currently Working
-//               </label>
-//               {index > 0 && (
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     const updated = [...Experience];
-//                     updated.splice(index, 1);
-//                     setExperience(updated);
-//                   }}
-//                   className="text-red-500 font-bold"
-//                 >
-//                   Remove
-//                 </button>
-//               )}
-//             </div>
-//           ))}
-//           <button
-//             type="button"
-//             onClick={() =>
-//               setExperience((prev) => [
-//                 ...prev,
-//                 { company: "", designation: "", startDate: "", endDate: "", currentlyWorking: false },
-//               ])
-//             }
-//             className="text-[#caa057] font-semibold mb-4"
-//           >
-//             + Add Experience
-//           </button>
-//         </div>
-
-//         {/* File Uploads */}
-//         <div className="space-y-2">
-//           <input
-//             type="file"
-//             name="profilphoto"
-//             onChange={handleChange}
-//             accept="image/*"
-//             className="w-full border px-3 py-2 rounded"
-//           />
-//           <input
-//             type="file"
-//             name="resume"
-//             onChange={handleChange}
-//             accept=".pdf,.doc,.docx"
-//             className="w-full border px-3 py-2 rounded"
-//           />
-//         </div>
-
-//         <button
-//           type="submit"
-//           className="w-full bg-[#caa057] hover:bg-[#b4924c] text-white font-semibold px-4 py-2 rounded transition"
-//         >
-//           Submit
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState } from "react";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import Cookies from "js-cookie";
-
-// const Register = () => {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-//   const signupData = location.state || {};
-
-//   const [formData, setFormData] = useState({
-//     username: signupData.username || "",
-//     useremail: signupData.useremail || "",
-//     phonenumber: "",
-//     designation: "",
-//     profilphoto: null,
-//     resume: null,
-//     Skill: [""],
-//   });
-
-//   // Qualification as array
-//   const [qualifications, setQualifications] = useState([
-//     {
-//       degree: "",
-//       institution: "",
-//       board: "",
-//       university: "",
-//       fieldOfStudy: "",
-//       startDate: "",
-//       endDate: "",
-//       pursuing: false,
-//     },
-//   ]);
-
-//   // Experience type selection
-//   const [experienceType, setExperienceType] = useState("Fresher");
-
-//   // Experience details array (only if not fresher)
-//   const [Experience, setExperience] = useState([
-//     {
-//       company: "",
-//       designation: "",
-//       startDate: "",
-//       endDate: "",
-//       currentlyWorking: false,
-//     },
-//   ]);
-
-//   // General input handler
-//   const handleChange = (e) => {
-//     const { name, value, files } = e.target;
-//     if (files) {
-//       setFormData((prev) => ({ ...prev, [name]: files[0] }));
-//     } else {
-//       setFormData((prev) => ({ ...prev, [name]: value }));
-//     }
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const token = Cookies.get("userToken");
-//     if (!token) return alert("Please login again.");
-
-//     const payload = new FormData();
-
-//     // Append basic formData
-//     Object.entries(formData).forEach(([key, value]) => {
-//       if (value) {
-//         if (key === "Skill") payload.append(key, JSON.stringify(value));
-//         else payload.append(key, value);
-//       }
-//     });
-
-//     // Append qualifications
-//     payload.append("qualification", JSON.stringify(qualifications));
-
-//     // Append experience based on selection
-//     if (experienceType === "Fresher") {
-//       payload.append("experience", JSON.stringify([]));
-//     } else {
-//       payload.append("experience", JSON.stringify(Experience));
-//     }
-
-//     try {
-//       const res = await fetch(
-//         "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
-//         {
-//           method: "PUT",
-//           headers: { Authorization: `Bearer ${token}` },
-//           body: payload,
-//         }
-//       );
-//       const data = await res.json();
-//       if (!res.ok) throw new Error(data.message || "Update failed");
-//       alert("✅ Profile updated!");
-//       navigate("/jobs");
-//     } catch (err) {
-//       console.error(err);
-//       alert("Something went wrong!");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-[#fff1ed] p-4">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-4xl space-y-6"
-//       >
-//         <h2 className="text-3xl font-bold text-[#caa057] text-center mb-6">
-//           Complete Your Profile
-//         </h2>
-
-//         {/* Basic Info */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//           <input
-//             type="text"
-//             name="username"
-//             value={formData.username}
-//             onChange={handleChange}
-//             placeholder="Full Name"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="email"
-//             name="useremail"
-//             value={formData.useremail}
-//             onChange={handleChange}
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="text"
-//             name="phonenumber"
-//             value={formData.phonenumber}
-//             onChange={handleChange}
-//             placeholder="Phone Number"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//           <input
-//             type="text"
-//             name="designation"
-//             value={formData.designation}
-//             onChange={handleChange}
-//             placeholder="Designation"
-//             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//             required
-//           />
-//         </div>
-
-//         {/* Skills */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Skills</h3>
-//           {formData.Skill.map((skill, index) => (
-//             <div key={index} className="flex gap-2 mb-2 items-center">
-//               <input
-//                 type="text"
-//                 value={skill}
-//                 onChange={(e) => {
-//                   const newSkill = [...formData.Skill];
-//                   newSkill[index] = e.target.value;
-//                   setFormData((prev) => ({ ...prev, Skill: newSkill }));
-//                 }}
-//                 placeholder="Skill"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//               />
-//               {index > 0 && (
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     const newSkill = [...formData.Skill];
-//                     newSkill.splice(index, 1);
-//                     setFormData((prev) => ({ ...prev, Skill: newSkill }));
-//                   }}
-//                   className="text-red-500 font-bold"
-//                 >
-//                   X
-//                 </button>
-//               )}
-//             </div>
-//           ))}
-//           <button
-//             type="button"
-//             onClick={() =>
-//               setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }))
-//             }
-//             className="text-[#caa057] font-semibold mb-4"
-//           >
-//             + Add Skill
-//           </button>
-//         </div>
-
-//         {/* Qualifications */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Qualifications</h3>
-//           {qualifications.map((q, index) => (
-//             <div
-//               key={index}
-//               className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-//             >
-//               <input
-//                 type="text"
-//                 name="degree"
-//                 value={q.degree}
-//                 onChange={(e) => {
-//                   const updated = [...qualifications];
-//                   updated[index].degree = e.target.value;
-//                   setQualifications(updated);
-//                 }}
-//                 placeholder="Degree / Certification"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 required
-//               />
-//               <input
-//                 type="text"
-//                 name="institution"
-//                 value={q.institution}
-//                 onChange={(e) => {
-//                   const updated = [...qualifications];
-//                   updated[index].institution = e.target.value;
-//                   setQualifications(updated);
-//                 }}
-//                 placeholder="Institution"
-//                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 required
-//               />
-//               <div className="flex gap-2">
-//                 <input
-//                   type="date"
-//                   name="startDate"
-//                   value={q.startDate}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].startDate = e.target.value;
-//                     setQualifications(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 />
-//                 <input
-//                   type="date"
-//                   name="endDate"
-//                   value={q.endDate}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].endDate = e.target.value;
-//                     setQualifications(updated);
-//                   }}
-//                   className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                   disabled={q.pursuing}
-//                 />
-//               </div>
-//               <label className="flex items-center gap-2 mt-1">
-//                 <input
-//                   type="checkbox"
-//                   checked={q.pursuing}
-//                   onChange={(e) => {
-//                     const updated = [...qualifications];
-//                     updated[index].pursuing = e.target.checked;
-//                     if (e.target.checked) updated[index].endDate = "";
-//                     setQualifications(updated);
-//                   }}
-//                 />
-//                 Currently Pursuing
-//               </label>
-//               {index > 0 && (
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     const updated = [...qualifications];
-//                     updated.splice(index, 1);
-//                     setQualifications(updated);
-//                   }}
-//                   className="text-red-500 font-bold"
-//                 >
-//                   Remove
-//                 </button>
-//               )}
-//             </div>
-//           ))}
-//           <button
-//             type="button"
-//             onClick={() =>
-//               setQualifications((prev) => [
-//                 ...prev,
-//                 {
-//                   degree: "",
-//                   institution: "",
-//                   board: "",
-//                   university: "",
-//                   fieldOfStudy: "",
-//                   startDate: "",
-//                   endDate: "",
-//                   pursuing: false,
-//                 },
-//               ])
-//             }
-//             className="text-[#caa057] font-semibold mb-4"
-//           >
-//             + Add Qualification
-//           </button>
-//         </div>
-
-//         {/* Experience */}
-//         <div>
-//           <h3 className="font-semibold mb-2">Experience</h3>
-//           <select
-//             value={experienceType}
-//             onChange={(e) => setExperienceType(e.target.value)}
-//             className="w-full border px-3 py-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//           >
-//             <option value="Fresher">Fresher</option>
-//             <option value="0-1 year">0-1 year</option>
-//             <option value="1-5 years">1-5 years</option>
-//             <option value="5-10 years">5-10 years</option>
-//             <option value="10+ years">10+ years</option>
-//           </select>
-
-//           {experienceType !== "Fresher" &&
-//             Experience.map((exp, index) => (
-//               <div
-//                 key={index}
-//                 className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-//               >
-//                 <input
-//                   type="text"
-//                   name="company"
-//                   value={exp.company}
-//                   onChange={(e) => {
-//                     const updated = [...Experience];
-//                     updated[index].company = e.target.value;
-//                     setExperience(updated);
-//                   }}
-//                   placeholder="Company Name"
-//                   className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 />
-//                 <input
-//                   type="text"
-//                   name="designation"
-//                   value={exp.designation}
-//                   onChange={(e) => {
-//                     const updated = [...Experience];
-//                     updated[index].designation = e.target.value;
-//                     setExperience(updated);
-//                   }}
-//                   placeholder="Job Role / Designation"
-//                   className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                 />
-//                 <div className="flex gap-2">
-//                   <input
-//                     type="date"
-//                     name="startDate"
-//                     value={exp.startDate}
-//                     onChange={(e) => {
-//                       const updated = [...Experience];
-//                       updated[index].startDate = e.target.value;
-//                       setExperience(updated);
-//                     }}
-//                     className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                   />
-//                   <input
-//                     type="date"
-//                     name="endDate"
-//                     value={exp.endDate}
-//                     onChange={(e) => {
-//                       const updated = [...Experience];
-//                       updated[index].endDate = e.target.value;
-//                       setExperience(updated);
-//                     }}
-//                     className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-//                     disabled={exp.currentlyWorking}
-//                   />
-//                 </div>
-//                 <label className="flex items-center gap-2 mt-1">
-//                   <input
-//                     type="checkbox"
-//                     checked={exp.currentlyWorking}
-//                     onChange={(e) => {
-//                       const updated = [...Experience];
-//                       updated[index].currentlyWorking = e.target.checked;
-//                       if (e.target.checked) updated[index].endDate = "";
-//                       setExperience(updated);
-//                     }}
-//                   />
-//                   Currently Working
-//                 </label>
-//                 {index > 0 && (
-//                   <button
-//                     type="button"
-//                     onClick={() => {
-//                       const updated = [...Experience];
-//                       updated.splice(index, 1);
-//                       setExperience(updated);
-//                     }}
-//                     className="text-red-500 font-bold"
-//                   >
-//                     Remove
-//                   </button>
-//                 )}
-//               </div>
-//             ))}
-
-//           {experienceType !== "Fresher" && (
-//             <button
-//               type="button"
-//               onClick={() =>
-//                 setExperience((prev) => [
-//                   ...prev,
-//                   {
-//                     company: "",
-//                     designation: "",
-//                     startDate: "",
-//                     endDate: "",
-//                     currentlyWorking: false,
-//                   },
-//                 ])
-//               }
-//               className="text-[#caa057] font-semibold mb-4"
-//             >
-//               + Add Experience
-//             </button>
-//           )}
-//         </div>
-
-//         {/* File Uploads */}
-//         <div className="space-y-2">
-//           <input
-//             type="file"
-//             name="profilphoto"
-//             onChange={handleChange}
-//             accept="image/*"
-//             className="w-full border px-3 py-2 rounded"
-//           />
-//           <input
-//             type="file"
-//             name="resume"
-//             onChange={handleChange}
-//             accept=".pdf,.doc,.docx"
-//             className="w-full border px-3 py-2 rounded"
-//           />
-//         </div>
-
-//         <button
-//           type="submit"
-//           className="w-full bg-[#caa057] hover:bg-[#b4924c] text-white font-semibold px-4 py-2 rounded transition"
-//         >
-//           Submit
-//         </button>
-//         </form>
-//         </div>)}
-// export default Register;
-
-
-
-
-
-
-
-
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import Cookies from "js-cookie";
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
+import Cookies from "js-cookie"
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  GraduationCap,
+  Plus,
+  Trash2,
+  Upload,
+  FileText,
+  ImageIcon,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react"
+
+// --- Utility Hooks ---
+
+// 1. Hook to safely create and clean up object URLs for file previews
+const useFilePreview = (file) => {
+  const [url, setUrl] = useState(null)
+
+  useEffect(() => {
+    if (!file) {
+      setUrl(null)
+      return
+    }
+    const newUrl = URL.createObjectURL(file)
+    setUrl(newUrl)
+
+    return () => {
+      URL.revokeObjectURL(newUrl)
+    }
+  }, [file])
+
+  return url
+}
+
+// --- Custom Components for Enhanced UI ---
+
+const accentColor = "#caa057"
+const accentColorHover = "#b4924c"
+
+// Reusable Input Field Component (Fixes overlap/refocus issues with proper layout and state binding)
+const InputField = ({ icon: Icon, label, className = "", ...props }) => (
+  <div className={`w-full ${className}`}>
+    {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+    <div className="relative">
+      {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />}
+      <input
+        {...props}
+        className={`w-full border border-gray-300 ${
+          Icon ? "pl-10" : "pl-4"
+        } pr-4 py-3 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[${accentColor}] focus:border-[${accentColor}] placeholder-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+      />
+    </div>
+  </div>
+)
+
+// Section Header Component
+const SectionHeader = ({ icon: Icon, title, description }) => (
+  <div className="flex items-start space-x-3 pb-3 mb-4 border-b-2 border-gray-100">
+    <Icon className={`w-6 h-6 text-[${accentColor}] mt-1 flex-shrink-0`} />
+    <div>
+      <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+      {description && <p className="text-sm text-gray-500">{description}</p>}
+    </div>
+  </div>
+)
+
+// Custom Notification/Toast Component
+const Notification = ({ message, type, onClose }) => {
+  if (!message) return null
+
+  const baseClasses =
+    "fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl z-50 flex items-center space-x-3 max-w-sm transition-opacity duration-300"
+  const typeClasses = {
+    success: "bg-green-500 text-white",
+    error: "bg-red-500 text-white",
+  }
+  const Icon = type === "success" ? CheckCircle : AlertTriangle
+
+  return (
+    <div className={`${baseClasses} ${typeClasses[type]}`}>
+      <Icon className="w-6 h-6" />
+      <p className="font-medium flex-grow">{message}</p>
+      <button onClick={onClose} className="text-white opacity-75 hover:opacity-100 font-bold">
+        &times;
+      </button>
+    </div>
+  )
+}
 
 const Register = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const signupData = location.state || {};
+  const navigate = useNavigate()
+  const location = useLocation()
+  const signupData = location.state || {}
 
   const [formData, setFormData] = useState({
     username: signupData.username || "",
@@ -912,426 +108,544 @@ const Register = () => {
     profilphoto: null,
     resume: null,
     Skill: [""],
-  });
+  })
 
-  // Qualifications array
   const [qualifications, setQualifications] = useState([
     {
       degree: "",
       institution: "",
-      board: "",
-      university: "",
-      fieldOfStudy: "",
       startDate: "",
       endDate: "",
       pursuing: false,
     },
-  ]);
+  ])
 
-  // Experience type
-  const [experienceType, setExperienceType] = useState("Fresher");
+  const [experienceType, setExperienceType] = useState("Fresher")
 
-  // Experience array (only for non-Fresher)
   const [Experience, setExperience] = useState([
-    { company: "", designation: "", startDate: "", endDate: "", currentlyWorking: false },
-  ]);
+    {
+      company: "",
+      designation: "",
+      startDate: "",
+      endDate: "",
+      currentlyWorking: false,
+    },
+  ])
 
-  // General input handler
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  // Notification state
+  const [notification, setNotification] = useState({ message: "", type: "" })
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type })
+    setTimeout(() => setNotification({ message: "", type: "" }), 5000)
+  }
+
+  // --- State Handlers ---
+
+  // 1. Main form fields (Basic Info, Files)
+  const handleMainFormChange = (e) => {
+    const { name, value, files } = e.target
     if (files) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+      setFormData((prev) => ({ ...prev, [name]: files[0] }))
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }))
     }
-  };
+  }
 
-  // Submit handler
+  // 2. Skills list changes
+  const handleSkillChange = (index, value) => {
+    const updatedSkills = [...formData.Skill]
+    updatedSkills[index] = value
+    // Critically, we update the array copy in the state to trigger a correct rerender
+    setFormData((prev) => ({ ...prev, Skill: updatedSkills }))
+  }
+
+  const handleAddSkill = () => {
+    setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }))
+  }
+
+  const handleRemoveSkill = (index) => {
+    const updatedSkills = [...formData.Skill]
+    updatedSkills.splice(index, 1)
+    setFormData((prev) => ({ ...prev, Skill: updatedSkills }))
+  }
+
+  // 3. Qualifications list changes
+  const handleQualificationChange = (index, e) => {
+    const { name, value, checked, type } = e.target
+    const updatedQualifications = [...qualifications]
+    updatedQualifications[index][name] = type === "checkbox" ? checked : value
+
+    if (name === "pursuing" && checked) {
+      updatedQualifications[index].endDate = ""
+    }
+    setQualifications(updatedQualifications)
+  }
+
+  const handleAddQualification = () => {
+    setQualifications((prev) => [
+      ...prev,
+      {
+        degree: "",
+        institution: "",
+        startDate: "",
+        endDate: "",
+        pursuing: false,
+      },
+    ])
+  }
+
+  const handleRemoveQualification = (index) => {
+    const updatedQualifications = [...qualifications]
+    updatedQualifications.splice(index, 1)
+    setQualifications(updatedQualifications)
+  }
+
+  // 4. Experience list changes
+  const handleExperienceChange = (index, e) => {
+    const { name, value, checked, type } = e.target
+    const updatedExperience = [...Experience]
+    updatedExperience[index][name] = type === "checkbox" ? checked : value
+
+    if (name === "currentlyWorking" && checked) {
+      updatedExperience[index].endDate = ""
+    }
+    setExperience(updatedExperience)
+  }
+
+  const handleAddExperience = () => {
+    setExperience((prev) => [
+      ...prev,
+      {
+        company: "",
+        designation: "",
+        startDate: "",
+        endDate: "",
+        currentlyWorking: false,
+      },
+    ])
+  }
+
+  const handleRemoveExperience = (index) => {
+    const updatedExperience = [...Experience]
+    updatedExperience.splice(index, 1)
+    setExperience(updatedExperience)
+  }
+
+  // --- Submission Logic ---
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = Cookies.get("userToken");
-    if (!token) return alert("Please login again.");
+    e.preventDefault()
+    const token = Cookies.get("userToken")
+    if (!token) {
+      showNotification("Authentication required. Please log in again.", "error")
+      return
+    }
 
-    const payload = new FormData();
-
-    // Append basic info
+    const payload = new FormData()
     Object.entries(formData).forEach(([key, value]) => {
       if (value) {
-        if (key === "Skill") payload.append(key, JSON.stringify(value));
-        else payload.append(key, value);
+        // Ensure array fields like Skill are stringified
+        if (key === "Skill") payload.append(key, JSON.stringify(value))
+        else payload.append(key, value)
       }
-    });
+    })
 
-    // Append multiple qualifications
-    payload.append("qualification", JSON.stringify(qualifications));
-
-    // Append experience based on type
-    payload.append("experience", JSON.stringify(experienceType === "Fresher" ? [] : Experience));
+    // Append array states as JSON strings
+    payload.append("qualification", JSON.stringify(qualifications))
+    payload.append("Experience", JSON.stringify(experienceType === "Fresher" ? [] : Experience))
 
     try {
-      const res = await fetch(
-        "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: payload,
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Update failed");
-      alert("✅ Profile updated!");
-      navigate("/jobs");
+      const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/updateProfile", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: payload,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || "Update failed")
+
+      showNotification("Profile updated successfully!", "success")
+      setTimeout(() => navigate("/jobs"), 1500)
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong!");
+      console.error("Profile update failed:", err)
+      showNotification("Update failed: " + err.message, "error")
     }
-  };
+  }
+
+  // File Preview URLs
+  const photoPreviewUrl = useFilePreview(formData.profilphoto)
+  const resumePreviewUrl = useFilePreview(formData.resume)
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fff1ed] p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-4xl space-y-6"
-      >
-        <h2 className="text-3xl font-bold text-[#caa057] text-center mb-6">
-          Complete Your Profile
-        </h2>
+    <div className="min-h-screen flex items-start justify-center bg-gray-50 p-4 sm:p-6 md:p-10 font-sans">
+      <div className="w-full max-w-5xl">
+        <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-900">
+          Complete Your <span className={`text-[${accentColor}]`}> Profile</span>
+        </h1>
 
-        {/* Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="Full Name"
-            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-            required
-          />
-          <input
-            type="email"
-            name="useremail"
-            value={formData.useremail}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-            required
-          />
-          <input
-            type="text"
-            name="phonenumber"
-            value={formData.phonenumber}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-            required
-          />
-          <input
-            type="text"
-            name="designation"
-            value={formData.designation}
-            onChange={handleChange}
-            placeholder="Designation"
-            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-            required
-          />
-        </div>
-
-        {/* Skills */}
-        <div>
-          <h3 className="font-semibold mb-2">Skills</h3>
-          {formData.Skill.map((skill, index) => (
-            <div key={index} className="flex gap-2 mb-2 items-center">
-              <input
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 sm:p-8 md:p-10 rounded-3xl shadow-2xl space-y-8 border border-gray-100"
+        >
+          {/* 1. Basic Information */}
+          <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <SectionHeader
+              icon={User}
+              title="Basic Information"
+              description="Personal details and your targeted role."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <InputField
+                icon={User}
                 type="text"
-                value={skill}
-                onChange={(e) => {
-                  const newSkill = [...formData.Skill];
-                  newSkill[index] = e.target.value;
-                  setFormData((prev) => ({ ...prev, Skill: newSkill }));
-                }}
-                placeholder="Skill"
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-              />
-              {index > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newSkill = [...formData.Skill];
-                    newSkill.splice(index, 1);
-                    setFormData((prev) => ({ ...prev, Skill: newSkill }));
-                  }}
-                  className="text-red-500 font-bold"
-                >
-                  X
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }))
-            }
-            className="text-[#caa057] font-semibold mb-4"
-          >
-            + Add Skill
-          </button>
-        </div>
-
-        {/* Qualifications */}
-        <div>
-          <h3 className="font-semibold mb-2">Qualifications</h3>
-          {qualifications.map((q, index) => (
-            <div
-              key={index}
-              className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-            >
-              <input
-                type="text"
-                name="degree"
-                value={q.degree}
-                onChange={(e) => {
-                  const updated = [...qualifications];
-                  updated[index].degree = e.target.value;
-                  setQualifications(updated);
-                }}
-                placeholder="Degree / Certification"
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
+                name="username"
+                value={formData.username}
+                onChange={handleMainFormChange}
+                placeholder="Full Name"
                 required
               />
-              <input
-                type="text"
-                name="institution"
-                value={q.institution}
-                onChange={(e) => {
-                  const updated = [...qualifications];
-                  updated[index].institution = e.target.value;
-                  setQualifications(updated);
-                }}
-                placeholder="Institution"
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
+              <InputField
+                icon={Mail}
+                type="email"
+                name="useremail"
+                value={formData.useremail}
+                onChange={handleMainFormChange}
+                placeholder="Email Address"
+                required
+                readOnly
+                disabled
+              />
+              <InputField
+                icon={Phone}
+                type="tel"
+                name="phonenumber"
+                value={formData.phonenumber}
+                onChange={handleMainFormChange}
+                placeholder="Phone Number"
                 required
               />
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  name="startDate"
-                  value={q.startDate}
-                  onChange={(e) => {
-                    const updated = [...qualifications];
-                    updated[index].startDate = e.target.value;
-                    setQualifications(updated);
-                  }}
-                  className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-                />
-                <input
-                  type="date"
-                  name="endDate"
-                  value={q.endDate}
-                  onChange={(e) => {
-                    const updated = [...qualifications];
-                    updated[index].endDate = e.target.value;
-                    setQualifications(updated);
-                  }}
-                  className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-                  disabled={q.pursuing}
-                />
-              </div>
-              <label className="flex items-center gap-2 mt-1">
-                <input
-                  type="checkbox"
-                  checked={q.pursuing}
-                  onChange={(e) => {
-                    const updated = [...qualifications];
-                    updated[index].pursuing = e.target.checked;
-                    if (e.target.checked) updated[index].endDate = "";
-                    setQualifications(updated);
-                  }}
-                />
-                Currently Pursuing
-              </label>
-              {index > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const updated = [...qualifications];
-                    updated.splice(index, 1);
-                    setQualifications(updated);
-                  }}
-                  className="text-red-500 font-bold"
-                >
-                  Remove
-                </button>
-              )}
+              <InputField
+                icon={Briefcase}
+                type="text"
+                name="designation"
+                value={formData.designation}
+                onChange={handleMainFormChange}
+                placeholder="Current/Targeted Designation"
+                required
+              />
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setQualifications((prev) => [
-                ...prev,
-                {
-                  degree: "",
-                  institution: "",
-                  board: "",
-                  university: "",
-                  fieldOfStudy: "",
-                  startDate: "",
-                  endDate: "",
-                  pursuing: false,
-                },
-              ])
-            }
-            className="text-[#caa057] font-semibold mb-4"
-          >
-            + Add Qualification
-          </button>
-        </div>
+          </section>
 
-        {/* Experience */}
-        <div>
-          <h3 className="font-semibold mb-2">Experience</h3>
-          <select
-            value={experienceType}
-            onChange={(e) => setExperienceType(e.target.value)}
-            className="w-full border px-3 py-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-          >
-            <option value="Fresher">Fresher</option>
-            <option value="0-1 year">0-1 year</option>
-            <option value="1-5 years">1-5 years</option>
-            <option value="5-10 years">5-10 years</option>
-            <option value="10+ years">10+ years</option>
-          </select>
-
-          {experienceType !== "Fresher" &&
-            Experience.map((exp, index) => (
-              <div
-                key={index}
-                className="border p-4 rounded-lg mb-3 bg-[#fff7f0] space-y-2"
-              >
-                <input
-                  type="text"
-                  name="company"
-                  value={exp.company}
-                  onChange={(e) => {
-                    const updated = [...Experience];
-                    updated[index].company = e.target.value;
-                    setExperience(updated);
-                  }}
-                  placeholder="Company Name"
-                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-                  required
-                />
-                <input
-                  type="text"
-                  name="designation"
-                  value={exp.designation}
-                  onChange={(e) => {
-                    const updated = [...Experience];
-                    updated[index].designation = e.target.value;
-                    setExperience(updated);
-                  }}
-                  placeholder="Job Role / Designation"
-                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-                  required
-                />
-                <div className="flex gap-2">
+          {/* 2. Skills */}
+          <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <SectionHeader
+              icon={Briefcase}
+              title="Skills"
+              description="List your core technical and professional skills."
+            />
+            <div className="space-y-3">
+              {formData.Skill.map((skill, index) => (
+                <div key={index} className="flex items-center gap-3">
                   <input
-                    type="date"
-                    name="startDate"
-                    value={exp.startDate}
-                    onChange={(e) => {
-                      const updated = [...Experience];
-                      updated[index].startDate = e.target.value;
-                      setExperience(updated);
-                    }}
-                    className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
+                    type="text"
+                    value={skill}
+                    onChange={(e) => handleSkillChange(index, e.target.value)}
+                    className={`w-full border border-gray-300 px-4 py-3 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[${accentColor}] focus:border-[${accentColor}] placeholder-gray-500`}
+                    placeholder={`Skill #${index + 1} (e.g., React, Java, Marketing)`}
+                    required={index === 0}
                   />
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={exp.endDate}
-                    onChange={(e) => {
-                      const updated = [...Experience];
-                      updated[index].endDate = e.target.value;
-                      setExperience(updated);
-                    }}
-                    className="border px-2 py-1 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-[#caa057]"
-                    disabled={exp.currentlyWorking}
-                  />
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(index)}
+                      className="text-red-500 hover:text-red-700 transition duration-200 p-2 rounded-full hover:bg-red-50 flex-shrink-0"
+                      title="Remove Skill"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
-                <label className="flex items-center gap-2 mt-1">
-                  <input
-                    type="checkbox"
-                    checked={exp.currentlyWorking}
-                    onChange={(e) => {
-                      const updated = [...Experience];
-                      updated[index].currentlyWorking = e.target.checked;
-                      if (e.target.checked) updated[index].endDate = "";
-                      setExperience(updated);
-                    }}
+              ))}
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                className={`flex items-center font-semibold text-[${accentColor}] hover:text-[${accentColorHover}] transition duration-200 mt-4 text-sm`}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add Another Skill
+              </button>
+            </div>
+          </section>
+
+          {/* 3. Qualifications / Education */}
+          <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <SectionHeader
+              icon={GraduationCap}
+              title="Education & Qualifications"
+              description="Your academic background and certifications."
+            />
+            <div className="space-y-6">
+              {qualifications.map((q, index) => (
+                <div key={index} className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative">
+                  <h4 className="font-bold text-base text-gray-700">Qualification #{index + 1}</h4>
+
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveQualification(index)}
+                      className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition duration-200 p-2 rounded-full hover:bg-red-50"
+                      title="Remove Qualification"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  <InputField
+                    type="text"
+                    name="degree"
+                    value={q.degree}
+                    onChange={(e) => handleQualificationChange(index, e)}
+                    placeholder="Degree / Certification Name"
+                    required
                   />
-                  Currently Working
+                  <InputField
+                    type="text"
+                    name="institution"
+                    value={q.institution}
+                    onChange={(e) => handleQualificationChange(index, e)}
+                    placeholder="Institution / University Name"
+                    required
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField
+                      label="Start Date"
+                      type="date"
+                      name="startDate"
+                      value={q.startDate}
+                      onChange={(e) => handleQualificationChange(index, e)}
+                      required
+                    />
+                    <InputField
+                      label="End Date (or Expected)"
+                      type="date"
+                      name="endDate"
+                      value={q.endDate}
+                      onChange={(e) => handleQualificationChange(index, e)}
+                      disabled={q.pursuing}
+                      required={!q.pursuing}
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 mt-2 text-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="pursuing"
+                      checked={q.pursuing}
+                      onChange={(e) => handleQualificationChange(index, e)}
+                      className={`h-4 w-4 rounded border-gray-300 text-[${accentColor}] focus:ring-[${accentColor}]`}
+                    />
+                    Currently Pursuing
+                  </label>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={handleAddQualification}
+                className={`flex items-center font-semibold text-[${accentColor}] hover:text-[${accentColorHover}] transition duration-200 mt-4 text-sm`}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add Another Qualification
+              </button>
+            </div>
+          </section>
+
+          {/* 4. Experience */}
+          <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <SectionHeader icon={Briefcase} title="Work Experience" description="Your professional history details." />
+
+            <div className="mb-6">
+              <label htmlFor="experienceType" className="block text-sm font-medium text-gray-700 mb-1">
+                Total Experience Level
+              </label>
+              <select
+                id="experienceType"
+                value={experienceType}
+                onChange={(e) => setExperienceType(e.target.value)}
+                className={`w-full border border-gray-300 px-4 py-3 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[${accentColor}] focus:border-[${accentColor}] bg-white`}
+              >
+                <option value="Fresher">Fresher (No professional experience)</option>
+                <option value="0-1 year">0-1 year</option>
+                <option value="1-5 years">1-5 years</option>
+                <option value="5-10 years">5-10 years</option>
+                <option value="10+ years">10+ years</option>
+              </select>
+            </div>
+
+            {experienceType !== "Fresher" && (
+              <div className="space-y-6">
+                {Experience.map((exp, index) => (
+                  <div key={index} className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative">
+                    <h4 className="font-bold text-base text-gray-700">Job Role #{index + 1}</h4>
+
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExperience(index)}
+                        className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition duration-200 p-2 rounded-full hover:bg-red-50"
+                        title="Remove Experience"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+
+                    <InputField
+                      type="text"
+                      name="company"
+                      value={exp.company}
+                      onChange={(e) => handleExperienceChange(index, e)}
+                      placeholder="Company Name"
+                      required
+                    />
+                    <InputField
+                      type="text"
+                      name="designation"
+                      value={exp.designation}
+                      onChange={(e) => handleExperienceChange(index, e)}
+                      placeholder="Job Role / Designation"
+                      required
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <InputField
+                        label="Start Date"
+                        type="date"
+                        name="startDate"
+                        value={exp.startDate}
+                        onChange={(e) => handleExperienceChange(index, e)}
+                        required
+                      />
+                      <InputField
+                        label="End Date"
+                        type="date"
+                        name="endDate"
+                        value={exp.endDate}
+                        onChange={(e) => handleExperienceChange(index, e)}
+                        disabled={exp.currentlyWorking}
+                        required={!exp.currentlyWorking}
+                      />
+                    </div>
+
+                    <label className="flex items-center gap-2 mt-2 text-gray-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="currentlyWorking"
+                        checked={exp.currentlyWorking}
+                        onChange={(e) => handleExperienceChange(index, e)}
+                        className={`h-4 w-4 rounded border-gray-300 text-[${accentColor}] focus:ring-[${accentColor}]`}
+                      />
+                      Currently Working Here
+                    </label>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={handleAddExperience}
+                  className={`flex items-center font-semibold text-[${accentColor}] hover:text-[${accentColorHover}] transition duration-200 mt-4 text-sm`}
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Add Another Job Role
+                </button>
+              </div>
+            )}
+          </section>
+
+          {/* 5. File Uploads (Photo & Resume) */}
+          <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+            <SectionHeader
+              icon={Upload}
+              title="Documents & Photo"
+              description="Upload your professional photo and most recent resume."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Profile Photo Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <ImageIcon className="w-4 h-4 mr-1 text-gray-500" /> Profile Photo (Image: JPG, PNG)
                 </label>
-                {index > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = [...Experience];
-                      updated.splice(index, 1);
-                      setExperience(updated);
-                    }}
-                    className="text-red-500 font-bold"
-                  >
-                    Remove
-                  </button>
+                <input
+                  type="file"
+                  name="profilphoto"
+                  onChange={handleMainFormChange}
+                  accept="image/*"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-[${accentColor}] hover:file:bg-gray-200 cursor-pointer"
+                />
+                {photoPreviewUrl ? (
+                  <div className="mt-4 flex items-center space-x-4">
+                    <img
+                      src={photoPreviewUrl || "/placeholder.svg"}
+                      alt="Profile Preview"
+                      className="w-20 h-20 object-cover rounded-full border-4 border-white shadow-lg"
+                    />
+                    <p className="text-xs text-gray-500">Photo selected.</p>
+                  </div>
+                ) : (
+                  <div className="mt-4 text-sm text-gray-500 p-3 border border-dashed rounded-lg flex items-center justify-center h-20 bg-gray-50">
+                    No photo selected.
+                  </div>
                 )}
               </div>
-            ))}
 
-          {experienceType !== "Fresher" && (
-            <button
-              type="button"
-              onClick={() =>
-                setExperience((prev) => [
-                  ...prev,
-                  { company: "", designation: "", startDate: "", endDate: "", currentlyWorking: false },
-                ])
-              }
-              className="text-[#caa057] font-semibold mb-4"
-            >
-              + Add Experience
-            </button>
-          )}
-        </div>
+              {/* Resume Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <FileText className="w-4 h-4 mr-1 text-gray-500" /> Resume / CV (.pdf, .doc, .docx)
+                </label>
+                <input
+                  type="file"
+                  name="resume"
+                  onChange={handleMainFormChange}
+                  accept=".pdf,.doc,.docx"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-[${accentColor}] hover:file:bg-gray-200 cursor-pointer"
+                />
+                {formData.resume ? (
+                  <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between shadow-sm">
+                    <span className="text-sm font-medium text-gray-800 truncate max-w-[60%] flex items-center">
+                      <FileText className={`w-5 h-5 mr-2 text-[${accentColor}]`} />
+                      {formData.resume.name}
+                    </span>
+                    <a
+                      href={resumePreviewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-xs px-3 py-1 rounded-full border border-[${accentColor}] text-[${accentColor}] hover:bg-[${accentColor}] hover:text-white transition duration-200 flex-shrink-0`}
+                      title="Open Resume in new tab"
+                    >
+                      Preview
+                    </a>
+                  </div>
+                ) : (
+                  <div className="mt-4 text-sm text-gray-500 p-3 border border-dashed rounded-lg flex items-center justify-center h-20 bg-gray-50">
+                    No resume file selected.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
 
-        {/* File Uploads */}
-        <div className="space-y-2">
-          <input
-            type="file"
-            name="profilphoto"
-            onChange={handleChange}
-            accept="image/*"
-            className="w-full border px-3 py-2 rounded"
-          />
-          <input
-            type="file"
-            name="resume"
-            onChange={handleChange}
-            accept=".pdf,.doc,.docx"
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
+          {/* Submission Button */}
+          <button
+            type="submit"
+            className={`w-full bg-[${accentColor}] hover:bg-[${accentColorHover}] text-white font-bold text-lg tracking-wide px-4 py-4 rounded-xl transition duration-300 shadow-lg shadow-[${accentColor}]/50 hover:shadow-xl`}
+          >
+            Save and Complete Profile
+          </button>
+        </form>
+      </div>
 
-        <button
-          type="submit"
-          className="w-full bg-[#caa057] hover:bg-[#b4924c] text-white font-semibold px-4 py-2 rounded transition"
-        >
-          Submit
-        </button>
-      </form>
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "" })}
+      />
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

@@ -18,6 +18,7 @@ const generateResume = (profileData) => {
     Skills = "",
     skills = "",
     qualification = "",
+    Experience = "",
     projects = "",
     certificationlink = "",
     currentSalary = "",
@@ -35,7 +36,18 @@ const generateResume = (profileData) => {
   } = profileData
 
   // Use Skills or skills field (fallback)
-  const skillsData = Skills || skills || ""
+  const parseJSON = (data) => {
+    if (!data) return null
+    try {
+      return typeof data === "string" ? JSON.parse(data) : data
+    } catch (e) {
+      return data
+    }
+  }
+
+  const skillsData = parseJSON(Skills || skills) || []
+  const qualificationData = parseJSON(qualification) || []
+  const experienceData = parseJSON(Experience) || []
   const summaryData = summary || bio || ""
 
   const profileImage = image
@@ -211,12 +223,46 @@ const generateResume = (profileData) => {
   `
 
   // Process skills into grid format
-  const skillsList = skillsData
-    ? skillsData
-        .split(",")
-        .map((skill) => `<div class="skill-item">${skill.trim()}</div>`)
-        .join("")
-    : ""
+  const skillsList = Array.isArray(skillsData)
+    ? skillsData.map((skill) => `<div class="skill-item">${skill.trim()}</div>`).join("")
+    : typeof skillsData === "string"
+      ? skillsData
+          .split(",")
+          .map((skill) => `<div class="skill-item">${skill.trim()}</div>`)
+          .join("")
+      : ""
+
+  const qualificationHTML =
+    Array.isArray(qualificationData) && qualificationData.length > 0
+      ? qualificationData
+          .map(
+            (qual) => `
+        <div class="detail-item">
+          <strong>${qual.degree || "Degree"}</strong><br/>
+          <span style="color: #6b7280;">${qual.institution || ""}</span><br/>
+          ${qual.startDate ? `<span style="font-size: 0.9em; color: #9ca3af;">${qual.startDate} - ${qual.currentlyPursuing ? "Present" : qual.endDate || ""}</span>` : ""}
+        </div>
+      `,
+          )
+          .join("")
+      : typeof qualification === "string" && qualification
+        ? `<div class="detail-item">${qualification}</div>`
+        : ""
+
+  const experienceHTML =
+    Array.isArray(experienceData) && experienceData.length > 0
+      ? experienceData
+          .map(
+            (exp) => `
+        <div class="detail-item">
+          <strong>${exp.designation || "Position"}</strong> at <strong>${exp.company || "Company"}</strong><br/>
+          ${exp.startDate ? `<span style="font-size: 0.9em; color: #9ca3af;">${exp.startDate} - ${exp.currentlyWorking ? "Present" : exp.endDate || ""}</span>` : ""}
+          ${exp.description ? `<p style="margin-top: 8px; color: #4b5563;">${exp.description}</p>` : ""}
+        </div>
+      `,
+          )
+          .join("")
+      : ""
 
   const resumeHTML = `
     <!DOCTYPE html>
@@ -238,7 +284,6 @@ const generateResume = (profileData) => {
             ${email ? `<span class="contact-item">📧 ${email}</span>` : ""}
             ${phone ? `<span class="contact-item">📱 ${phone}</span>` : ""}
             ${location ? `<span class="contact-item">📍 ${location}</span>` : ""}
-            ${experience ? `<span class="contact-item">💼 ${experience} Experience</span>` : ""}
           </div>
         </div>
 
@@ -257,7 +302,7 @@ const generateResume = (profileData) => {
 
          Skills Section 
         ${
-          skillsData
+          skillsList
             ? `
         <div class="section">
           <h2 class="section-title">Core Skills & Expertise</h2>
@@ -270,13 +315,12 @@ const generateResume = (profileData) => {
 
          Professional Experience 
         ${
-          previousCompany || experience
+          experienceHTML
             ? `
         <div class="section">
           <h2 class="section-title">Professional Experience</h2>
-          <div class="content">
-            ${previousCompany ? `<p><strong>Previous Company:</strong> ${previousCompany}</p>` : ""}
-            ${experience ? `<p><strong>Years of Experience:</strong> ${experience}</p>` : ""}
+          <div class="detail-section">
+            ${experienceHTML}
           </div>
         </div>`
             : ""
@@ -284,12 +328,12 @@ const generateResume = (profileData) => {
 
          Education & Qualifications 
         ${
-          qualification
+          qualificationHTML
             ? `
         <div class="section">
           <h2 class="section-title">Education & Qualifications</h2>
-          <div class="content">
-            <p>${qualification}</p>
+          <div class="detail-section">
+            ${qualificationHTML}
           </div>
         </div>`
             : ""
@@ -332,24 +376,6 @@ const generateResume = (profileData) => {
             ${currentSalary ? `<div class="detail-item"><strong>Current Salary:</strong> ${currentSalary}</div>` : ""}
             ${expectedSalary ? `<div class="detail-item"><strong>Expected Salary:</strong> ${expectedSalary}</div>` : ""}
             ${preferredLocation ? `<div class="detail-item"><strong>Preferred Location:</strong> ${preferredLocation}</div>` : ""}
-          </div>
-        </div>`
-            : ""
-        }
-
-         Recruiter Information (if available) 
-        ${
-          recruterCompany || recruterPhone || recruterIndustry
-            ? `
-        <div class="section">
-          <h2 class="section-title">Recruiter Information</h2>
-          <div class="detail-section">
-            ${recruterCompany ? `<div class="detail-item"><strong>Company:</strong> ${recruterCompany}</div>` : ""}
-            ${recruterCompanyType ? `<div class="detail-item"><strong>Company Type:</strong> ${recruterCompanyType}</div>` : ""}
-            ${recruterIndustry ? `<div class="detail-item"><strong>Industry:</strong> ${recruterIndustry}</div>` : ""}
-            ${recruterPhone ? `<div class="detail-item"><strong>Contact:</strong> ${recruterPhone}</div>` : ""}
-            ${recruterCompanyAddress ? `<div class="detail-item"><strong>Address:</strong> ${recruterCompanyAddress}</div>` : ""}
-            ${recruterGstIn ? `<div class="detail-item"><strong>GST IN:</strong> ${recruterGstIn}</div>` : ""}
           </div>
         </div>`
             : ""
