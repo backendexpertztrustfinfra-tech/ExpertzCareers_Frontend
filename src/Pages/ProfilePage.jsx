@@ -38,6 +38,7 @@ import {
   Clock,
   Plus,
   Trash2,
+  ExternalLink,
 } from "lucide-react"
 
 import generateResume from "../utils/generateResume"
@@ -163,7 +164,6 @@ const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
   </div>
 )
 
-// --- Stable add form for Qualifications ---
 const AddQualificationFormFixed = ({ onSave, onCancel }) => {
   const [form, setForm] = useState({
     degree: "",
@@ -230,7 +230,6 @@ const AddQualificationFormFixed = ({ onSave, onCancel }) => {
   )
 }
 
-// --- Stable add form for Experience ---
 const AddExperienceFormFixed = ({ onSave, onCancel }) => {
   const [form, setForm] = useState({
     designation: "",
@@ -297,7 +296,6 @@ const AddExperienceFormFixed = ({ onSave, onCancel }) => {
   )
 }
 
-// --- Simple editable row for a single Skill ---
 const EditableSkillRow = ({ skill, index, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [value, setValue] = useState(skill || "")
@@ -356,7 +354,6 @@ const EditableSkillRow = ({ skill, index, onSave, onDelete }) => {
   )
 }
 
-// --- Add Skill form with Save/Cancel ---
 const AddSkillFormFixed = ({ onSave, onCancel }) => {
   const [name, setName] = useState("")
   return (
@@ -384,6 +381,249 @@ const AddSkillFormFixed = ({ onSave, onCancel }) => {
         </Button>
       </div>
     </div>
+  )
+}
+
+const EditableQualificationCard = ({ qualification, index, onSave, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [form, setForm] = useState(qualification || {})
+
+  useEffect(() => {
+    setForm(qualification || {})
+  }, [qualification])
+
+  return (
+    <Card className="border-orange-100 hover:shadow-lg transition-shadow relative">
+      <CardContent className="p-4">
+        {isEditing ? (
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="degree"
+              value={form.degree || ""}
+              onChange={(e) => setForm((p) => ({ ...p, degree: e.target.value }))}
+              placeholder="Degree / Certification Name"
+              className="w-full p-2 border rounded"
+            />
+            <input
+              type="text"
+              name="institution"
+              value={form.institution || ""}
+              onChange={(e) => setForm((p) => ({ ...p, institution: e.target.value }))}
+              placeholder="Institution / University Name"
+              className="w-full p-2 border rounded"
+            />
+            <div className="flex gap-2">
+              <input
+                type="date"
+                name="startDate"
+                value={form.startDate || ""}
+                onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
+                className="w-1/2 p-2 border rounded"
+              />
+              <input
+                type="date"
+                name="endDate"
+                value={form.endDate || ""}
+                onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
+                disabled={form.pursuing}
+                className="w-1/2 p-2 border rounded"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                name="pursuing"
+                checked={form.pursuing || false}
+                onChange={(e) => setForm((p) => ({ ...p, pursuing: e.target.checked }))}
+              />
+              Currently Pursuing
+            </label>
+            <div className="flex space-x-2 mt-4">
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await onSave(index, form)
+                  setIsEditing(false)
+                }}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false)
+                  setForm(qualification || {})
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                <h4 className="font-semibold text-lg text-gray-900">{qualification.degree || "N/A"}</h4>
+                <p className="text-sm text-gray-600 mt-1">{qualification.institution || "N/A"}</p>
+              </div>
+              <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+                <GraduationCap className="w-3 h-3 mr-1" />#{index + 1}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500 mt-3">
+              <Calendar className="w-4 h-4" />
+              <span>
+                {qualification.startDate
+                  ? new Date(qualification.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                  : "N/A"}
+                {" - "}
+                {qualification.pursuing ? (
+                  <Badge className="bg-green-500 text-white text-xs">Currently Pursuing</Badge>
+                ) : qualification.endDate ? (
+                  new Date(qualification.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                ) : (
+                  "N/A"
+                )}
+              </span>
+            </div>
+            <div className="absolute top-2 right-2 flex space-x-1">
+              <button onClick={() => setIsEditing(true)} className="p-1 rounded-full hover:bg-gray-100">
+                <Edit3 className="w-4 h-4 text-gray-500" />
+              </button>
+              <button onClick={() => onDelete(index)} className="p-1 rounded-full hover:bg-red-100">
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+const EditableExperienceCard = ({ experience, index, onSave, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [form, setForm] = useState(experience || {})
+
+  useEffect(() => {
+    setForm(experience || {})
+  }, [experience])
+
+  return (
+    <Card className="border-orange-100 hover:shadow-lg transition-shadow relative">
+      <CardContent className="p-4">
+        {isEditing ? (
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="designation"
+              value={form.designation || ""}
+              onChange={(e) => setForm((p) => ({ ...p, designation: e.target.value }))}
+              placeholder="Job Role / Designation"
+              className="w-full p-2 border rounded"
+            />
+            <input
+              type="text"
+              name="company"
+              value={form.company || ""}
+              onChange={(e) => setForm((p) => ({ ...p, company: e.target.value }))}
+              placeholder="Company Name"
+              className="w-full p-2 border rounded"
+            />
+            <div className="flex gap-2">
+              <input
+                type="date"
+                name="startDate"
+                value={form.startDate || ""}
+                onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
+                className="w-1/2 p-2 border rounded"
+              />
+              <input
+                type="date"
+                name="endDate"
+                value={form.endDate || ""}
+                onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
+                disabled={form.currentlyWorking}
+                className="w-1/2 p-2 border rounded"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                name="currentlyWorking"
+                checked={form.currentlyWorking || false}
+                onChange={(e) => setForm((p) => ({ ...p, currentlyWorking: e.target.checked }))}
+              />
+              Currently Working Here
+            </label>
+            <div className="flex space-x-2 mt-4">
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await onSave(index, form)
+                  setIsEditing(false)
+                }}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false)
+                  setForm(experience || {})
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                <h4 className="font-semibold text-lg text-gray-900">{experience.designation || "N/A"}</h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <Building className="w-4 h-4 text-gray-500" />
+                  <p className="text-sm text-gray-600">{experience.company || "N/A"}</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+                <Briefcase className="w-3 h-3 mr-1" />#{index + 1}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500 mt-3">
+              <Clock className="w-4 h-4" />
+              <span>
+                {experience.startDate
+                  ? new Date(experience.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                  : "N/A"}
+                {" - "}
+                {experience.currentlyWorking ? (
+                  <Badge className="bg-green-500 text-white text-xs">Currently Working</Badge>
+                ) : experience.endDate ? (
+                  new Date(experience.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                ) : (
+                  "N/A"
+                )}
+              </span>
+            </div>
+            <div className="absolute top-2 right-2 flex space-x-1">
+              <button onClick={() => setIsEditing(true)} className="p-1 rounded-full hover:bg-gray-100">
+                <Edit3 className="w-4 h-4 text-gray-500" />
+              </button>
+              <button onClick={() => onDelete(index)} className="p-1 rounded-full hover:bg-red-100">
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -419,21 +659,22 @@ const ProfilePage = () => {
   const [modalMessage, setModalMessage] = useState("")
 
   // State for Skills
-  const [newSkillName, setNewSkillName] = useState("")
   const [isAddingSkill, setIsAddingSkill] = useState(false)
-  const [editingSkillIndex, setEditingSkillIndex] = useState(null)
-  const [tempSkillValue, setTempSkillValue] = useState("")
-
+  
   // State for Qualifications
   const [isAddingQualification, setIsAddingQualification] = useState(false)
-  const [newQualification, setNewQualification] = useState({})
-  const [editingQualIndex, setEditingQualIndex] = useState(null) // Declare editingQualIndex
-
+  
   // State for Experience
   const [isAddingExperience, setIsAddingExperience] = useState(false)
-  const [newExperience, setNewExperience] = useState({})
-  const [editingExpIndex, setEditingExpIndex] = useState(null) // Declare editingExpIndex
-
+  
+  // State for Portfolio links
+  const [isEditingPortfolio, setIsEditingPortfolio] = useState(false);
+  const [isEditingProjects, setIsEditingProjects] = useState(false);
+  const [isEditingCert, setIsEditingCert] = useState(false);
+  const [tempPortfolioValue, setTempPortfolioValue] = useState("");
+  const [tempProjectValue, setTempProjectValue] = useState("");
+  const [tempCertValue, setTempCertValue] = useState("");
+  
   // Other state for file uploads
   const [videoFile, setVideoFile] = useState(null)
   const [previewVideo, setPreviewVideo] = useState(null)
@@ -488,7 +729,7 @@ const ProfilePage = () => {
       })
 
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
       if (!response.ok) {
         throw new Error(data.message || "Failed to fetch profile")
       }
@@ -548,22 +789,21 @@ const ProfilePage = () => {
         // optimistic merge to prevent flicker
         setProfile((prev) => {
           const optimistic = { ...prev }
+          const beToUi = {
+            username: "name",
+            useremail: "email",
+            phonenumber: "phone",
+            designation: "designation",
+            location: "location",
+            previousSalary: "currentSalary",
+            salaryExpectation: "expectedSalary",
+            bio: "bio",
+            projectlink: "projects",
+            certificationlink: "certificationlink",
+            portfioliolink: "portfioliolink",
+            previousCompany: "previousCompany",
+          }
           for (const [k, v] of Object.entries(payloadOrFormData)) {
-            // convert backend keys to UI keys for optimistic merge
-            const beToUi = {
-              username: "name",
-              useremail: "email",
-              phonenumber: "phone",
-              designation: "designation",
-              location: "location",
-              previousSalary: "currentSalary",
-              salaryExpectation: "expectedSalary",
-              bio: "bio",
-              projectlink: "projects",
-              certificationlink: "certificationlink",
-              portfioliolink: "portfioliolink",
-              previousCompany: "previousCompany",
-            }
             const uiKey = beToUi[k]
             if (uiKey) optimistic[uiKey] = v
           }
@@ -587,13 +827,11 @@ const ProfilePage = () => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || "Failed to update profile")
 
-      // safe update to avoid data disappearing
       setProfileSafely(data)
       showNotification("Profile updated successfully!")
     } catch (error) {
       console.error("Error updating profile:", error)
       showNotification(error.message || "Failed to update profile.")
-      // ensure UI is in a good state
       fetchProfile()
     }
   }
@@ -622,7 +860,6 @@ const ProfilePage = () => {
       payload.introvideo = videoFile
     }
 
-    // The handleUpdateProfile function will handle the API call and notifications
     await handleUpdateProfile(payload)
   }
 
@@ -640,16 +877,15 @@ const ProfilePage = () => {
     else if (editingField === "location") updatePayload.location = tempValue
     else if (editingField === "phone") updatePayload.phonenumber = tempValue
     else if (editingField === "email")
-      updatePayload.useremail = tempValue // Assuming email can also be edited
+      updatePayload.useremail = tempValue 
     else if (editingField === "bio") updatePayload.bio = tempValue
-    else if (editingField === "projects") updatePayload.projectlink = tempValue
-    else if (editingField === "certificationlink") updatePayload.certificationlink = tempValue
-    else if (editingField === "portfioliolink") updatePayload.portfioliolink = tempValue
     else if (editingField === "previousCompany") updatePayload.previousCompany = tempValue
     else if (editingField === "currentSalary") updatePayload.previousSalary = tempValue
     else if (editingField === "expectedSalary") updatePayload.salaryExpectation = tempValue
+    else if (editingField === "projects") updatePayload.projectlink = tempValue;
+    else if (editingField === "certificationlink") updatePayload.certificationlink = tempValue;
+    else if (editingField === "portfioliolink") updatePayload.portfioliolink = tempValue;
 
-    // Check if any actual change is being saved
     if (updatePayload[uiToBackendMap[editingField]] !== profile[editingField]) {
       needsUpdate = true
     }
@@ -681,17 +917,10 @@ const ProfilePage = () => {
     }
   }
 
-  const handleEditSkill = async (index, updatedSkillValue) => {
-    if (!updatedSkillValue.trim()) {
-      showNotification("Skill name cannot be empty.")
-      return
-    }
-    const newSkillsList = profile.Skills.map((s, i) => (i === index ? updatedSkillValue.trim() : s))
+  const saveSkillAtIndex = async (index, updated) => {
+    const newSkillsList = profile.Skills.map((s, i) => (i === index ? updated : s))
     const success = await saveArrayToBackend("Skill", newSkillsList)
-    if (success) {
-      setEditingSkillIndex(null)
-      showNotification("Skill updated successfully!")
-    }
+    if (success) showNotification("Skill updated successfully!")
   }
 
   const handleRemoveSkill = async (index) => {
@@ -701,13 +930,6 @@ const ProfilePage = () => {
     if (success) {
       showNotification("Skill removed successfully!")
     }
-  }
-
-  // --- Helper to save skill at index (same pattern as qualification) ---
-  const saveSkillAtIndex = async (index, updated) => {
-    const newSkillsList = profile.Skills.map((s, i) => (i === index ? updated : s))
-    const success = await saveArrayToBackend("Skill", newSkillsList)
-    if (success) showNotification("Skill updated successfully!")
   }
 
   // --- Qualifications Logic ---
@@ -724,13 +946,10 @@ const ProfilePage = () => {
     }
   }
 
-  const handleEditQualification = async (index, updatedQualification) => {
-    const newQualsList = profile.qualification.map((q, i) => (i === index ? updatedQualification : q))
+  const saveQualificationAtIndex = async (index, updated) => {
+    const newQualsList = profile.qualification.map((q, i) => (i === index ? updated : q))
     const success = await saveArrayToBackend("qualification", newQualsList)
-    if (success) {
-      setEditingQualIndex(null) // Close edit mode
-      showNotification("Qualification updated successfully!")
-    }
+    if (success) showNotification("Qualification updated successfully!")
   }
 
   const handleRemoveQualification = async (index) => {
@@ -756,13 +975,10 @@ const ProfilePage = () => {
     }
   }
 
-  const handleEditExperience = async (index, updatedExperience) => {
-    const newExpList = profile.experience.map((e, i) => (i === index ? updatedExperience : e))
+  const saveExperienceAtIndex = async (index, updated) => {
+    const newExpList = profile.experience.map((e, i) => (i === index ? updated : e))
     const success = await saveArrayToBackend("Experience", newExpList)
-    if (success) {
-      setEditingExpIndex(null)
-      showNotification("Experience updated successfully!")
-    }
+    if (success) showNotification("Experience updated successfully!")
   }
 
   const handleRemoveExperience = async (index) => {
@@ -773,23 +989,10 @@ const ProfilePage = () => {
       showNotification("Experience removed successfully!")
     }
   }
-
-  const saveQualificationAtIndex = async (index, updated) => {
-    const newQualsList = profile.qualification.map((q, i) => (i === index ? updated : q))
-    const success = await saveArrayToBackend("qualification", newQualsList)
-    if (success) showNotification("Qualification updated successfully!")
-  }
-
-  const saveExperienceAtIndex = async (index, updated) => {
-    const newExpList = profile.experience.map((e, i) => (i === index ? updated : e))
-    const success = await saveArrayToBackend("Experience", newExpList)
-    if (success) showNotification("Experience updated successfully!")
-  }
-
+  
   // --- Other profile field logic (video, resume, etc.) ---
   const handleVideoDelete = async () => {
     const fd = new FormData()
-    // explicitly set null via empty value for backend to clear
     fd.append("introvideo", "")
     await handleUpdateProfile(fd)
   }
@@ -809,7 +1012,7 @@ const ProfilePage = () => {
     fd.append("resume", file)
     await handleUpdateProfile(fd)
   }
-
+  
   const handleDownloadResume = () => {
     if (!profile.name && !profile.email) {
       showNotification("Please fill in at least your name and email before generating the resume.")
@@ -818,6 +1021,43 @@ const ProfilePage = () => {
     generateResume(profile)
     showNotification("Your resume has been generated and downloaded!")
   }
+
+  const handleSavePortfolioField = async (field) => {
+    let valueToSave;
+    let uiKey;
+    if (field === "projects") {
+        valueToSave = tempProjectValue;
+        uiKey = "projects";
+    } else if (field === "certificationlink") {
+        valueToSave = tempCertValue;
+        uiKey = "certificationlink";
+    } else if (field === "portfioliolink") {
+        valueToSave = tempPortfolioValue;
+        uiKey = "portfioliolink";
+    } else {
+        return; 
+    }
+
+    const payload = { [uiToBackendMap[uiKey]]: valueToSave };
+    await handleUpdateProfile(payload);
+
+    if (field === "projects") setIsEditingProjects(false);
+    if (field === "certificationlink") setIsEditingCert(false);
+    if (field === "portfioliolink") setIsEditingPortfolio(false);
+};
+
+const handleCancelPortfolioEdit = (field) => {
+    if (field === "projects") {
+        setIsEditingProjects(false);
+        setTempProjectValue(profile.projects);
+    } else if (field === "certificationlink") {
+        setIsEditingCert(false);
+        setTempCertValue(profile.certificationlink);
+    } else if (field === "portfioliolink") {
+        setIsEditingPortfolio(false);
+        setTempPortfolioValue(profile.portfioliolink);
+    }
+};
 
   useEffect(() => {
     fetchJobStats()
@@ -859,14 +1099,14 @@ const ProfilePage = () => {
       editable: false,
       placeholder: "Your email address",
     },
-    {
-      key: "previousCompany",
-      icon: Building,
-      value: profile.previousCompany,
-      color: "text-gray-600",
-      editable: true,
-      placeholder: "Enter your previous company",
-    },
+    // {
+    //   key: "previousCompany",
+    //   icon: Building,
+    //   value: profile.previousCompany,
+    //   color: "text-gray-600",
+    //   editable: true,
+    //   placeholder: "Enter your previous company",
+    // },
   ]
 
   const jobStatsData = [
@@ -874,387 +1114,13 @@ const ProfilePage = () => {
     { label: "Saved", value: jobStats.saved, icon: Heart, color: "text-red-500", bg: "bg-red-100" },
   ]
 
-  // A dedicated component for the add qualification form - Replaced by AddQualificationFormFixed
-  // const AddQualificationForm = () => (
-  //   <div className="p-4 border-2 border-dashed rounded-lg bg-gray-50 space-y-4">
-  //     <h3 className="text-lg font-semibold">Add New Qualification</h3>
-  //     <input
-  //       type="text"
-  //       value={newQualification.degree || ""}
-  //       onChange={(e) => setNewQualification((prev) => ({ ...prev, degree: e.target.value }))}
-  //       placeholder="Degree / Certification Name"
-  //       className="w-full p-2 border rounded"
-  //     />
-  //     <input
-  //       type="text"
-  //       value={newQualification.institution || ""}
-  //       onChange={(e) => setNewQualification((prev) => ({ ...prev, institution: e.target.value }))}
-  //       placeholder="Institution / University Name"
-  //       className="w-full p-2 border rounded"
-  //     />
-  //     <div className="flex gap-2">
-  //       <input
-  //         type="date"
-  //         value={newQualification.startDate || ""}
-  //         onChange={(e) => setNewQualification((prev) => ({ ...prev, startDate: e.target.value }))}
-  //         className="w-1/2 p-2 border rounded"
-  //       />
-  //       <input
-  //         type="date"
-  //         value={newQualification.endDate || ""}
-  //         onChange={(e) => setNewQualification((prev) => ({ ...prev, endDate: e.target.value }))}
-  //         disabled={newQualification.pursuing}
-  //         className="w-1/2 p-2 border rounded"
-  //       />
-  //     </div>
-  //     <label className="flex items-center gap-2 text-sm text-gray-600">
-  //       <input
-  //         type="checkbox"
-  //         checked={newQualification.pursuing || false}
-  //         onChange={(e) => setNewQualification((prev) => ({ ...prev, pursuing: e.target.checked }))}
-  //       />
-  //       Currently Pursuing
-  //     </label>
-  //     <div className="flex space-x-2">
-  //       <Button
-  //         onClick={async () => {
-  //           if (!newQualification.degree || !newQualification.institution) {
-  //             showNotification("Please fill in degree and institution.")
-  //             return
-  //           }
-  //           const newList = [...profile.qualification, newQualification]
-  //           const ok = await saveArrayToBackend("qualification", newList)
-  //           if (ok) {
-  //             setIsAddingQualification(false)
-  //             setNewQualification({})
-  //             showNotification("Qualification added successfully!")
-  //           }
-  //         }}
-  //       >
-  //         Save
-  //       </Button>
-  //       <Button
-  //         variant="outline"
-  //         onClick={() => {
-  //           setIsAddingQualification(false)
-  //           setNewQualification({})
-  //         }}
-  //       >
-  //         Cancel
-  //       </Button>
-  //     </div>
-  //   </div>
-  // )
-
-  // A dedicated component for the add experience form - Replaced by AddExperienceFormFixed
-  // const AddExperienceForm = () => (
-  //   <div className="p-4 border-2 border-dashed rounded-lg bg-gray-50 space-y-4">
-  //     <h3 className="text-lg font-semibold">Add New Experience</h3>
-  //     <input
-  //       type="text"
-  //       value={newExperience.designation || ""}
-  //       onChange={(e) => setNewExperience((prev) => ({ ...prev, designation: e.target.value }))}
-  //       placeholder="Job Role / Designation"
-  //       className="w-full p-2 border rounded"
-  //     />
-  //     <input
-  //       type="text"
-  //       value={newExperience.company || ""}
-  //       onChange={(e) => setNewExperience((prev) => ({ ...prev, company: e.target.value }))}
-  //       placeholder="Company Name"
-  //       className="w-full p-2 border rounded"
-  //     />
-  //     <div className="flex gap-2">
-  //       <input
-  //         type="date"
-  //         value={newExperience.startDate || ""}
-  //         onChange={(e) => setNewExperience((prev) => ({ ...prev, startDate: e.target.value }))}
-  //         className="w-1/2 p-2 border rounded"
-  //       />
-  //       <input
-  //         type="date"
-  //         value={newExperience.endDate || ""}
-  //         onChange={(e) => setNewExperience((prev) => ({ ...prev, endDate: e.target.value }))}
-  //         disabled={newExperience.currentlyWorking}
-  //         className="w-1/2 p-2 border rounded"
-  //       />
-  //     </div>
-  //     <label className="flex items-center gap-2 text-sm text-gray-600">
-  //       <input
-  //         type="checkbox"
-  //         checked={newExperience.currentlyWorking || false}
-  //         onChange={(e) => setNewExperience((prev) => ({ ...prev, currentlyWorking: e.target.checked }))}
-  //       />
-  //       Currently Working Here
-  //     </label>
-  //     <div className="flex space-x-2">
-  //       <Button onClick={handleAddExperience}>Save</Button>
-  //       <Button
-  //         variant="outline"
-  //         onClick={() => {
-  //           setIsAddingExperience(false)
-  //           setNewExperience({})
-  //         }}
-  //       >
-  //         Cancel
-  //       </Button>
-  //     </div>
-  //   </div>
-  // )
-
-  const EditableQualificationCard = ({ qualification, index, onSave, onDelete }) => {
-    const [isEditing, setIsEditing] = useState(false)
-    const [form, setForm] = useState(qualification || {})
-
-    useEffect(() => {
-      // keep local form in sync if list changes externally
-      setForm(qualification || {})
-    }, [qualification])
-
-    return (
-      <Card className="border-orange-100 hover:shadow-lg transition-shadow relative">
-        <CardContent className="p-4">
-          {isEditing ? (
-            <div className="space-y-4">
-              <input
-                type="text"
-                name="degree"
-                value={form.degree || ""}
-                onChange={(e) => setForm((p) => ({ ...p, degree: e.target.value }))}
-                placeholder="Degree / Certification Name"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                name="institution"
-                value={form.institution || ""}
-                onChange={(e) => setForm((p) => ({ ...p, institution: e.target.value }))}
-                placeholder="Institution / University Name"
-                className="w-full p-2 border rounded"
-              />
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  name="startDate"
-                  value={form.startDate || ""}
-                  onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-                  className="w-1/2 p-2 border rounded"
-                />
-                <input
-                  type="date"
-                  name="endDate"
-                  value={form.endDate || ""}
-                  onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
-                  disabled={form.pursuing}
-                  className="w-1/2 p-2 border rounded"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  name="pursuing"
-                  checked={form.pursuing || false}
-                  onChange={(e) => setForm((p) => ({ ...p, pursuing: e.target.checked }))}
-                />
-                Currently Pursuing
-              </label>
-              <div className="flex space-x-2 mt-4">
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    await onSave(index, form)
-                    setIsEditing(false)
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  Save
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false)
-                    setForm(qualification || {})
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg text-gray-900">{qualification.degree || "N/A"}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{qualification.institution || "N/A"}</p>
-                </div>
-                <Badge variant="secondary" className="bg-orange-100 text-orange-700">
-                  <GraduationCap className="w-3 h-3 mr-1" />#{index + 1}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-3">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {qualification.startDate
-                    ? new Date(qualification.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-                    : "N/A"}
-                  {" - "}
-                  {qualification.pursuing ? (
-                    <Badge className="bg-green-500 text-white text-xs">Currently Pursuing</Badge>
-                  ) : qualification.endDate ? (
-                    new Date(qualification.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-                  ) : (
-                    "N/A"
-                  )}
-                </span>
-              </div>
-              <div className="absolute top-2 right-2 flex space-x-1">
-                <button onClick={() => setIsEditing(true)} className="p-1 rounded-full hover:bg-gray-100">
-                  <Edit3 className="w-4 h-4 text-gray-500" />
-                </button>
-                <button onClick={() => onDelete(index)} className="p-1 rounded-full hover:bg-red-100">
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const EditableExperienceCard = ({ experience, index, onSave, onDelete }) => {
-    const [isEditing, setIsEditing] = useState(false)
-    const [form, setForm] = useState(experience || {})
-
-    useEffect(() => {
-      setForm(experience || {})
-    }, [experience])
-
-    return (
-      <Card className="border-orange-100 hover:shadow-lg transition-shadow relative">
-        <CardContent className="p-4">
-          {isEditing ? (
-            <div className="space-y-4">
-              <input
-                type="text"
-                name="designation"
-                value={form.designation || ""}
-                onChange={(e) => setForm((p) => ({ ...p, designation: e.target.value }))}
-                placeholder="Job Role / Designation"
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                name="company"
-                value={form.company || ""}
-                onChange={(e) => setForm((p) => ({ ...p, company: e.target.value }))}
-                placeholder="Company Name"
-                className="w-full p-2 border rounded"
-              />
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  name="startDate"
-                  value={form.startDate || ""}
-                  onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-                  className="w-1/2 p-2 border rounded"
-                />
-                <input
-                  type="date"
-                  name="endDate"
-                  value={form.endDate || ""}
-                  onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
-                  disabled={form.currentlyWorking}
-                  className="w-1/2 p-2 border rounded"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  name="currentlyWorking"
-                  checked={form.currentlyWorking || false}
-                  onChange={(e) => setForm((p) => ({ ...p, currentlyWorking: e.target.checked }))}
-                />
-                Currently Working Here
-              </label>
-              <div className="flex space-x-2 mt-4">
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    await onSave(index, form)
-                    setIsEditing(false)
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  Save
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false)
-                    setForm(experience || {})
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg text-gray-900">{experience.designation || "N/A"}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Building className="w-4 h-4 text-gray-500" />
-                    <p className="text-sm text-gray-600">{experience.company || "N/A"}</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="bg-orange-100 text-orange-700">
-                  <Briefcase className="w-3 h-3 mr-1" />#{index + 1}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-3">
-                <Clock className="w-4 h-4" />
-                <span>
-                  {experience.startDate
-                    ? new Date(experience.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-                    : "N/A"}
-                  {" - "}
-                  {experience.currentlyWorking ? (
-                    <Badge className="bg-green-500 text-white text-xs">Currently Working</Badge>
-                  ) : experience.endDate ? (
-                    new Date(experience.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-                  ) : (
-                    "N/A"
-                  )}
-                </span>
-              </div>
-              <div className="absolute top-2 right-2 flex space-x-1">
-                <button onClick={() => setIsEditing(true)} className="p-1 rounded-full hover:bg-gray-100">
-                  <Edit3 className="w-4 h-4 text-gray-500" />
-                </button>
-                <button onClick={() => onDelete(index)} className="p-1 rounded-full hover:bg-red-100">
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Profile Header Card */}
         <Card className="overflow-hidden bg-gradient-to-br from-white via-orange-50 to-yellow-50 border-2 border-orange-200/50 shadow-2xl mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5"></div>
           <CardContent className="relative p-6 sm:p-8">
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
-              {/* Avatar and Video Intro Section */}
               <div className="relative group text-center md:text-left mb-6 md:mb-0">
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-4 border-gradient-to-br from-orange-400 to-yellow-400 shadow-2xl ring-4 ring-orange-200/50">
@@ -1280,7 +1146,6 @@ const ProfilePage = () => {
                       if (!file) return
                       const formData = new FormData()
                       formData.append("profilphoto", file)
-                      // inside the avatar photo onChange handler replace the then(...) with safe setter + refetch fallback
                       fetch(`${BASE_URL}/jobseeker/updateProfile`, {
                         method: "PUT",
                         headers: { Authorization: `Bearer ${Cookies.get("userToken")}` },
@@ -1303,7 +1168,6 @@ const ProfilePage = () => {
                     accept="image/*"
                   />
                 </div>
-
                 <div className="mt-4">
                   {previewVideo || profile.videoIntro ? (
                     <div className="relative">
@@ -1342,8 +1206,6 @@ const ProfilePage = () => {
                   )}
                 </div>
               </div>
-
-              {/* Profile Info Section */}
               <div className="flex-1 space-y-6">
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-bold flex items-center group">
@@ -1413,7 +1275,6 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-14 sm:h-16 bg-white/80 backdrop-blur-sm border border-orange-200/50 rounded-xl">
             {[
@@ -1435,7 +1296,6 @@ const ProfilePage = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Job Activity Dashboard */}
               <div className="lg:col-span-2">
                 <Card className="border-[#fff1ed] h-full bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
@@ -1455,7 +1315,6 @@ const ProfilePage = () => {
                 </Card>
               </div>
 
-              {/* Career Recommendations */}
               <div className="lg:col-span-1">
                 <Card className="bg-gradient-to-br from-[#fff1ed]/70 to-[#fff1ed]/30 border border-[#fff1ed] flex flex-col justify-center h-full shadow-md hover:shadow-lg transition-shadow duration-300">
                   <CardHeader className="pb-3">
@@ -1483,7 +1342,6 @@ const ProfilePage = () => {
             </div>
           </TabsContent>
 
-          {/* Skills Tab */}
           <TabsContent value="Skills" className="space-y-6">
             <Card className="border-[#fff1ed]">
               <CardHeader>
@@ -1530,7 +1388,6 @@ const ProfilePage = () => {
             </Card>
           </TabsContent>
 
-          {/* Experience and Education Tabs */}
           <TabsContent value="experience" className="space-y-6">
             <Card className="border-[#fff1ed]">
               <CardHeader>
@@ -1550,7 +1407,6 @@ const ProfilePage = () => {
                     onDelete={handleRemoveQualification}
                   />
                 ))}
-                {/* CHANGE: replace inline “Add New Qualification” with stable top-level component to avoid focus loss */}
                 {isAddingQualification ? (
                   <AddQualificationFormFixed
                     onSave={async (entry) => {
@@ -1592,7 +1448,6 @@ const ProfilePage = () => {
                     onDelete={handleRemoveExperience}
                   />
                 ))}
-                {/* CHANGE: replace inline “Add New Experience” with stable top-level component to avoid focus loss */}
                 {isAddingExperience ? (
                   <AddExperienceFormFixed
                     onSave={async (entry) => {
@@ -1617,7 +1472,6 @@ const ProfilePage = () => {
             </Card>
           </TabsContent>
 
-          {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
             <Card className="bg-gradient-to-br from-[#fff1ed] to-[#fff1ed] border-2 border-[#fff1ed]">
               <CardHeader>
@@ -1625,91 +1479,159 @@ const ProfilePage = () => {
                   <FileText className="w-5 h-5 mr-2 text-[#caa057]" />
                   Resume & Documents
                 </CardTitle>
-                <CardDescription>Upload your resume and other important documents</CardDescription>
+                <CardDescription>
+                  Upload your resume and other important documents
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Resume Upload */}
-                  <div className="text-center p-8 border-2 border-dashed border-[#caa057] rounded-lg hover:border-[#caa057] transition-colors">
-                    <Upload className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Upload Resume</h3>
-                    <p className="text-sm text-gray-500 mb-4">PDF, DOC, or DOCX (Max 5MB)</p>
-                    <input
-                      id="resumeInput"
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleResumeUpload}
-                    />
-                    <div className="flex flex-col items-center space-y-4">
-                      <Button
-                        className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg w-full max-w-xs"
-                        onClick={() => document.getElementById("resumeInput").click()}
+                <div className="text-center p-8 border-2 border-dashed border-[#caa057] rounded-lg hover:border-[#caa057] transition-colors">
+                  <Upload className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">Upload Resume</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    PDF, DOC, or DOCX (Max 5MB)
+                  </p>
+                  <input
+                    id="resumeInput"
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                  />
+                  <div className="flex flex-col items-center space-y-4">
+                    <Button
+                      className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c] text-white shadow-lg w-full max-w-xs"
+                      onClick={() => document.getElementById("resumeInput").click()}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File
+                    </Button>
+                    {profile.resume && (
+                      <a
+                         href={`https://expertzcareers-backend.onrender.com${profile.resume}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full max-w-xs"
                       >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Choose File
-                      </Button>
-                      {profile.resume && (
-                        <a href={profile.resume} target="_blank" rel="noopener noreferrer" className="w-full max-w-xs">
-                          <div className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Preview Resume
-                          </div>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Portfolio Links */}
-                  <div className="text-center p-8 border-2 border-dashed border-[#caa057] rounded-lg hover:border-[#caa057] transition-colors cursor-pointer">
-                    <Lightbulb className="w-12 h-12 text-[#caa057] mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Portfolio Links</h3>
-                    <p className="text-sm text-gray-500 mb-4">GitHub, Behance, Personal Website</p>
-                    <EditableField
-                      field="portfioliolink"
-                      value={profile.portfioliolink}
-                      isEditing={editingField === "portfioliolink"}
-                      tempValue={tempValue}
-                      onEdit={handleEdit}
-                      onSave={handleSave}
-                      onCancel={handleCancel}
-                      onTempChange={setTempValue}
-                      className="text-center w-full"
-                      placeholder="Enter a link to your portfolio"
-                    />
+                        <Button
+                          variant="outline"
+                          className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview Resume
+                        </Button>
+                      </a>
+                    )}
                   </div>
                 </div>
-                {/* Certificates */}
-                <Card className="border-[#fff1ed] mt-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Award className="w-5 h-5 mr-2 text-[#caa057]" />
-                      Certificates & Achievements
-                    </CardTitle>
-                    <CardDescription>Professional Certificates and achievements</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <EditableField
-                      field="certificationlink"
-                      value={profile.certificationlink}
-                      isEditing={editingField === "certificationlink"}
-                      tempValue={tempValue}
-                      onEdit={handleEdit}
-                      onSave={handleSave}
-                      onCancel={handleCancel}
-                      onTempChange={setTempValue}
-                      multiline={3}
-                      className="text-center w-full"
-                      placeholder="Enter links to your certifications"
-                    />
-                  </CardContent>
-                </Card>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[#fff1ed]">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Lightbulb className="w-5 h-5 mr-2 text-[#caa057]" />
+                  Portfolio Links
+                </CardTitle>
+                <CardDescription>
+                  Showcase your work and professional achievements.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  {
+                    key: "portfioliolink",
+                    title: "Personal Portfolio",
+                    icon: Lightbulb,
+                    placeholder: "e.g., https://my-portfolio.com",
+                    isEditing: isEditingPortfolio,
+                    tempValue: tempPortfolioValue,
+                    setTempValue: setTempPortfolioValue,
+                    setIsEditing: setIsEditingPortfolio,
+                  },
+                  {
+                    key: "projects",
+                    title: "Project Links",
+                    icon: FileText,
+                    placeholder: "e.g., https://github.com/my-projects",
+                    isEditing: isEditingProjects,
+                    tempValue: tempProjectValue,
+                    setTempValue: setTempProjectValue,
+                    setIsEditing: setIsEditingProjects,
+                  },
+                  {
+                    key: "certificationlink",
+                    title: "Certificates & Achievements",
+                    icon: Award,
+                    placeholder: "e.g., https://coursera.org/certificate/...",
+                    isEditing: isEditingCert,
+                    tempValue: tempCertValue,
+                    setTempValue: setTempCertValue,
+                    setIsEditing: setIsEditingCert,
+                  },
+                ].map(({ key, title, icon: Icon, placeholder, isEditing, tempValue, setTempValue, setIsEditing }) => (
+                  <div
+                    key={key}
+                    className="p-4 border rounded-lg hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between"
+                  >
+                    <div className="flex items-center mb-2 sm:mb-0">
+                      <Icon className="w-5 h-5 mr-2 text-[#caa057]" />
+                      <h4 className="font-semibold">{title}</h4>
+                    </div>
+                    {isEditing ? (
+                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:ml-4 space-y-2 sm:space-y-0 sm:space-x-2">
+                        <input
+                          type="text"
+                          value={tempValue}
+                          onChange={(e) => setTempValue(e.target.value)}
+                          placeholder={placeholder}
+                          className="flex-1 p-2 border rounded-md text-gray-900"
+                        />
+                        <div className="flex space-x-2">
+                          <Button size="sm" onClick={() => handleSavePortfolioField(key)}>
+                            Save
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleCancelPortfolioEdit(key)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+                        {profile[key] ? (
+                          <a
+                            href={profile[key]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline flex items-center"
+                          >
+                            View Link <ExternalLink className="w-3 h-3 ml-1" />
+                          </a>
+                        ) : (
+                          <span className="text-sm text-gray-500">{placeholder}</span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setIsEditing(true)
+                            if (key === "projects") setTempProjectValue(profile[key] || "")
+                            if (key === "certificationlink") setTempCertValue(profile[key] || "")
+                            if (key === "portfioliolink") setTempPortfolioValue(profile[key] || "")
+                          }}
+                          className="border-[#caa057] text-[#caa057] hover:bg-[#fff1ed]"
+                        >
+                          <Edit3 className="w-4 h-4 mr-1" />
+                          {profile[key] ? "Edit" : "Add"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-12">
           <Button
             size="lg"
@@ -1731,7 +1653,6 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Custom Alert Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm relative border-2 border-orange-400">
@@ -1756,4 +1677,4 @@ const ProfilePage = () => {
   )
 }
 
-export default ProfilePage
+export default ProfilePage  

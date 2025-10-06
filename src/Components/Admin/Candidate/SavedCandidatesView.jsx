@@ -4,13 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Cookies from "js-cookie"
 import CandidateCard from "../Database/CandidateCard"
 import CandidateMiniCard from "../Database/CandidateMiniCard"
-import {
-  getAppliedUser,
-  getSavedCandidates,
-  saveCandidate,
-  rejectCandidate,
-  sendNotification,
-} from "../../../services/apis"
+import { getSavedCandidates } from "../../../services/apis"
 import { Listbox } from "@headlessui/react"
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid"
 import Slider from "rc-slider"
@@ -18,13 +12,9 @@ import "rc-slider/assets/index.css"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-const CandidateView = ({ selectedJob, showAllSaved = false }) => {
+const SavedCandidatesView = () => {
   const token = Cookies.get("userToken")
-  const [appliedCandidates, setAppliedCandidates] = useState([])
   const [savedCandidates, setSavedCandidates] = useState([])
-  const [rejectedCandidates, setRejectedCandidates] = useState([])
-  const [savedCandidateIds, setSavedCandidateIds] = useState(new Set())
-  const [tab, setTab] = useState("Applied")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [activeCandidate, setActiveCandidate] = useState(null)
@@ -112,65 +102,20 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         portfioliolink: user.portfioliolink || user.portfoliolink || null,
         profilePhoto: user.profilphoto || user.profilePhoto || null,
         appliedDate: applicationData.appliedAt || user.appliedDate || user.createdAt || new Date().toISOString(),
-        status: applicationData.status || "applied",
+        status: applicationData.status || "saved",
         jobId: applicationData.jobId || item.jobId || null,
       }
     })
   }, [])
 
-  const fetchCandidates = useCallback(
-    async (apiCall, setter, jobId = null) => {
-      if (!token) {
-        setError("Please log in to view candidates")
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-
-      try {
-        const data = await apiCall(token, jobId)
-        let candidatesArray = []
-        if (data?.candidatesApplied && Array.isArray(data.candidatesApplied)) {
-          candidatesArray = data.candidatesApplied
-        } else if (data?.user?.savedCandidates && Array.isArray(data.user.savedCandidates)) {
-          candidatesArray = data.user.savedCandidates
-        } else if (Array.isArray(data)) {
-          candidatesArray = data
-        } else {
-          console.warn("Unexpected response structure:", data)
-        }
-
-        setter(transformCandidateData(candidatesArray))
-      } catch (err) {
-        console.error("Error fetching candidates:", err)
-        setError(`Failed to load candidates: ${err.message}`)
-        setter([])
-      } finally {
-        setLoading(false)
-      }
-    },
-    [token, transformCandidateData],
-  )
-
-  const handleFetchApplied = useCallback(() => {
-    if (selectedJob && selectedJob._id) {
-      fetchCandidates(
-        getAppliedUser,
-        (candidates) => {
-          // Separate applied and rejected candidates
-          const applied = candidates.filter((c) => c.status !== "rejected")
-          const rejected = candidates.filter((c) => c.status === "rejected")
-          setAppliedCandidates(applied)
-          setRejectedCandidates(rejected)
-        },
-        selectedJob._id,
-      )
+  const fetchSavedCandidates = useCallback(async () => {
+    if (!token) {
+      setError("Please log in to view saved candidates")
+      return
     }
-  }, [selectedJob, fetchCandidates])
 
-  const handleFetchSaved = useCallback(async () => {
-    if (!token) return
+    setLoading(true)
+    setError(null)
 
     try {
       const data = await getSavedCandidates(token)
@@ -178,7 +123,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
 
       let candidatesArray = []
 
-      // Handle multiple possible response structures
       if (data?.user?.savedCandidates && Array.isArray(data.user.savedCandidates)) {
         candidatesArray = data.user.savedCandidates
       } else if (data?.savedCandidates && Array.isArray(data.savedCandidates)) {
@@ -188,229 +132,57 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       }
 
       const transformed = transformCandidateData(candidatesArray)
-
-      const filteredByJob =
-        showAllSaved || !selectedJob
-          ? transformed
-          : transformed.filter((c) => c.jobId === selectedJob._id || c.jobId === selectedJob.id)
-
-      setSavedCandidates(filteredByJob)
-
-      // Create a Set of saved candidate IDs for quick lookup
-      const savedIds = new Set(transformed.map((c) => c._id).filter(Boolean))
-      setSavedCandidateIds(savedIds)
-
-      console.log("[v0] Saved candidates synced:", filteredByJob.length, "displayed,", transformed.length, "total")
+      setSavedCandidates(transformed)
+      console.log("[v0] All saved candidates loaded:", transformed.length)
     } catch (err) {
-      console.error("❌ Error fetching saved candidates:", err)
+      console.error("Error fetching saved candidates:", err)
+      setError(`Failed to load saved candidates: ${err.message}`)
       setSavedCandidates([])
-      setSavedCandidateIds(new Set())
+    } finally {
+      setLoading(false)
     }
-  }, [token, transformCandidateData, showAllSaved, selectedJob])
+  }, [token, transformCandidateData])
 
-  const handleRejectCandidate = async (candidateId) => {
+  const handleRemoveFromSaved = async (candidateId) => {
     if (!candidateId) {
-      console.error("Cannot reject candidate: Missing candidate ID")
       toast.error("Candidate ID is missing!")
       return
     }
 
     try {
-      const candidate =
-        appliedCandidates.find((c) => c._id === candidateId) || savedCandidates.find((c) => c._id === candidateId)
-
-      if (!candidate) {
-        throw new Error("Candidate not found")
-      }
-
-      const jobId = selectedJob._id || selectedJob.id
-
-      // 1. Update status in backend
-      await fetch(`https://expertzcareers-backend.onrender.com/recruiter/updateapplyjobstatus/${jobId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          candidateId: candidateId,
-          status: "rejected",
-        }),
-      })
-
-      // 2. Call reject API
-      await rejectCandidate(token, candidateId, jobId)
-
-      // 3. Send notification
-      if (token && selectedJob) {
-        await sendNotification({
-          token,
-          type: "REJECTED",
-          userId: candidateId,
-          extraData: { job: selectedJob },
-        })
-      }
-
-      const rejectedCandidate = { ...candidate, status: "rejected" }
-      setRejectedCandidates((prev) => [...prev, rejectedCandidate])
-      setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
+      // Remove from saved list locally
       setSavedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
-      setSavedCandidateIds((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(candidateId)
-        return newSet
-      })
 
       if (activeCandidate?._id === candidateId) {
         setActiveCandidate(null)
       }
 
-      toast.success("Candidate rejected successfully!")
-      console.log(`[v0] Candidate ${candidate.username} rejected`)
+      toast.success("Candidate removed from saved list!")
+      console.log(`[v0] Candidate removed from saved list`)
+
+      // Refresh the list to sync with backend
+      setTimeout(() => {
+        fetchSavedCandidates()
+      }, 500)
     } catch (err) {
-      console.error("❌ Error rejecting candidate:", err)
-      setError(`Failed to reject candidate: ${err.message}`)
-      toast.error("Failed to reject candidate!")
+      console.error("Error removing candidate:", err)
+      toast.error("Failed to remove candidate!")
     }
   }
 
-  const handleMiniCardClick = async (candidate) => {
+  const handleMiniCardClick = (candidate) => {
     if (!candidate || !candidate._id) {
       console.error("Invalid candidate data")
       return
     }
     setActiveCandidate(candidate)
-    if (token && selectedJob) {
-      try {
-        await sendNotification({
-          token,
-          type: "VIEWED",
-          userId: candidate._id,
-          extraData: { job: selectedJob },
-        })
-      } catch (err) {
-        console.error("Failed to send view notification:", err)
-      }
-    }
-  }
-
-  const handleSaveCandidate = async (candidateId) => {
-    if (!candidateId) {
-      console.error("[v0] handleSaveCandidate: Missing candidate ID")
-      toast.error("Candidate ID is missing!")
-      return
-    }
-
-    if (!token) {
-      console.error("[v0] handleSaveCandidate: Missing token")
-      toast.error("You are not authenticated!")
-      return
-    }
-
-    // Check if already saved locally
-    if (savedCandidateIds.has(candidateId)) {
-      console.log("[v0] Candidate already saved locally:", candidateId)
-      toast.info("Candidate is already saved!")
-      return
-    }
-
-    try {
-      console.log("[v0] Attempting to save candidate:", candidateId)
-
-      // Call the save candidate API
-      const response = await saveCandidate(token, candidateId)
-      console.log("[v0] Save candidate API response:", response)
-
-      // Handle "already saved" case
-      if (response.alreadySaved) {
-        console.log("[v0] Backend says candidate already saved, syncing local state")
-        setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
-        toast.info("Candidate was already saved!")
-
-        // Refresh saved list to sync with backend
-        setTimeout(() => {
-          handleFetchSaved()
-        }, 500)
-        return
-      }
-
-      // Find the candidate in applied list
-      const candidateToSave = appliedCandidates.find((c) => c._id === candidateId)
-
-      if (candidateToSave) {
-        // Add to saved list (don't remove from applied)
-        setSavedCandidates((prev) => {
-          // Check if already in saved list
-          if (prev.some((c) => c._id === candidateId)) {
-            return prev
-          }
-          return [...prev, candidateToSave]
-        })
-
-        // Add to saved IDs set
-        setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
-
-        toast.success("Candidate saved successfully!")
-        console.log("[v0] Candidate saved locally:", candidateToSave.username)
-
-        // Optionally switch to saved tab to show the saved candidate
-        setTimeout(() => {
-          setTab("Saved")
-          setActiveCandidate(candidateToSave)
-        }, 500)
-      } else {
-        console.warn("[v0] Candidate not found in applied list, but marked as saved")
-        // Still mark as saved even if not in current list
-        setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
-        toast.success("Candidate saved successfully!")
-      }
-
-      // Refresh saved candidates list to ensure sync with backend
-      setTimeout(() => {
-        handleFetchSaved()
-      }, 1000)
-    } catch (err) {
-      console.error("[v0] Error saving candidate:", err)
-
-      // Handle specific error cases
-      if (err?.message?.toLowerCase().includes("already saved")) {
-        console.log("[v0] Error message indicates already saved, syncing state")
-        setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
-        toast.info("Candidate is already saved!")
-
-        // Refresh to sync with backend
-        setTimeout(() => {
-          handleFetchSaved()
-        }, 500)
-      } else if (err?.response?.status === 500) {
-        toast.error("Server error! Please try again later.")
-      } else {
-        toast.error(`Failed to save candidate: ${err.message}`)
-      }
-    }
-  }
-
-  const handleTabChange = (t) => {
-    setTab(t)
-    setError(null)
-    setActiveCandidate(null)
-    if (t === "Saved") handleFetchSaved()
-    else if (t === "Applied") handleFetchApplied()
-    else if (t === "Rejected") handleFetchApplied() // Rejected are fetched with applied
   }
 
   useEffect(() => {
     if (token) {
-      console.log("[v0] Initial fetch of saved candidates")
-      handleFetchSaved()
+      fetchSavedCandidates()
     }
-  }, [token, handleFetchSaved])
-
-  useEffect(() => {
-    if (selectedJob && token) {
-      handleFetchApplied()
-    }
-  }, [selectedJob, token, handleFetchApplied])
+  }, [token, fetchSavedCandidates])
 
   const resetFilters = useCallback(() => {
     setFilters({
@@ -436,10 +208,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
     })
   }
 
-  const candidatesToShow =
-    tab === "Applied" ? appliedCandidates : tab === "Rejected" ? rejectedCandidates : savedCandidates
-
-  const filteredCandidates = candidatesToShow.filter((c) => {
+  const filteredCandidates = savedCandidates.filter((c) => {
     const skillsMatch =
       !filters.skills.length ||
       filters.skills.every((s) => c.skills?.some((skill) => skill.toLowerCase().includes(s.toLowerCase())))
@@ -459,7 +228,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
 
     const distanceMatch = filters.distance === 0 || Number(c.distance || 999) <= Number(filters.distance)
 
-    // Date range filtering
     let dateMatch = true
     if (filters.dateFrom || filters.dateTo) {
       try {
@@ -486,24 +254,16 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       experienceMatch &&
       distanceMatch &&
       skillsMatch &&
-      customSkillMatch
+      customSkillMatch &&
+      dateMatch
     )
   })
-
-  if (!selectedJob && !showAllSaved) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-10 text-center text-gray-500">
-        <div className="text-6xl mb-4">🔍</div>
-        <p className="text-lg font-medium mb-2">Please select a job first to view candidates.</p>
-        <p className="text-sm text-gray-400">Choose a job from the Job Listings to see applied and saved candidates.</p>
-      </div>
-    )
-  }
 
   return (
     <div className="flex gap-6 flex-col md:flex-row">
       <ToastContainer position="top-right" autoClose={3000} />
 
+      {/* Filters Sidebar */}
       <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-5 space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
@@ -646,7 +406,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         </div>
 
         <div>
-          <label className="block text-sm mb-1 font-medium text-gray-700">Applied Date Range</label>
+          <label className="block text-sm mb-1 font-medium text-gray-700">Saved Date Range</label>
           <div className="space-y-2">
             <div>
               <label className="block text-xs text-gray-500 mb-1">From</label>
@@ -677,34 +437,21 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         </button>
       </div>
 
+      {/* Main Content */}
       <div className="w-full md:w-3/4">
-        {selectedJob && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-[#caa057] to-[#b4924c] text-white rounded-lg shadow">
-            <h2 className="text-xl font-bold">{selectedJob.jobTitle || selectedJob.title}</h2>
-            <p className="text-sm opacity-90">{selectedJob.company || selectedJob.companyName}</p>
-          </div>
-        )}
+        <div className="mb-4 p-4 bg-gradient-to-r from-[#caa057] to-[#b4924c] text-white rounded-lg shadow">
+          <h2 className="text-2xl font-bold">All Saved Candidates</h2>
+          <p className="text-sm opacity-90">View and manage all your saved candidates across all jobs</p>
+        </div>
 
-        <div className="flex gap-3 mb-6">
-          {["Applied", "Rejected"].map((t) => (
-            <button
-              key={t}
-              className={`px-5 py-2 rounded-full font-medium shadow-sm transition-colors ${
-                tab === t
-                  ? "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-              onClick={() => handleTabChange(t)}
-            >
-              {t} Candidates (
-              {t === "Applied"
-                ? appliedCandidates.length
-                : t === "Rejected"
-                  ? rejectedCandidates.length
-                  : savedCandidates.length}
-              )
-            </button>
-          ))}
+        <div className="mb-6 p-4 bg-white rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold text-gray-800">{savedCandidates.length}</p>
+              <p className="text-sm text-gray-600">Total Saved Candidates</p>
+            </div>
+            <div className="text-4xl">💾</div>
+          </div>
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">{error}</div>}
@@ -712,7 +459,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         {loading && (
           <div className="flex items-center justify-center py-10">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <p className="ml-3 text-gray-600">Loading candidates...</p>
+            <p className="ml-3 text-gray-600">Loading saved candidates...</p>
           </div>
         )}
 
@@ -725,22 +472,20 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
                 </button>
                 <CandidateCard
                   candidate={activeCandidate}
-                  onSave={() => handleSaveCandidate(activeCandidate._id)}
-                  onReject={() => handleRejectCandidate(activeCandidate._id)}
-                  isSaved={savedCandidateIds.has(activeCandidate._id)}
-                  selectedJob={selectedJob}
+                  onSave={() => handleRemoveFromSaved(activeCandidate._id)}
+                  onReject={() => handleRemoveFromSaved(activeCandidate._id)}
+                  isSaved={true}
+                  selectedJob={null}
                   token={token}
                 />
               </div>
             ) : filteredCandidates.length === 0 ? (
               <div className="text-center py-10 text-gray-500">
-                <div className="text-5xl mb-4">{candidatesToShow.length === 0 ? "📭" : "🔍"}</div>
+                <div className="text-5xl mb-4">{savedCandidates.length === 0 ? "📭" : "🔍"}</div>
                 <p className="text-lg font-medium mb-2">
-                  {candidatesToShow.length === 0
-                    ? `No ${tab.toLowerCase()} candidates found.`
-                    : "No candidates match your filters."}
+                  {savedCandidates.length === 0 ? "No saved candidates found." : "No candidates match your filters."}
                 </p>
-                {candidatesToShow.length > 0 && (
+                {savedCandidates.length > 0 && (
                   <button onClick={resetFilters} className="text-orange-600 hover:text-orange-700 underline">
                     Clear filters to see all candidates
                   </button>
@@ -762,4 +507,4 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
   )
 }
 
-export default CandidateView
+export default SavedCandidatesView
