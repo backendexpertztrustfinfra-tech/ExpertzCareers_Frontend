@@ -38,7 +38,7 @@ const MyJobsDashboard = () => {
         {[
           { id: "saved", label: "Saved Jobs" },
           { id: "applied", label: "Applied Jobs" },
-          { id: "interview", label: "Interview Invites" },
+          // { id: "interview", label: "Interview Invites" },
         ].map((tab) => (
           <button
             key={tab.id}

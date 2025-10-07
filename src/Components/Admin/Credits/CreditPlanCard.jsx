@@ -23,7 +23,7 @@ const creditPlans = {
   ],
   "1 Year": [
     { planId: "68d8e0fc3b752e5019d8ec73", name: "Platinum", price: "Rs 12999", details: ["25 Jobs", "500 DB Points", "Job Live 15 days", "Validity 365 days"] },
-    { planId: "", name: "Platinum Plus", price: "", details: ["Custom Plan"] },
+    // { planId: "", name: "Platinum Plus", price: "", details: ["Custom Plan"] },
   ],
 };
 

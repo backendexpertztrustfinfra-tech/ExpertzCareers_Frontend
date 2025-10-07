@@ -139,6 +139,22 @@ const Register = () => {
     setTimeout(() => setNotification({ message: "", type: "" }), 5000)
   }
 
+  // Prefill username/email from cookies when state is missing
+  useEffect(() => {
+    setFormData((prev) => {
+      const nameCookie = Cookies.get("prefillName") || Cookies.get("userName")
+      const emailCookie = Cookies.get("prefillEmail") || Cookies.get("userEmail")
+      if ((!prev.username && nameCookie) || (!prev.useremail && emailCookie)) {
+        return {
+          ...prev,
+          username: prev.username || nameCookie || "",
+          useremail: prev.useremail || emailCookie || "",
+        }
+      }
+      return prev
+    })
+  }, [])
+
   // --- State Handlers ---
 
   // 1. Main form fields (Basic Info, Files)
@@ -241,17 +257,46 @@ const Register = () => {
     }
 
     const payload = new FormData()
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value) {
-        // Ensure array fields like Skill are stringified
-        if (key === "Skill") payload.append(key, JSON.stringify(value))
-        else payload.append(key, value)
-      }
-    })
 
-    // Append array states as JSON strings
-    payload.append("qualification", JSON.stringify(qualifications))
-    payload.append("Experience", JSON.stringify(experienceType === "Fresher" ? [] : Experience))
+    // 1. Skills as comma-separated string
+    if (formData.Skill.length) {
+      payload.append("Skill", formData.Skill.join(", "))
+    }
+
+    // 2. Qualifications as JSON strings joined by '@'
+    if (qualifications.length) {
+      const qualString = qualifications
+        .map((q) =>
+          JSON.stringify({
+            degree: q.degree,
+            institution: q.institution,
+            startDate: q.startDate,
+            endDate: q.endDate,
+          }),
+        )
+        .join("@")
+      payload.append("qualification", qualString)
+    }
+
+    // 3. Experience as JSON strings joined by '@'
+    if (experienceType !== "Fresher" && Experience.length) {
+      const expString = Experience.map((exp) =>
+        JSON.stringify({
+          company: exp.company,
+          designation: exp.designation,
+          startDate: exp.startDate,
+          endDate: exp.endDate,
+          currentlyWorking: exp.currentlyWorking,
+        }),
+      ).join("@")
+      payload.append("Experience", expString)
+    } else {
+      payload.append("Experience", "")
+    }
+
+    // 4. Profile photo and resume (if present)
+    if (formData.profilphoto) payload.append("profilphoto", formData.profilphoto)
+    if (formData.resume) payload.append("resume", formData.resume)
 
     try {
       const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/updateProfile", {

@@ -8,7 +8,7 @@ import { Briefcase, Clock, Building2 } from "lucide-react";
 const Notifications = () => {
   const { user } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false); // 🔹 Added loader state
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   // 🔹 Fetch notifications

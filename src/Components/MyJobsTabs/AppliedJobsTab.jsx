@@ -80,6 +80,7 @@ const AppliedJobsTab = () => {
             showActions={false}
             isApplied={true}
             onUpdate={fetchAppliedJobs}
+            showBookmark={false}
           />
         ))
       )}

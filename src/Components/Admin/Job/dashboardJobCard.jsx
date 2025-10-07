@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import Cookies from "js-cookie";
 import { deleteJob } from "../../../services/apis";
+import { BASE_URL } from "../../../config";
 
 const DashboardJobCard = ({
   job,
@@ -19,8 +20,10 @@ const DashboardJobCard = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const menuRef = useRef(null);
 
+  // ---------- Time Ago Helper ----------
   const getTimeAgo = (date) => {
     if (!date) return "Just now";
     const diff = Date.now() - new Date(date).getTime();
@@ -36,6 +39,7 @@ const DashboardJobCard = ({
     return `${years}y ago`;
   };
 
+  // ---------- Close Menu on Outside Click ----------
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -46,6 +50,7 @@ const DashboardJobCard = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ---------- Delete Job ----------
   const handleDelete = async (e) => {
     e.stopPropagation();
     setLoading(true);
@@ -62,34 +67,50 @@ const DashboardJobCard = ({
     }
   };
 
+  // ---------- Get Company Logo URL ----------
+  const getCompanyLogo = () => {
+    if (!job.companyLogo) return null;
+    if (job.companyLogo.startsWith("http")) return job.companyLogo;
+    return `${BASE_URL.replace(/\/$/, "")}${job.companyLogo}`;
+  };
+
+  const logoUrl = getCompanyLogo();
+  const showImage = logoUrl && !imageError;
+
   return (
     <div
       className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm 
-                   hover:shadow-md hover:scale-[1.01] transition-all duration-200 
-                   cursor-pointer flex flex-col gap-3"
+                 hover:shadow-md hover:scale-[1.01] transition-all duration-200 
+                 cursor-pointer flex flex-col gap-3"
       onClick={() => onJobClick && onJobClick(job)}
     >
-      {/* Top Section */}
+      {/* ---------- Top Section ---------- */}
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
-          {job.companyLogo ? (
+          {/* Company Logo or First Letter Fallback */}
+          {showImage ? (
             <img
-              src={job.companyLogo}
-              alt={job.company}
+              src={logoUrl}
+              alt={job.company || "Company Logo"}
               className="w-10 h-10 rounded-md border object-cover"
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="w-10 h-10 flex items-center justify-center rounded-md bg-[#fff1ed] border border-[#caa057]">
               <span className="text-sm font-bold text-[#caa057]">
-                {job.company?.[0] || "C"}
+                {job.company?.[0]?.toUpperCase() || "C"}
               </span>
             </div>
           )}
+
+          {/* Company Info */}
           <div className="max-w-[160px]">
             <h3 className="font-semibold text-sm md:text-base text-gray-800 truncate">
               {job.jobTitle}
             </h3>
-            <p className="text-xs text-gray-500 truncate">{job.company}</p>
+            <p className="text-xs text-gray-500 truncate">
+              {job.company || "Company Name"}
+            </p>
             <span
               className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${
                 job.status === "Active"
@@ -106,7 +127,7 @@ const DashboardJobCard = ({
           </div>
         </div>
 
-        {/* Menu */}
+        {/* ---------- Menu ---------- */}
         <div className="flex items-center gap-1 relative" ref={menuRef}>
           <span className="text-[11px] text-gray-400">
             {getTimeAgo(job.createdAt)}
@@ -144,7 +165,7 @@ const DashboardJobCard = ({
         </div>
       </div>
 
-      {/* Job Info */}
+      {/* ---------- Job Info ---------- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-1">
         <div className="flex items-center gap-1 text-gray-700">
           <FaBriefcase className="text-[#caa057]" size={12} />{" "}
@@ -164,11 +185,11 @@ const DashboardJobCard = ({
         </div>
       </div>
 
-      {/* Candidate Stats */}
+      {/* ---------- Candidate Stats ---------- */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <button
           className="py-1.5 text-xs font-medium rounded-md border border-blue-200 bg-blue-50 
-                       hover:bg-blue-100 text-blue-700 flex items-center justify-center"
+                     hover:bg-blue-100 text-blue-700 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             onJobClick && onJobClick(job);
@@ -178,7 +199,7 @@ const DashboardJobCard = ({
         </button>
         <button
           className="py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 
-                       hover:bg-green-100 text-green-700"
+                     hover:bg-green-100 text-green-700"
           onClick={(e) => e.stopPropagation()}
         >
           📞 {job.contactedCount ?? 0} Contacted

@@ -4,12 +4,12 @@ import React, { useState, forwardRef, useImperativeHandle, useContext, useEffect
 import Cookies from "js-cookie"
 import { useNavigate } from "react-router-dom"
 import { BASE_URL } from "../../config"
-import { signInWithPopup, sendPasswordResetEmail } from "firebase/auth"
-import { auth } from "../../firebase-config";
+import { signInWithPopup } from "firebase/auth"
+import { auth } from "../../firebase-config"
 import { AuthContext } from "../../context/AuthContext"
 import SuccessfullyLogin from "../../assets/animation/succesfulllogin"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
-import { GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth"
 import MessageModal from "../UserProfile/message"
 
 const Hero = forwardRef(({ onlogin }, ref) => {
@@ -21,8 +21,8 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
   const loginSectionRef = React.useRef(null)
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalMessage, setModalMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -91,59 +91,59 @@ const Hero = forwardRef(({ onlogin }, ref) => {
     return trimmedPassword.length >= 6 && hasLettersAndNumbers
   }
 
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault()
 
-  const trimmedEmail = email.trim();
-  if (!validateEmail(trimmedEmail)) {
-    setEmailError("Please enter a valid email address.");
-    return;
-  }
-  setEmailError("");
-
-  setLoading(true);
-  try {
-    const res = await fetch(`${BASE_URL}/user/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ useremail: trimmedEmail, password }),
-    });
-
-    const data = await res.json();
-    console.log(data);
-    if (!res.ok) {
-      setModalMessage("Login failed: Invalid email or password");
-      setModalOpen(true);
-      return;
+    const trimmedEmail = email.trim()
+    if (!validateEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email address.")
+      return
     }
+    setEmailError("")
 
-    // 👇 backend sends varification, not isVerified
-    const { token, usertype, varification, username, useremail } = data;
-    // console.log("User Token:", token);
+    setLoading(true)
+    try {
+      const res = await fetch(`${BASE_URL}/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ useremail: trimmedEmail, password }),
+      })
 
-    if (token && usertype) {
-      login(token, usertype, varification);
+      const data = await res.json()
+      console.log(data)
+      if (!res.ok) {
+        setModalMessage("Login failed: Invalid email or password")
+        setModalOpen(true)
+        return
+      }
 
-      setShowSuccessAnimation(true);
-      setTimeout(() => {
-        setShowSuccessAnimation(false);
-       if (usertype === "recruiter") {
-            navigate("/admin", { replace: true });
+      // 👇 backend sends varification, not isVerified
+      const { token, usertype, varification, username, useremail } = data
+      // console.log("User Token:", token);
+
+      if (token && usertype) {
+        login(token, usertype, varification)
+
+        setShowSuccessAnimation(true)
+        setTimeout(() => {
+          setShowSuccessAnimation(false)
+          if (usertype === "recruiter") {
+            navigate("/admin", { replace: true })
           } else if (usertype === "jobseeker") {
-            navigate("/", { replace: true });
+            navigate("/", { replace: true })
           }
 
-          onlogin?.();
-        }, 2000);
+          onlogin?.()
+        }, 2000)
+      }
+    } catch (err) {
+      setModalMessage(err.message || "Login error")
+      setModalOpen(true)
+    } finally {
+      setLoading(false)
     }
-  } catch (err) {
-    setModalMessage(err.message || "Login error");
-    setModalOpen(true);
-  } finally {
-    setLoading(false);
   }
-};
 
   const handleSignup = async (e) => {
     e.preventDefault()
@@ -190,9 +190,13 @@ const handleLogin = async (e) => {
 
       if (token) {
         saveTokenInCookie(token, signupData.usertype)
-        login(token, signupData.usertype, true,  signupData.username, signupData.useremail)
+        login(token, signupData.usertype, true, signupData.username, signupData.useremail)
+
+        Cookies.set("prefillName", signupData.username || "", { expires: 7 })
+        Cookies.set("prefillEmail", signupData.useremail || "", { expires: 7 })
+
         onlogin?.()
-        navigate("/emailverification", { state: { signupData } });
+        navigate("/emailverification", { state: { signupData } })
       }
     } catch (err) {
       alert(err.message || "Signup error")
@@ -201,59 +205,54 @@ const handleLogin = async (e) => {
     }
   }
 
-  const googleProvider = new GoogleAuthProvider();
-  googleProvider.addScope("email");
-  googleProvider.addScope("profile");
-
+  const googleProvider = new GoogleAuthProvider()
+  googleProvider.addScope("email")
+  googleProvider.addScope("profile")
 
   const loginWithGoogle = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+      const result = await signInWithPopup(auth, googleProvider)
+      const user = result.user
 
-      const useremail = user.email || user.providerData[0]?.email;
-      const password = user.uid;
+      const useremail = user.email || user.providerData[0]?.email
+      const password = user.uid
 
       if (!useremail) {
-        alert("Cannot fetch email from Google. Please use another login method.");
-        return;
+        alert("Cannot fetch email from Google. Please use another login method.")
+        return
       }
 
-      const checkRes = await fetch(`${BASE_URL}/user/finduser/${encodeURIComponent(useremail)}`);
-      const checkData = await checkRes.json();
-      //       console.log("User check result:", checkData);
+      const checkRes = await fetch(`${BASE_URL}/user/finduser/${encodeURIComponent(useremail)}`)
+      const checkData = await checkRes.json()
+      // console.log("User check result:", checkData);
 
       if (checkData.userFound) {
         const loginRes = await fetch(`${BASE_URL}/user/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ useremail, password }),
-        });
+        })
 
         if (loginRes.ok) {
-          const loginData = await loginRes.json();
+          const loginData = await loginRes.json()
           if (loginData?.token) {
-            saveTokenInCookie(loginData.token, loginData.usertype);
-            login(loginData.token);
-            onlogin?.();
+            saveTokenInCookie(loginData.token, loginData.usertype)
+            login(loginData.token)
+            onlogin?.()
             navigate(
-              loginData.usertype === "jobseeker"
-                ? "/jobs"
-                : loginData.usertype === "recruiter"
-                  ? "/admin"
-                  : "/signup"
-            );
+              loginData.usertype === "jobseeker" ? "/jobs" : loginData.usertype === "recruiter" ? "/admin" : "/signup",
+            )
           } else {
-            alert("Credentials are wrong");
+            alert("Credentials are wrong")
           }
         } else {
-          alert("Credentials are wrong");
+          alert("Credentials are wrong")
         }
       } else {
-        Cookies.set("userEmail", useremail, { expires: 7 });
-        Cookies.set("userPassword", password, { expires: 7 });
-        Cookies.set("userName", user.displayName || "Google User", { expires: 7 });
+        Cookies.set("userEmail", useremail, { expires: 7 })
+        Cookies.set("userPassword", password, { expires: 7 })
+        Cookies.set("userName", user.displayName || "Google User", { expires: 7 })
 
         navigate("/signup", {
           state: {
@@ -261,15 +260,15 @@ const handleLogin = async (e) => {
             password,
             username: user.displayName || "Google User",
           },
-        });
+        })
       }
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Google login failed");
+      console.error(err)
+      alert(err.message || "Google login failed")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (showSuccessAnimation) return <SuccessfullyLogin />
   const isverified = Cookies.get("isVerified")
@@ -338,7 +337,6 @@ const handleLogin = async (e) => {
                 </svg>
               </button>
             </div>
-
 
             <div className="flex items-center space-x-8 pt-8">
               <div className="text-center">
@@ -616,4 +614,4 @@ const handleLogin = async (e) => {
   )
 })
 
-export default Hero;
+export default Hero
