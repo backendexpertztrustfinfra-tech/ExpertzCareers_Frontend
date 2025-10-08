@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
           if (usertype === "recruiter" && location.pathname === "/") {
             navigate("/admin", { replace: true });
           } else if (usertype === "jobseeker" && location.pathname === "/") {
-            navigate("/jobs", { replace: true });
+            navigate("/", { replace: true });
           }
         }
 
