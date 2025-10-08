@@ -17,6 +17,54 @@ import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+  
+const parseSkills = (skillField) => {
+  if (!skillField) return []
+  if (Array.isArray(skillField))
+    return skillField
+      .filter(Boolean)
+      .map((s) => (typeof s === "string" ? s : s?.name || s?.skill || "").trim())
+      .filter(Boolean)
+  if (typeof skillField === "string") {
+    try {
+      const arr = JSON.parse(skillField)
+      if (Array.isArray(arr))
+        return arr
+          .filter(Boolean)
+          .map((s) => (typeof s === "string" ? s : s?.name || s?.skill || "").trim())
+          .filter(Boolean)
+    } catch {}
+    return skillField
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+const parseQualOrExpArray = (field) => {
+  if (!field) return []
+  if (Array.isArray(field)) return field
+  if (typeof field === "string") {
+    const low = field.trim().toLowerCase()
+    if (!low || low === "not provided" || low === "not specified") return []
+    return field
+      .split("@")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => {
+        try {
+          const fixed = item.replace(/'/g, '"').replace(/(\b\w+\b)\s*:/g, '"$1":')
+          return JSON.parse(fixed)
+        } catch {
+          return { degree: item }
+        }
+      })
+      .filter(Boolean)
+  }
+  if (typeof field === "object") return [field]
+  return []
+}
 
 const CandidateView = ({ selectedJob, showAllSaved = false }) => {
   const token = Cookies.get("userToken")
@@ -55,45 +103,32 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       const user = item.userId || item
       const applicationData = item.userId ? item : {}
 
-      let qualificationText = "Not Provided"
-      if (user.qualification) {
-        try {
-          const parsed = JSON.parse(user.qualification)
-          if (Array.isArray(parsed)) {
-            qualificationText = parsed
-              .map((q) => `${q.degree || ""}${q.institution ? " - " + q.institution : ""}`)
-              .join(", ")
-          }
-        } catch {
-          qualificationText = user.qualification
-        }
-      }
+      const skillsArray = parseSkills(user.Skill ?? user.skills ?? item.skills)
 
-      let experienceText = "0"
+      // preserve raw fields for robust parsing in the cards
+      const qualificationRaw = user.qualification ?? ""
+      const experienceRaw = user.Experience ?? user.experience ?? ""
+
+      // Build derived text for filtering and quick display
+      const quals = parseQualOrExpArray(qualificationRaw)
+      const qualificationText = quals.length
+        ? quals
+            .map((q) => {
+              const deg = q.degree || q.title || ""
+              const inst = q.institution || q.instution || ""
+              return [deg, inst].filter(Boolean).join(" - ")
+            })
+            .filter(Boolean)
+            .join(", ")
+        : typeof qualificationRaw === "string"
+          ? qualificationRaw
+          : "Not Provided"
+
+      // years for filtering
       let experienceYears = 0
       if (user.yearsofExperience) {
-        const match = user.yearsofExperience.match(/(\d+)/)
+        const match = String(user.yearsofExperience).match(/(\d+)/)
         experienceYears = match ? Number(match[1]) : 0
-        experienceText = user.yearsofExperience
-      } else if (user.Experience) {
-        try {
-          const expParsed = JSON.parse(user.Experience)
-          if (Array.isArray(expParsed)) {
-            experienceText = expParsed.map((e) => `${e.designation || "Role"} at ${e.company || "Company"}`).join(", ")
-          }
-        } catch {
-          experienceText = user.Experience
-        }
-      }
-
-      let skillsArray = []
-      if (user.Skill) {
-        try {
-          skillsArray = JSON.parse(user.Skill)
-        } catch {
-          if (Array.isArray(user.Skill)) skillsArray = user.Skill
-          else skillsArray = [user.Skill]
-        }
       }
 
       return {
@@ -101,12 +136,14 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         username: user.username || "No Name",
         useremail: user.useremail || "No Email",
         designation: user.designation || "No Designation",
-        qualification: qualificationText,
+        // provide both raw and derived
+        qualification: qualificationRaw,
+        qualificationText,
+        experience: experienceRaw,
+        experienceYears,
         skills: skillsArray,
         location: user.location || "Not Provided",
-        expectedSalary: user.salaryExpectation || user.expectedSalary || "N/A",
-        experience: experienceText,
-        experienceYears,
+        // expectedSalary: user.salaryExpectation || user.expectedSalary || "N/A",
         phonenumber: user.phonenumber || "Not Provided",
         resume: user.resume || null,
         portfioliolink: user.portfioliolink || user.portfoliolink || null,
@@ -124,7 +161,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         setError("Please log in to view candidates")
         return
       }
-
       setLoading(true)
       setError(null)
 
@@ -140,7 +176,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         } else {
           console.warn("Unexpected response structure:", data)
         }
-
         setter(transformCandidateData(candidatesArray))
       } catch (err) {
         console.error("Error fetching candidates:", err)
@@ -158,7 +193,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       fetchCandidates(
         getAppliedUser,
         (candidates) => {
-          // Separate applied and rejected candidates
           const applied = candidates.filter((c) => c.status !== "rejected")
           const rejected = candidates.filter((c) => c.status === "rejected")
           setAppliedCandidates(applied)
@@ -171,14 +205,9 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
 
   const handleFetchSaved = useCallback(async () => {
     if (!token) return
-
     try {
       const data = await getSavedCandidates(token)
-      console.log("[v0] Raw saved candidates response:", data)
-
       let candidatesArray = []
-
-      // Handle multiple possible response structures
       if (data?.user?.savedCandidates && Array.isArray(data.user.savedCandidates)) {
         candidatesArray = data.user.savedCandidates
       } else if (data?.savedCandidates && Array.isArray(data.savedCandidates)) {
@@ -186,21 +215,14 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       } else if (Array.isArray(data)) {
         candidatesArray = data
       }
-
       const transformed = transformCandidateData(candidatesArray)
-
       const filteredByJob =
         showAllSaved || !selectedJob
           ? transformed
           : transformed.filter((c) => c.jobId === selectedJob._id || c.jobId === selectedJob.id)
 
       setSavedCandidates(filteredByJob)
-
-      // Create a Set of saved candidate IDs for quick lookup
-      const savedIds = new Set(transformed.map((c) => c._id).filter(Boolean))
-      setSavedCandidateIds(savedIds)
-
-      console.log("[v0] Saved candidates synced:", filteredByJob.length, "displayed,", transformed.length, "total")
+      setSavedCandidateIds(new Set(transformed.map((c) => c._id).filter(Boolean)))
     } catch (err) {
       console.error("❌ Error fetching saved candidates:", err)
       setSavedCandidates([])
@@ -219,29 +241,20 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       const candidate =
         appliedCandidates.find((c) => c._id === candidateId) || savedCandidates.find((c) => c._id === candidateId)
 
-      if (!candidate) {
-        throw new Error("Candidate not found")
-      }
-
+      if (!candidate) throw new Error("Candidate not found")
       const jobId = selectedJob._id || selectedJob.id
 
-      // 1. Update status in backend
       await fetch(`https://expertzcareers-backend.onrender.com/recruiter/updateapplyjobstatus/${jobId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          candidateId: candidateId,
-          status: "rejected",
-        }),
+        body: JSON.stringify({ candidateId, status: "rejected" }),
       })
 
-      // 2. Call reject API
       await rejectCandidate(token, candidateId, jobId)
 
-      // 3. Send notification
       if (token && selectedJob) {
         await sendNotification({
           token,
@@ -256,17 +269,13 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       setAppliedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
       setSavedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
       setSavedCandidateIds((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(candidateId)
-        return newSet
+        const next = new Set(prev)
+        next.delete(candidateId)
+        return next
       })
 
-      if (activeCandidate?._id === candidateId) {
-        setActiveCandidate(null)
-      }
-
+      if (activeCandidate?._id === candidateId) setActiveCandidate(null)
       toast.success("Candidate rejected successfully!")
-      console.log(`[v0] Candidate ${candidate.username} rejected`)
     } catch (err) {
       console.error("❌ Error rejecting candidate:", err)
       setError(`Failed to reject candidate: ${err.message}`)
@@ -275,10 +284,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
   }
 
   const handleMiniCardClick = async (candidate) => {
-    if (!candidate || !candidate._id) {
-      console.error("Invalid candidate data")
-      return
-    }
+    if (!candidate || !candidate._id) return
     setActiveCandidate(candidate)
     if (token && selectedJob) {
       try {
@@ -300,88 +306,45 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       toast.error("Candidate ID is missing!")
       return
     }
-
     if (!token) {
       console.error("[v0] handleSaveCandidate: Missing token")
       toast.error("You are not authenticated!")
       return
     }
-
-    // Check if already saved locally
     if (savedCandidateIds.has(candidateId)) {
-      console.log("[v0] Candidate already saved locally:", candidateId)
       toast.info("Candidate is already saved!")
       return
     }
 
     try {
-      console.log("[v0] Attempting to save candidate:", candidateId)
-
-      // Call the save candidate API
       const response = await saveCandidate(token, candidateId)
-      console.log("[v0] Save candidate API response:", response)
-
-      // Handle "already saved" case
       if (response.alreadySaved) {
-        console.log("[v0] Backend says candidate already saved, syncing local state")
         setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
         toast.info("Candidate was already saved!")
-
-        // Refresh saved list to sync with backend
-        setTimeout(() => {
-          handleFetchSaved()
-        }, 500)
+        setTimeout(() => handleFetchSaved(), 500)
         return
       }
 
-      // Find the candidate in applied list
       const candidateToSave = appliedCandidates.find((c) => c._id === candidateId)
-
       if (candidateToSave) {
-        // Add to saved list (don't remove from applied)
-        setSavedCandidates((prev) => {
-          // Check if already in saved list
-          if (prev.some((c) => c._id === candidateId)) {
-            return prev
-          }
-          return [...prev, candidateToSave]
-        })
-
-        // Add to saved IDs set
+        setSavedCandidates((prev) => (prev.some((c) => c._id === candidateId) ? prev : [...prev, candidateToSave]))
         setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
-
         toast.success("Candidate saved successfully!")
-        console.log("[v0] Candidate saved locally:", candidateToSave.username)
-
-        // Optionally switch to saved tab to show the saved candidate
         setTimeout(() => {
           setTab("Saved")
           setActiveCandidate(candidateToSave)
         }, 500)
       } else {
-        console.warn("[v0] Candidate not found in applied list, but marked as saved")
-        // Still mark as saved even if not in current list
         setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
         toast.success("Candidate saved successfully!")
       }
-
-      // Refresh saved candidates list to ensure sync with backend
-      setTimeout(() => {
-        handleFetchSaved()
-      }, 1000)
+      setTimeout(() => handleFetchSaved(), 1000)
     } catch (err) {
       console.error("[v0] Error saving candidate:", err)
-
-      // Handle specific error cases
       if (err?.message?.toLowerCase().includes("already saved")) {
-        console.log("[v0] Error message indicates already saved, syncing state")
         setSavedCandidateIds((prev) => new Set([...prev, candidateId]))
         toast.info("Candidate is already saved!")
-
-        // Refresh to sync with backend
-        setTimeout(() => {
-          handleFetchSaved()
-        }, 500)
+        setTimeout(() => handleFetchSaved(), 500)
       } else if (err?.response?.status === 500) {
         toast.error("Server error! Please try again later.")
       } else {
@@ -395,21 +358,15 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
     setError(null)
     setActiveCandidate(null)
     if (t === "Saved") handleFetchSaved()
-    else if (t === "Applied") handleFetchApplied()
-    else if (t === "Rejected") handleFetchApplied() // Rejected are fetched with applied
+    else handleFetchApplied() // Applied or Rejected both refresh same source
   }
 
   useEffect(() => {
-    if (token) {
-      console.log("[v0] Initial fetch of saved candidates")
-      handleFetchSaved()
-    }
+    if (token) handleFetchSaved()
   }, [token, handleFetchSaved])
 
   useEffect(() => {
-    if (selectedJob && token) {
-      handleFetchApplied()
-    }
+    if (selectedJob && token) handleFetchApplied()
   }, [selectedJob, token, handleFetchApplied])
 
   const resetFilters = useCallback(() => {
@@ -427,13 +384,11 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
   }, [])
 
   const toggleSkill = (skill) => {
-    setFilters((prev) => {
-      if (prev.skills.includes(skill)) {
-        return { ...prev, skills: prev.skills.filter((s) => s !== skill) }
-      } else {
-        return { ...prev, skills: [...prev.skills, skill] }
-      }
-    })
+    setFilters((prev) =>
+      prev.skills.includes(skill)
+        ? { ...prev, skills: prev.skills.filter((s) => s !== skill) }
+        : { ...prev, skills: [...prev.skills, skill] },
+    )
   }
 
   const candidatesToShow =
@@ -442,41 +397,46 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
   const filteredCandidates = candidatesToShow.filter((c) => {
     const skillsMatch =
       !filters.skills.length ||
-      filters.skills.every((s) => c.skills?.some((skill) => skill.toLowerCase().includes(s.toLowerCase())))
+      filters.skills.every((s) =>
+        (c.skills || []).some((skill) => String(skill).toLowerCase().includes(String(s).toLowerCase())),
+      )
 
     const customSkillMatch =
-      !filters.customSkill || c.skills?.some((s) => s.toLowerCase().includes(filters.customSkill.toLowerCase()))
+      !filters.customSkill ||
+      (c.skills || []).some((s) => String(s).toLowerCase().includes(String(filters.customSkill).toLowerCase()))
 
-    const locationMatch = !filters.location || c.location?.toLowerCase().includes(filters.location.toLowerCase())
+    const locationMatch =
+      !filters.location ||
+      String(c.location || "")
+        .toLowerCase()
+        .includes(String(filters.location).toLowerCase())
 
+    const qualSource = c.qualificationText || (typeof c.qualification === "string" ? c.qualification : "")
     const qualificationMatch =
-      !filters.qualification || c.qualification?.toLowerCase().includes(filters.qualification.toLowerCase())
+      !filters.qualification || String(qualSource).toLowerCase().includes(String(filters.qualification).toLowerCase())
 
     const customQualificationMatch =
-      !filters.customQualification || c.qualification?.toLowerCase().includes(filters.customQualification.toLowerCase())
+      !filters.customQualification ||
+      String(qualSource).toLowerCase().includes(String(filters.customQualification).toLowerCase())
 
     const experienceMatch = !filters.experience || Number(c.experienceYears || 0) >= Number(filters.experience)
-
     const distanceMatch = filters.distance === 0 || Number(c.distance || 999) <= Number(filters.distance)
 
-    // Date range filtering
     let dateMatch = true
     if (filters.dateFrom || filters.dateTo) {
       try {
-        const appliedDate = new Date(c.appliedDate)
+        const applied = new Date(c.appliedDate)
         if (filters.dateFrom) {
-          const fromDate = new Date(filters.dateFrom)
-          fromDate.setHours(0, 0, 0, 0)
-          dateMatch = dateMatch && appliedDate >= fromDate
+          const from = new Date(filters.dateFrom)
+          from.setHours(0, 0, 0, 0)
+          dateMatch = dateMatch && applied >= from
         }
         if (filters.dateTo) {
-          const toDate = new Date(filters.dateTo)
-          toDate.setHours(23, 59, 59, 999)
-          dateMatch = dateMatch && appliedDate <= toDate
+          const to = new Date(filters.dateTo)
+          to.setHours(23, 59, 59, 999)
+          dateMatch = dateMatch && applied <= to
         }
-      } catch (err) {
-        console.error("Error parsing date:", err)
-      }
+      } catch {}
     }
 
     return (
@@ -486,7 +446,8 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
       experienceMatch &&
       distanceMatch &&
       skillsMatch &&
-      customSkillMatch
+      customSkillMatch &&
+      dateMatch
     )
   })
 
@@ -504,6 +465,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
     <div className="flex gap-6 flex-col md:flex-row">
       <ToastContainer position="top-right" autoClose={3000} />
 
+      {/* Filters */}
       <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-5 space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
@@ -677,6 +639,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         </button>
       </div>
 
+      {/* List / Details */}
       <div className="w-full md:w-3/4">
         {selectedJob && (
           <div className="mb-4 p-4 bg-gradient-to-r from-[#caa057] to-[#b4924c] text-white rounded-lg shadow">

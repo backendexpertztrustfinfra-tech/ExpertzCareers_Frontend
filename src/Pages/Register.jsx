@@ -1,8 +1,6 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
-import Cookies from "js-cookie"
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Cookies from "js-cookie";
 import {
   User,
   Mail,
@@ -16,41 +14,43 @@ import {
   ImageIcon,
   AlertTriangle,
   CheckCircle,
-} from "lucide-react"
+} from "lucide-react";
 
-// --- Utility Hooks ---
-
-// 1. Hook to safely create and clean up object URLs for file previews
+const monthYearFormat = (date) => {
+  if (!date) return "";
+  const d = new Date(date);
+  return d.toLocaleString("default", { month: "long", year: "numeric" });
+};
 const useFilePreview = (file) => {
-  const [url, setUrl] = useState(null)
-
+  const [url, setUrl] = useState(null);
   useEffect(() => {
     if (!file) {
-      setUrl(null)
-      return
+      setUrl(null);
+      return;
     }
-    const newUrl = URL.createObjectURL(file)
-    setUrl(newUrl)
+    const newUrl = URL.createObjectURL(file);
+    setUrl(newUrl);
 
     return () => {
-      URL.revokeObjectURL(newUrl)
-    }
-  }, [file])
+      URL.revokeObjectURL(newUrl);
+    };
+  }, [file]);
 
-  return url
-}
-
-// --- Custom Components for Enhanced UI ---
-
-const accentColor = "#caa057"
-const accentColorHover = "#b4924c"
-
-// Reusable Input Field Component (Fixes overlap/refocus issues with proper layout and state binding)
+  return url;
+};
+const accentColor = "#caa057";
+const accentColorHover = "#b4924c";
 const InputField = ({ icon: Icon, label, className = "", ...props }) => (
   <div className={`w-full ${className}`}>
-    {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+    {label && (
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+    )}
     <div className="relative">
-      {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />}
+      {Icon && (
+        <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      )}
       <input
         {...props}
         className={`w-full border border-gray-300 ${
@@ -59,9 +59,7 @@ const InputField = ({ icon: Icon, label, className = "", ...props }) => (
       />
     </div>
   </div>
-)
-
-// Section Header Component
+);
 const SectionHeader = ({ icon: Icon, title, description }) => (
   <div className="flex items-start space-x-3 pb-3 mb-4 border-b-2 border-gray-100">
     <Icon className={`w-6 h-6 text-[${accentColor}] mt-1 flex-shrink-0`} />
@@ -70,45 +68,44 @@ const SectionHeader = ({ icon: Icon, title, description }) => (
       {description && <p className="text-sm text-gray-500">{description}</p>}
     </div>
   </div>
-)
-
-// Custom Notification/Toast Component
+);
 const Notification = ({ message, type, onClose }) => {
-  if (!message) return null
+  if (!message) return null;
 
   const baseClasses =
-    "fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl z-50 flex items-center space-x-3 max-w-sm transition-opacity duration-300"
+    "fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl z-50 flex items-center space-x-3 max-w-sm transition-opacity duration-300";
   const typeClasses = {
     success: "bg-green-500 text-white",
     error: "bg-red-500 text-white",
-  }
-  const Icon = type === "success" ? CheckCircle : AlertTriangle
+  };
+  const Icon = type === "success" ? CheckCircle : AlertTriangle;
 
   return (
     <div className={`${baseClasses} ${typeClasses[type]}`}>
       <Icon className="w-6 h-6" />
       <p className="font-medium flex-grow">{message}</p>
-      <button onClick={onClose} className="text-white opacity-75 hover:opacity-100 font-bold">
+      <button
+        onClick={onClose}
+        className="text-white opacity-75 hover:opacity-100 font-bold"
+      >
         &times;
       </button>
     </div>
-  )
-}
-
+  );
+};
 const Register = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const signupData = location.state || {}
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  const signupData = location.state || {};
   const [formData, setFormData] = useState({
-    username: signupData.username || "",
+    username: "",
     useremail: signupData.useremail || "",
     phonenumber: "",
     designation: "",
     profilphoto: null,
     resume: null,
     Skill: [""],
-  })
+  });
 
   const [qualifications, setQualifications] = useState([
     {
@@ -116,88 +113,78 @@ const Register = () => {
       institution: "",
       startDate: "",
       endDate: "",
+      fieldOfStudy: "",
       pursuing: false,
     },
-  ])
+  ]);
 
-  const [experienceType, setExperienceType] = useState("Fresher")
+  const [experienceType, setExperienceType] = useState("Fresher");
 
   const [Experience, setExperience] = useState([
     {
-      company: "",
-      designation: "",
+      companyName: "",
+      position: "",
       startDate: "",
       endDate: "",
       currentlyWorking: false,
     },
-  ])
+  ]);
 
-  // Notification state
-  const [notification, setNotification] = useState({ message: "", type: "" })
+  const [notification, setNotification] = useState({ message: "", type: "" });
   const showNotification = (message, type = "success") => {
-    setNotification({ message, type })
-    setTimeout(() => setNotification({ message: "", type: "" }), 5000)
-  }
+    setNotification({ message, type });
+    setTimeout(() => setNotification({ message: "", type: "" }), 5000);
+  };
 
-  // Prefill username/email from cookies when state is missing
   useEffect(() => {
     setFormData((prev) => {
-      const nameCookie = Cookies.get("prefillName") || Cookies.get("userName")
-      const emailCookie = Cookies.get("prefillEmail") || Cookies.get("userEmail")
+      const nameCookie = Cookies.get("prefillName") || Cookies.get("userName");
+      const emailCookie =
+        Cookies.get("prefillEmail") || Cookies.get("userEmail");
       if ((!prev.username && nameCookie) || (!prev.useremail && emailCookie)) {
         return {
           ...prev,
           username: prev.username || nameCookie || "",
           useremail: prev.useremail || emailCookie || "",
-        }
+        };
       }
-      return prev
-    })
-  }, [])
+      return prev;
+    });
+  }, []);
 
-  // --- State Handlers ---
-
-  // 1. Main form fields (Basic Info, Files)
   const handleMainFormChange = (e) => {
-    const { name, value, files } = e.target
+    const { name, value, files } = e.target;
     if (files) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }))
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
-  // 2. Skills list changes
   const handleSkillChange = (index, value) => {
-    const updatedSkills = [...formData.Skill]
-    updatedSkills[index] = value
-    // Critically, we update the array copy in the state to trigger a correct rerender
-    setFormData((prev) => ({ ...prev, Skill: updatedSkills }))
-  }
+    const updatedSkills = [...formData.Skill];
+    updatedSkills[index] = value;
+    setFormData((prev) => ({ ...prev, Skill: updatedSkills }));
+  };
 
-  const handleAddSkill = () => {
-    setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }))
-  }
-
+  const handleAddSkill = () =>
+    setFormData((prev) => ({ ...prev, Skill: [...prev.Skill, ""] }));
   const handleRemoveSkill = (index) => {
-    const updatedSkills = [...formData.Skill]
-    updatedSkills.splice(index, 1)
-    setFormData((prev) => ({ ...prev, Skill: updatedSkills }))
-  }
+    const updatedSkills = [...formData.Skill];
+    updatedSkills.splice(index, 1);
+    setFormData((prev) => ({ ...prev, Skill: updatedSkills }));
+  };
 
-  // 3. Qualifications list changes
   const handleQualificationChange = (index, e) => {
-    const { name, value, checked, type } = e.target
-    const updatedQualifications = [...qualifications]
-    updatedQualifications[index][name] = type === "checkbox" ? checked : value
+    const { name, value, checked, type } = e.target;
+    const updatedQualifications = [...qualifications];
+    updatedQualifications[index][name] = type === "checkbox" ? checked : value;
+    if (name === "pursuing" && checked)
+      updatedQualifications[index].endDate = "";
+    setQualifications(updatedQualifications);
+  };
 
-    if (name === "pursuing" && checked) {
-      updatedQualifications[index].endDate = ""
-    }
-    setQualifications(updatedQualifications)
-  }
-
-  const handleAddQualification = () => {
+  const handleAddQualification = () =>
     setQualifications((prev) => [
       ...prev,
       {
@@ -205,125 +192,133 @@ const Register = () => {
         institution: "",
         startDate: "",
         endDate: "",
+        fieldOfStudy: "",
         pursuing: false,
       },
-    ])
-  }
+    ]);
 
   const handleRemoveQualification = (index) => {
-    const updatedQualifications = [...qualifications]
-    updatedQualifications.splice(index, 1)
-    setQualifications(updatedQualifications)
-  }
+    const updatedQualifications = [...qualifications];
+    updatedQualifications.splice(index, 1);
+    setQualifications(updatedQualifications);
+  };
 
-  // 4. Experience list changes
   const handleExperienceChange = (index, e) => {
-    const { name, value, checked, type } = e.target
-    const updatedExperience = [...Experience]
-    updatedExperience[index][name] = type === "checkbox" ? checked : value
+    const { name, value, checked, type } = e.target;
+    const updatedExperience = [...Experience];
+    updatedExperience[index][name] = type === "checkbox" ? checked : value;
+    if (name === "currentlyWorking" && checked)
+      updatedExperience[index].endDate = "";
+    setExperience(updatedExperience);
+  };
 
-    if (name === "currentlyWorking" && checked) {
-      updatedExperience[index].endDate = ""
-    }
-    setExperience(updatedExperience)
-  }
-
-  const handleAddExperience = () => {
+  const handleAddExperience = () =>
     setExperience((prev) => [
       ...prev,
       {
-        company: "",
-        designation: "",
+        companyName: "",
+        position: "",
         startDate: "",
         endDate: "",
         currentlyWorking: false,
       },
-    ])
-  }
+    ]);
 
   const handleRemoveExperience = (index) => {
-    const updatedExperience = [...Experience]
-    updatedExperience.splice(index, 1)
-    setExperience(updatedExperience)
-  }
+    const updatedExperience = [...Experience];
+    updatedExperience.splice(index, 1);
+    setExperience(updatedExperience);
+  };
 
-  // --- Submission Logic ---
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const token = Cookies.get("userToken")
+    e.preventDefault();
+    const token = Cookies.get("userToken");
     if (!token) {
-      showNotification("Authentication required. Please log in again.", "error")
-      return
+      showNotification(
+        "Authentication required. Please log in again.",
+        "error"
+      );
+      return;
     }
 
-    const payload = new FormData()
+    const payload = new FormData();
 
-    // 1. Skills as comma-separated string
-    if (formData.Skill.length) {
-      payload.append("Skill", formData.Skill.join(", "))
-    }
+    payload.append("username", formData.username);
+    payload.append("phonenumber", formData.phonenumber);
+    payload.append("designation", formData.designation);
 
-    // 2. Qualifications as JSON strings joined by '@'
-    if (qualifications.length) {
-      const qualString = qualifications
-        .map((q) =>
-          JSON.stringify({
-            degree: q.degree,
-            institution: q.institution,
-            startDate: q.startDate,
-            endDate: q.endDate,
-          }),
-        )
-        .join("@")
-      payload.append("qualification", qualString)
-    }
+    // Skills
+    if (formData.Skill.length)
+      payload.append("Skill", formData.Skill.join(", "));
 
-    // 3. Experience as JSON strings joined by '@'
-    if (experienceType !== "Fresher" && Experience.length) {
-      const expString = Experience.map((exp) =>
-        JSON.stringify({
-          company: exp.company,
-          designation: exp.designation,
-          startDate: exp.startDate,
-          endDate: exp.endDate,
-          currentlyWorking: exp.currentlyWorking,
-        }),
-      ).join("@")
-      payload.append("Experience", expString)
-    } else {
-      payload.append("Experience", "")
-    }
+// Qualifications
+if (qualifications.length) {
+  const qualString = qualifications
+    .map((q) => {
+      const start = monthYearFormat(q.startDate);
+      const end = q.pursuing ? "Present" : monthYearFormat(q.endDate);
+      return JSON.stringify({
+        degree: q.degree,
+        institution: q.institution,
+        fieldOfStudy: q.fieldOfStudy,
+        duration: `${start} - ${end}`,
+      });
+    })
+    .join("@"); // Join multiple qualifications by '@'
+  payload.append("qualification", qualString);
+}
 
-    // 4. Profile photo and resume (if present)
-    if (formData.profilphoto) payload.append("profilphoto", formData.profilphoto)
-    if (formData.resume) payload.append("resume", formData.resume)
+// Experience
+if (experienceType !== "Fresher" && Experience.length) {
+  const expString = Experience.map((exp) => {
+    const start = monthYearFormat(exp.startDate);
+    const end = exp.currentlyWorking ? "Present" : monthYearFormat(exp.endDate);
+    return JSON.stringify({
+      companyName: exp.companyName,
+      position: exp.position,
+      duration: `${start} - ${end}`,
+    });
+  }).join("@");
+  payload.append("Experience", expString);
+} else {
+  payload.append("Experience", "");
+}
+
+
+    // Files
+    if (formData.profilphoto)
+      payload.append("profilphoto", formData.profilphoto);
+    if (formData.resume) payload.append("resume", formData.resume);
 
     try {
-      const res = await fetch("https://expertzcareers-backend.onrender.com/jobseeker/updateProfile", {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: payload,
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || "Update failed")
+      const res = await fetch(
+        "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: payload,
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Update failed");
 
-      showNotification("Profile updated successfully!", "success")
-      setTimeout(() => navigate("/jobs"), 1500)
+      showNotification("Profile updated successfully!", "success");
+      setTimeout(() => navigate("/jobs"), 1500);
     } catch (err) {
-      console.error("Profile update failed:", err)
-      showNotification("Update failed: " + err.message, "error")
+      console.error("Profile update failed:", err);
+      showNotification("Update failed: " + err.message, "error");
     }
-  }
+  };
 
-  // File Preview URLs
-  const photoPreviewUrl = useFilePreview(formData.profilphoto)
-  const resumePreviewUrl = useFilePreview(formData.resume)
+  const photoPreviewUrl = useFilePreview(formData.profilphoto);
+  const resumePreviewUrl = useFilePreview(formData.resume);
 
   return (
     <div className="min-h-screen flex items-start justify-center bg-gray-50 p-4 sm:p-6 md:p-10 font-sans">
       <div className="w-full max-w-5xl">
         <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-900">
-          Complete Your <span className={`text-[${accentColor}]`}> Profile</span>
+          Complete Your{" "}
+          <span className={`text-[${accentColor}]`}> Profile</span>
         </h1>
 
         <form
@@ -373,7 +368,7 @@ const Register = () => {
                 name="designation"
                 value={formData.designation}
                 onChange={handleMainFormChange}
-                placeholder="Current/Targeted Designation"
+                placeholder="Current/Targeted designation"
                 required
               />
             </div>
@@ -394,7 +389,9 @@ const Register = () => {
                     value={skill}
                     onChange={(e) => handleSkillChange(index, e.target.value)}
                     className={`w-full border border-gray-300 px-4 py-3 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[${accentColor}] focus:border-[${accentColor}] placeholder-gray-500`}
-                    placeholder={`Skill #${index + 1} (e.g., React, Java, Marketing)`}
+                    placeholder={`Skill #${
+                      index + 1
+                    } (e.g., React, Java, Marketing)`}
                     required={index === 0}
                   />
                   {index > 0 && (
@@ -428,8 +425,13 @@ const Register = () => {
             />
             <div className="space-y-6">
               {qualifications.map((q, index) => (
-                <div key={index} className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative">
-                  <h4 className="font-bold text-base text-gray-700">Qualification #{index + 1}</h4>
+                <div
+                  key={index}
+                  className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative"
+                >
+                  <h4 className="font-bold text-base text-gray-700">
+                    Qualification #{index + 1}
+                  </h4>
 
                   {index > 0 && (
                     <button
@@ -447,7 +449,15 @@ const Register = () => {
                     name="degree"
                     value={q.degree}
                     onChange={(e) => handleQualificationChange(index, e)}
-                    placeholder="Degree / Certification Name"
+                    placeholder="Diploma / Degree"
+                    required
+                  />
+                  <InputField
+                    type="text"
+                    name="fieldOfStudy"
+                    value={q.fieldOfStudy}
+                    onChange={(e) => handleQualificationChange(index, e)}
+                    placeholder="Field of Study"
                     required
                   />
                   <InputField
@@ -503,10 +513,17 @@ const Register = () => {
 
           {/* 4. Experience */}
           <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-            <SectionHeader icon={Briefcase} title="Work Experience" description="Your professional history details." />
+            <SectionHeader
+              icon={Briefcase}
+              title="Work Experience"
+              description="Your professional history details."
+            />
 
             <div className="mb-6">
-              <label htmlFor="experienceType" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="experienceType"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Total Experience Level
               </label>
               <select
@@ -515,7 +532,9 @@ const Register = () => {
                 onChange={(e) => setExperienceType(e.target.value)}
                 className={`w-full border border-gray-300 px-4 py-3 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[${accentColor}] focus:border-[${accentColor}] bg-white`}
               >
-                <option value="Fresher">Fresher (No professional experience)</option>
+                <option value="Fresher">
+                  Fresher (No professional experience)
+                </option>
                 <option value="0-1 year">0-1 year</option>
                 <option value="1-5 years">1-5 years</option>
                 <option value="5-10 years">5-10 years</option>
@@ -526,8 +545,13 @@ const Register = () => {
             {experienceType !== "Fresher" && (
               <div className="space-y-6">
                 {Experience.map((exp, index) => (
-                  <div key={index} className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative">
-                    <h4 className="font-bold text-base text-gray-700">Job Role #{index + 1}</h4>
+                  <div
+                    key={index}
+                    className="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3 relative"
+                  >
+                    <h4 className="font-bold text-base text-gray-700">
+                      Job Role #{index + 1}
+                    </h4>
 
                     {index > 0 && (
                       <button
@@ -542,18 +566,19 @@ const Register = () => {
 
                     <InputField
                       type="text"
-                      name="company"
-                      value={exp.company}
+                      name="companyName"
+                      value={exp.companyNameName}
                       onChange={(e) => handleExperienceChange(index, e)}
-                      placeholder="Company Name"
+                      placeholder="companyName Name"
                       required
                     />
+
                     <InputField
                       type="text"
-                      name="designation"
-                      value={exp.designation}
+                      name="position"
+                      value={exp.position}
                       onChange={(e) => handleExperienceChange(index, e)}
-                      placeholder="Job Role / Designation"
+                      placeholder="Job Role / position"
                       required
                     />
 
@@ -612,7 +637,8 @@ const Register = () => {
               {/* Profile Photo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                  <ImageIcon className="w-4 h-4 mr-1 text-gray-500" /> Profile Photo (Image: JPG, PNG)
+                  <ImageIcon className="w-4 h-4 mr-1 text-gray-500" /> Profile
+                  Photo (Image: JPG, PNG)
                 </label>
                 <input
                   type="file"
@@ -640,7 +666,8 @@ const Register = () => {
               {/* Resume Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                  <FileText className="w-4 h-4 mr-1 text-gray-500" /> Resume / CV (.pdf, .doc, .docx)
+                  <FileText className="w-4 h-4 mr-1 text-gray-500" /> Resume /
+                  CV (.pdf, .doc, .docx)
                 </label>
                 <input
                   type="file"
@@ -652,7 +679,9 @@ const Register = () => {
                 {formData.resume ? (
                   <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between shadow-sm">
                     <span className="text-sm font-medium text-gray-800 truncate max-w-[60%] flex items-center">
-                      <FileText className={`w-5 h-5 mr-2 text-[${accentColor}]`} />
+                      <FileText
+                        className={`w-5 h-5 mr-2 text-[${accentColor}]`}
+                      />
                       {formData.resume.name}
                     </span>
                     <a
@@ -690,7 +719,7 @@ const Register = () => {
         onClose={() => setNotification({ message: "", type: "" })}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

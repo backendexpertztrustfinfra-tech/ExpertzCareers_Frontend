@@ -131,7 +131,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
           if (usertype === "recruiter") {
             navigate("/admin", { replace: true })
           } else if (usertype === "jobseeker") {
-            navigate("/", { replace: true })
+            navigate("/jobs", { replace: true })
           }
 
           onlogin?.()

@@ -67,11 +67,11 @@ const Navbar = ({ onToggleSidebar }) => {
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   const navItems = [
-    { label: "Home", path: "/" },
-    { label: "Jobs", path: "/jobs" },
-    { label: "Companies", path: "/companies" },
-    { label: "Services", path: "/services" },
-    { label: "About", path: "/about" },
+    // { label: "Home", path: "/" },
+    // { label: "Jobs", path: "/jobs" },
+    // { label: "Companies", path: "/companies" },
+    // { label: "Services", path: "/services" },
+    // { label: "About", path: "/about" },
   ];
 
   const megaMenuData = {

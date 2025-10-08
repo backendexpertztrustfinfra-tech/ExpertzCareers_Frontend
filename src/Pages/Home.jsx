@@ -8,6 +8,7 @@ import JobPromo from "../Components/Home/JobPromo"
 import QualificationCards from "../Components/Home/QualificationCards"
 import JobTypeCards from "../Components/Home/JobTypeCards"
 import FaqSection from "../Components/Home/FaqSection"
+import CompaniesMarqueea from '../Components/Home/companies-marquee'
 
 const Home = () => {
   const { user } = useContext(AuthContext)
@@ -31,7 +32,8 @@ const Home = () => {
         <div className="fixed top-32 left-1/2 transform -translate-x-1/2 bg-white-500 text-black px-4 py-2 rounded shadow z-50">
           Please login first to continue
         </div>
-      )}
+      )}  
+<CompaniesMarqueea />
 
       {/* Main Content */}
       <div className={`${!user ? "filter opacity-100 pointer-events-auto select-none" : ""}`}>

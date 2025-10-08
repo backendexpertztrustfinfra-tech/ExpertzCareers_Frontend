@@ -57,8 +57,10 @@ const JobTypeCards = () => {
           <div
             key={index}
             onClick={() => handleTypeClick(job.title)}
-            className="cursor-pointer bg-white/90 backdrop-blur-md rounded-2xl shadow-md border border-gray-100 hover:border-[#caa057] 
-                         transition-all duration-300 hover:shadow-xl hover:-translate-y-1 p-6 flex flex-col items-center text-center"
+            className="cursor-pointer bg-white/90 backdrop-blur-md rounded-2xl shadow-md border border-gray-100 hover:border-[#caa057] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 p-6 flex flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#caa057]"
+            tabIndex={0}
+            role="button"
+            aria-label={`View ${job.title} jobs`}
           >
             <div className="w-16 h-16 flex items-center justify-center rounded-full bg-[#fff1ed] mb-4">
               <img src={job.icon || "/placeholder.svg"} alt={job.title} className="w-10 h-10 object-contain" />
