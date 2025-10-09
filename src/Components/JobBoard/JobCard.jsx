@@ -9,13 +9,33 @@ import { BASE_URL } from "../../config"
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initialSaved = false, onUnsave }) => {
+const JobCard = ({
+  job,
+  showActions = true,
+  showBookmark = true,
+  onUpdate,
+  initialSaved = false,
+  onUnsave,
+  savedAt,
+  appliedAt,
+
+  // new optional, parent-driven controls
+  isSaved: isSavedProp,
+  isApplied: isAppliedProp,
+  applyLoading: applyLoadingProp,
+  onSave,
+  onApply,
+}) => {
   const navigate = useNavigate()
   const token = Cookies.get("userToken")
 
   const [isSaved, setIsSaved] = useState(initialSaved)
   const [isApplied, setIsApplied] = useState(false)
   const [applyLoading, setApplyLoading] = useState(false)
+
+  const effectiveSaved = typeof isSavedProp === "boolean" ? isSavedProp : isSaved
+  const effectiveApplied = typeof isAppliedProp === "boolean" ? isAppliedProp : isApplied
+  const effectiveApplyLoading = typeof applyLoadingProp === "boolean" ? applyLoadingProp : applyLoading
 
   const normalized = {
     id: job._id || job.id || job.jobId,
@@ -64,6 +84,9 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
     jobCreatedby: job.jobCreatedby,
   }
 
+  const displayDate = appliedAt || savedAt || normalized.postedDate
+  const displayLabel = appliedAt ? "Applied" : savedAt ? "Saved" : "Posted"
+
   useEffect(() => {
     setIsSaved(initialSaved)
   }, [initialSaved])
@@ -71,12 +94,18 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
   const handleSave = async (e) => {
     e.stopPropagation()
     if (!token) return toast.error("❌ Please log in to save jobs.")
+    if (effectiveApplied) return toast.info("You have already applied to this job. Saving is not allowed.")
+
+    if (onSave) {
+      onSave(normalized.id)
+      return
+    }
 
     try {
-      const url = isSaved
+      const url = effectiveSaved
         ? `${BASE_URL}/jobseeker/removesavedjob/${normalized.id}`
         : `${BASE_URL}/jobseeker/savejob/${normalized.id}`
-      const method = isSaved ? "DELETE" : "POST"
+      const method = effectiveSaved ? "DELETE" : "POST"
 
       const resp = await fetch(url, {
         method,
@@ -84,9 +113,9 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
       })
       if (!resp.ok) throw new Error("Failed to update saved job")
 
-      setIsSaved(!isSaved)
-      toast[isSaved ? "info" : "success"](isSaved ? "🗑 Job removed from saved" : "✅ Job saved!")
-      if (isSaved && onUnsave) onUnsave(normalized.id)
+      setIsSaved(!effectiveSaved)
+      toast[effectiveSaved ? "info" : "success"](effectiveSaved ? "🗑 Job removed from saved" : "✅ Job saved!")
+      if (effectiveSaved && onUnsave) onUnsave(normalized.id)
       if (onUpdate) onUpdate()
       window.dispatchEvent(new Event("savedJobsUpdated"))
     } catch (err) {
@@ -98,9 +127,14 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
   const handleApply = async (e) => {
     e.stopPropagation()
     if (!token) return toast.error("❌ Please log in to apply.")
-    if (isApplied) return toast.info("✅ Already applied.")
-    setApplyLoading(true)
+    if (effectiveApplied) return toast.info("✅ Already applied.")
 
+    if (onApply) {
+      onApply(normalized.id)
+      return
+    }
+
+    setApplyLoading(true)
     try {
       const resp = await fetch(`${BASE_URL}/jobseeker/applyforjob/${normalized.id}`, {
         method: "POST",
@@ -111,8 +145,9 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
 
       setIsApplied(true)
       toast.success("✅ Application submitted!")
+      window.dispatchEvent(new Event("appliedJobsUpdated"))
 
-      if (isSaved) {
+      if (effectiveSaved) {
         try {
           const unsaveResp = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${normalized.id}`, {
             method: "DELETE",
@@ -166,15 +201,15 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
           </div>
         </div>
         <div className="flex gap-2 relative">
-          {showBookmark && (
+          {showBookmark && !effectiveApplied && (
             <motion.button
               onClick={handleSave}
               whileTap={{ scale: 0.8 }}
-              animate={{ scale: isSaved ? [1, 1.3, 1] : 1 }}
+              animate={{ scale: effectiveSaved ? [1, 1.3, 1] : 1 }}
               transition={{ duration: 0.3 }}
               className="p-1.5 rounded-lg relative"
             >
-              <BookmarkIcon size={18} className={isSaved ? "text-[#caa057] fill-[#caa057]" : "text-gray-500"} />
+              <BookmarkIcon size={18} className={effectiveSaved ? "text-[#caa057] fill-[#caa057]" : "text-gray-500"} />
             </motion.button>
           )}
         </div>
@@ -224,8 +259,11 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
         <div className="flex gap-3 text-[11px] sm:text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
             <Clock size={12} className="text-[#caa057]" />
-            <span>{normalized.postedDate ? new Date(normalized.postedDate).toLocaleDateString() : "—"}</span>
+            <span>
+              {displayLabel}: {displayDate ? new Date(displayDate).toLocaleDateString() : "—"}
+            </span>
           </span>
+
           <span className="flex items-center gap-1.5">
             <Users size={12} className="text-[#caa057]" />
             <span>{normalized.applicants}</span>
@@ -236,14 +274,14 @@ const JobCard = ({ job, showActions = true, showBookmark = true, onUpdate, initi
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button
               onClick={handleApply}
-              disabled={applyLoading || isApplied}
+              disabled={effectiveApplyLoading || effectiveApplied}
               className={`px-4 py-2 rounded-lg font-medium text-xs sm:text-sm w-full sm:w-auto ${
-                isApplied
+                effectiveApplied
                   ? "bg-green-500 text-white cursor-not-allowed"
                   : "bg-gradient-to-r from-[#caa057] to-[#caa057] text-white"
               }`}
             >
-              {applyLoading ? "Applying..." : isApplied ? "✅ Applied" : "Apply Now"}
+              {effectiveApplyLoading ? "Applying..." : effectiveApplied ? "✅ Applied" : "Apply Now"}
             </button>
             <button
               onClick={(e) => {

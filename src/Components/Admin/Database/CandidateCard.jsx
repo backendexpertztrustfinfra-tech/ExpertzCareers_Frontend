@@ -11,9 +11,11 @@ import {
   FaPlayCircle,
   FaFilePdf,
   FaExternalLinkAlt,
+  FaChevronDown, 
+  FaChevronUp,  
 } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
-import { MdPersonAdd, MdOutlineWorkOutline } from "react-icons/md";
+import { MdPersonAdd, MdOutlineWorkOutline, MdClose } from "react-icons/md";
 import { sendNotification } from "../../../services/apis";
 import { BASE_URL } from "../../../config";
 
@@ -46,7 +48,7 @@ const safeParseSkills = (skills) => {
   return [];
 };
 
-/* Parse array of JSON-like items separated by '@', fix quotes and keys */
+/* Parse array of JSON */
 const parseMultiObjectString = (field) => {
   if (!field) return [];
   if (Array.isArray(field)) return field;
@@ -65,7 +67,6 @@ const parseMultiObjectString = (field) => {
             .replace(/(\b\w+\b)\s*:/g, '"$1":');
           return JSON.parse(fixed);
         } catch {
-          // If still not JSON, return as a best-effort object
           return { degree: item };
         }
       })
@@ -76,6 +77,8 @@ const parseMultiObjectString = (field) => {
   return [];
 };
 
+// --- CandidateCard Component (UPDATED) ---
+
 const CandidateCard = ({
   candidate,
   onSave,
@@ -85,6 +88,7 @@ const CandidateCard = ({
   token,
 }) => {
   const [showPhone, setShowPhone] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); 
 
   if (!candidate) {
     console.warn("CandidateCard: No candidate data provided");
@@ -111,19 +115,16 @@ const CandidateCard = ({
     appliedDate = null,
   } = candidate;
 
-  // Skills can come from candidate.skills or candidate.Skill
+  // Data Parsing (UNCHANGED)
   const skillsArray = safeParseSkills(candidate.skills ?? candidate.Skill);
-
-  // Qualifications/Experience can be arrays or '@'-joined strings
   const qualificationsArray = Array.isArray(candidate.qualification)
     ? candidate.qualification
     : parseMultiObjectString(candidate.qualification);
-
   const experienceArray = Array.isArray(candidate.experience)
     ? candidate.experience
     : parseMultiObjectString(candidate.experience);
 
-  // Applied time helpers
+  // Helper function to format date (UNCHANGED)
   const formatAppliedDate = (dateStr) => {
     if (!dateStr) return "Recently";
     try {
@@ -162,7 +163,6 @@ const CandidateCard = ({
       return "Recently";
     }
   };
-
   const isAppliedWithin24Hours = (dateStr) => {
     if (!dateStr) return false;
     try {
@@ -173,14 +173,13 @@ const CandidateCard = ({
       return false;
     }
   };
-
+  
+  // Actions logic (UNCHANGED)
   const appliedRecently = isAppliedWithin24Hours(appliedDate);
   const appliedTimeText = formatAppliedDate(appliedDate);
-
   const recruiterCompany = selectedJob?.recruterCompany || "Our Company";
   const inviteMessage = `Hello ${username}, this is ${recruiterCompany}. You are selected for the interview. Please contact us for further details.`;
 
-  // Actions
   const handleCall = () => {
     if (phonenumber && phonenumber !== "Not Provided") {
       window.open(`tel:${phonenumber}`, "_self");
@@ -188,7 +187,6 @@ const CandidateCard = ({
       alert("Phone number not available");
     }
   };
-
   const handleSMS = () => {
     if (phonenumber && phonenumber !== "Not Provided") {
       window.open(
@@ -199,7 +197,6 @@ const CandidateCard = ({
       alert("Phone number not available");
     }
   };
-
   const handleWhatsAppInvite = async () => {
     if (!phonenumber || phonenumber === "Not Provided") {
       alert("Phone number not available");
@@ -227,7 +224,6 @@ const CandidateCard = ({
       }
     }
   };
-
   const handleSaveClick = (e) => {
     e.stopPropagation();
     if (_id) {
@@ -236,244 +232,205 @@ const CandidateCard = ({
       console.error("Cannot save candidate: Missing candidate ID");
     }
   };
+  
+  // Helper Component for Info Rows (for readability)
+  const InfoRow = ({ Icon, title, content }) => (
+    <div className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
+      <Icon className="w-5 h-5 text-[#caa057] shrink-0 mt-1" />
+      <div>
+        <p className="text-xs text-gray-500 font-medium">{title}</p>
+        <p className="text-sm font-semibold text-gray-800 break-words">{content || "Not Provided"}</p>
+      </div>
+    </div>
+  );
+
+  // Helper Component for Link Buttons (for readability)
+  const LinkButton = ({ link, Icon, label, colorClass = "text-blue-600" }) => {
+    if (!link) return null;
+    const finalLink = link.startsWith('http') || link.startsWith('tel') || link.startsWith('mailto') ? link : `${BASE_URL}${link}`;
+    
+    return (
+      <a
+        href={finalLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`flex items-center justify-center gap-1 text-xs ${colorClass} hover:underline transition`}
+      >
+        <Icon className="w-4 h-4" /> {label}
+      </a>
+    );
+  };
+  
+  // Helper to format complex array list items for expansion (COMPACTED)
+  const renderListItems = (arr) => {
+      if (!arr || arr.length === 0) return <p className="text-gray-400">Not Provided</p>;
+      
+      return arr.map((item, index) => {
+          const mainTitle = item.position || item.degree || "N/A";
+          const subTitle = item.companyName || item.institution || "N/A";
+          
+          return (
+              <li key={index} className="leading-tight mb-2 p-1 border-b border-gray-100 last:border-b-0">
+                  <strong className="text-gray-800 block text-sm">{mainTitle}</strong>
+                  <div className="text-xs text-gray-600">{subTitle}</div>
+                  {item.duration && <div className="text-xs text-gray-500 mt-1">{item.duration}</div>}
+              </li>
+          );
+      });
+  };
+  
+  // Get preview data for core info grid
+  const previewQualification = qualificationsArray[0]?.degree || 'N/A';
+  const previewExperience = experienceArray[0]?.position || 'N/A';
+
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 w-full max-w-5xl mx-auto hover:shadow-lg transition">
-      {/* Top Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
-        <div className="flex items-start gap-4 w-full">
-          <img
-            src={
-              profilePhoto ||
-              profilphoto ||
-              "https://cdn-icons-png.flaticon.com/512/219/219969.png"
-            }
-            alt={`${username}'s avatar`}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border object-cover"
-            onError={(e) => {
-              e.currentTarget.src =
-                "https://cdn-icons-png.flaticon.com/512/219/219969.png";
-            }}
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                {username}
-              </h2>
-              {appliedRecently && (
-                <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                  NEW
-                </span>
-              )}
-              {isSaved && (
-                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                  Saved
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-4 mt-2 text-gray-600 text-sm">
-              {/* <span className="flex items-center gap-1">
-                <FaRupeeSign /> {expectedSalary}
-              </span> */}
-
-              {/* Qualification list (multi) */}
-              <div className="min-w-[200px]">
-                <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
-                  <FaGraduationCap className="text-gray-500" />
-                  Qualification
-                </h3>
-                {qualificationsArray.length > 0 ? (
-                  <ul className="space-y-1 text-gray-600">
-                    {qualificationsArray.map((q, index) => (
-                      <li key={index} className="leading-snug">
-                        <strong>{q.degree || q.title || "N/A"}</strong>
-                        {q.fieldOfStudy ? <> – {q.fieldOfStudy}</> : null}
-                        <div className="text-sm text-gray-500">
-                          {q.institution ||
-                            q.instution ||
-                            "Institution not provided"}
+    // **KEY FIX: Added 'relative' to the main container and managed dynamic height**
+    <div 
+        className={`bg-white rounded-xl shadow-lg border-2 border-orange-100 p-5 w-full mx-auto hover:shadow-xl transition flex flex-col justify-between relative ${isExpanded ? 'h-auto' : 'h-[400px]'}`}
+        style={!isExpanded ? { maxHeight: '400px' } : {}} 
+    >
+        
+        {/* Main Content Container with conditional overflow */}
+        <div className={`flex flex-col gap-4 flex-grow relative ${!isExpanded ? 'overflow-hidden' : ''}`}> 
+            
+            {/* User Info & Save Button */}
+            <div className="flex justify-between items-start">
+                <div className="flex items-start gap-4">
+                    <img
+                        src={profilePhoto || profilphoto || "https://cdn-icons-png.flaticon.com/512/219/219969.png"}
+                        alt={`${username}'s avatar`}
+                        className="w-16 h-16 rounded-full border-2 border-[#caa057] object-cover"
+                        onError={(e) => { e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/219/219969.png"; }}
+                    />
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl font-bold text-gray-800 truncate max-w-[150px]">
+                                {username}
+                            </h2>
+                            {appliedRecently && (
+                                <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                    NEW
+                                </span>
+                            )}
+                            {isSaved && (
+                                <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                    Saved
+                                </span>
+                            )}
                         </div>
-                        {q.duration && (
-                          <div className="text-xs text-gray-400">
-                            {q.duration}
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-400">Not Provided</p>
-                )}
-              </div>
+                        <p className="text-xs text-gray-500 mt-1">Applied: {appliedTimeText}</p>
+                    </div>
+                </div>
 
-              <span className="flex items-center gap-1">
-                <FaMapMarkerAlt /> {location}
-              </span>
+                <button
+                    onClick={handleSaveClick}
+                    className={`p-2 rounded-full transition-colors shrink-0 ${isSaved ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500'}`}
+                    title={isSaved ? "Unsave Candidate" : "Save Candidate"}
+                >
+                    <MdPersonAdd className="w-5 h-5" />
+                </button>
             </div>
-          </div>
-        </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full whitespace-nowrap">
-            Applied: {appliedTimeText}
-          </span>
-          {!isSaved && (
-            <button
-              onClick={handleSaveClick}
-              className="flex items-center gap-1 text-blue-600 text-sm hover:underline"
+            {/* Core Info Grid */}
+            <div className="grid grid-cols-2 gap-3 text-sm border-y py-3">
+                <InfoRow Icon={FaMapMarkerAlt} title="Location" content={location} />
+                <InfoRow Icon={FaRupeeSign} title="Expected Salary" content={expectedSalary} />
+                <InfoRow Icon={FaGraduationCap} title="Education" content={previewQualification} />
+                <InfoRow Icon={MdOutlineWorkOutline} title="Last Role" content={previewExperience} />
+            </div>
+
+            {/* Skills Preview */}
+            <div className="mt-2">
+                <h3 className="text-xs font-semibold text-[#caa057] mb-1">Skills:</h3>
+                <div className="flex flex-wrap gap-2">
+                    {skillsArray.slice(0, 5).map((skill, index) => (
+                        <span key={index} className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-0.5 rounded-md">
+                            {skill}
+                        </span>
+                    ))}
+                    {skillsArray.length === 0 && <span className="text-xs text-gray-400">Not Provided</span>}
+                    {skillsArray.length > 5 && <span className="text-xs text-gray-500">+{skillsArray.length - 5} more</span>}
+                </div>
+            </div>
+            
+            {/* Document Links Preview */}
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs mt-3 border-t pt-3">
+                <LinkButton link={resume} Icon={FaFilePdf} label="Resume" colorClass="text-red-600" />
+                <LinkButton link={portfioliolink || portfoliolink} Icon={FaLink} label="Portfolio" />
+                <LinkButton link={certificationlink} Icon={FaLink} label="Certificates" />
+                {introvideo && <LinkButton link={introvideo} Icon={FaPlayCircle} label="Video Intro" colorClass="text-purple-600" />}
+            </div>
+
+            {/* Use conditional class for a smooth transition */}
+            <div className={`transition-all duration-300 ${isExpanded ? 'mt-4 pt-4 border-t block' : 'h-0 overflow-hidden'}`}>
+                <h3 className="text-md font-bold text-gray-700 mb-2">Detailed Profile</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 className="font-semibold text-sm flex items-center mb-1"><MdOutlineWorkOutline className="w-4 h-4 mr-1" /> Work History:</h4>
+                        <ul className="space-y-1 text-xs bg-gray-50 p-2 rounded max-h-[150px] overflow-y-auto">
+                           {renderListItems(experienceArray)}
+                        </ul>
+                    </div>
+                    <div>
+                         <h4 className="font-semibold text-sm flex items-center mb-1"><FaGraduationCap className="w-4 h-4 mr-1" /> Qualifications:</h4>
+                        <ul className="space-y-1 text-xs bg-gray-50 p-2 rounded max-h-[150px] overflow-y-auto">
+                            {renderListItems(qualificationsArray)}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            {/* FADE OVERLAY & TOGGLE BUTTON AREA (Always Visible in Compact Mode) */}
+            {!isExpanded && (
+                <div className="absolute inset-x-0 bottom-[56px] h-[40px] bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+            )}
+        </div>
+        
+        {/* Footer Actions & Expand Toggle (Always fixed at the bottom of the card) */}
+        <div className="pt-4 border-t border-gray-100 flex flex-col">
+             <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full text-[#caa057] font-semibold py-2 rounded-lg hover:bg-orange-50 transition-colors flex items-center justify-center text-sm mb-3 border border-[#caa057]"
             >
-              <MdPersonAdd /> Save
+                {isExpanded ? (
+                    <><FaChevronUp className="w-4 h-4 mr-2" /> View Less</>
+                ) : (
+                    <><FaChevronDown className="w-4 h-4 mr-2" /> View More Details</>
+                )}
             </button>
-          )}
+            
+            {/* Quick Contact Buttons */}
+            <div className="flex justify-between gap-3">
+                <button
+                  onClick={() => {
+                    setShowPhone(true);
+                    handleCall();
+                  }}
+                  className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1.5 rounded-lg transition flex-1"
+                >
+                  <FaPhoneAlt />{" "}
+                  {showPhone && phonenumber !== "Not Provided" ? phonenumber : "Call"}
+                </button>
+
+                <button
+                  onClick={handleWhatsAppInvite}
+                  className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1.5 rounded-lg transition flex-1"
+                >
+                  <IoMdSend /> WhatsApp
+                </button>
+
+                {onReject && (
+                  <button
+                    onClick={() => onReject(_id)}
+                    className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1.5 rounded-lg transition w-1/4"
+                  >
+                    <MdClose />
+                  </button>
+                )}
+            </div>
         </div>
-      </div>
-
-      {/* Grid Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 text-sm">
-        {/* Skills */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <FaBriefcase className="text-gray-500" />
-            Skills
-          </h3>
-          <p className="text-gray-600">
-            {skillsArray.length > 0 ? skillsArray.join(", ") : "Not Provided"}
-          </p>
-        </div>
-
-        {/* Experience */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <MdOutlineWorkOutline className="text-gray-500" />
-            Experience
-          </h3>
-          {experienceArray.length > 0 ? (
-            <ul className="space-y-1 text-gray-600">
-              {experienceArray.map((exp, index) => (
-                <li key={index} className="leading-snug">
-                  <strong>{exp.position || exp.designation || "N/A"}</strong> at{" "}
-                  {exp.companyName || exp.company || "N/A"}
-                  {exp.duration && (
-                    <div className="text-xs text-gray-400">{exp.duration}</div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-400">Not Provided</p>
-          )}
-        </div>
-
-        {/* Documents */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <FaFilePdf className="text-gray-500" />
-            Documents
-          </h3>
-          <div className="space-y-1">
-            {resume ? (
-              <a
-                href={
-                  resume?.startsWith("http") ? resume : `${BASE_URL}/${resume}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:underline"
-              >
-                <FaExternalLinkAlt className="w-3 h-3" /> Resume
-              </a>
-            ) : (
-              <p className="text-gray-400">Resume Not Provided</p>
-            )}
-            {certificationlink ? (
-              <a
-                href={certificationlink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:underline"
-              >
-                <FaExternalLinkAlt className="w-3 h-3" /> Certificates
-              </a>
-            ) : (
-              <p className="text-gray-400">Certificates Not Provided</p>
-            )}
-          </div>
-        </div>
-
-        {/* Portfolio */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <FaLink className="text-gray-500" />
-            Portfolio
-          </h3>
-          {portfioliolink || portfoliolink ? (
-            <a
-              href={portfioliolink || portfoliolink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-blue-600 hover:underline"
-            >
-              <FaExternalLinkAlt className="w-3 h-3" /> View Portfolio
-            </a>
-          ) : (
-            <p className="text-gray-400">Not Provided</p>
-          )}
-        </div>
-      </div>
-
-      {/* Intro Video */}
-      {introvideo && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-            <FaPlayCircle className="text-red-500" />
-            Video Intro
-          </h3>
-          <video
-            src={introvideo}
-            className="w-full max-w-lg rounded-lg shadow-sm border"
-            controls
-          />
-        </div>
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-        <button
-          onClick={() => {
-            setShowPhone(true);
-            handleCall();
-          }}
-          className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
-        >
-          <FaPhoneAlt />{" "}
-          {showPhone && phonenumber !== "Not Provided"
-            ? phonenumber
-            : "View Phone"}
-        </button>
-
-        <button
-          onClick={handleSMS}
-          className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
-        >
-          <IoMdSend /> SMS
-        </button>
-
-        <button
-          onClick={handleWhatsAppInvite}
-          className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-5 py-2.5 rounded-lg border transition w-full sm:w-auto"
-        >
-          <MdPersonAdd /> WhatsApp Invite
-        </button>
-
-        {onReject && (
-          <button
-            onClick={() => onReject(_id)}
-            className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm px-5 py-2.5 rounded-lg transition w-full sm:w-auto"
-          >
-            ❌ Reject
-          </button>
-        )}
-      </div>
     </div>
   );
 };

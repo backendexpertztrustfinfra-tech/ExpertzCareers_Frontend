@@ -81,6 +81,7 @@ const AppliedJobsTab = () => {
             isApplied={true}
             onUpdate={fetchAppliedJobs}
             showBookmark={false}
+            appliedAt={job.appliedAt}
           />
         ))
       )}

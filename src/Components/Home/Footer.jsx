@@ -61,7 +61,7 @@ const Footer = () => {
                 { name: "Expertz DigiFinra Reality", route: "https://expertztrustfinfra.com/", external: true },
                 { name: "Expertz DigiShop", route: "https://expertzdigishop.com/", external: true },
                 { name: "Expertz Insta Services", route: "/", external: false },
-                { name: "Expertz Q-Mart", route: "/terms", external: false },
+                { name: "Expertz Q-Mart", route: "/", external: false },
                 { name: "Expertz Fine Dine RestroCafe", route: "https://expertzfinedinerestrocafe.com/", external: true },
                 { name: "Expertz Hotels", route: "/", external: false },
               ]}

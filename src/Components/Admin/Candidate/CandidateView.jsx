@@ -17,7 +17,7 @@ import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-  
+
 const parseSkills = (skillField) => {
   if (!skillField) return []
   if (Array.isArray(skillField))
@@ -102,14 +102,9 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
     return candidatesArray.map((item) => {
       const user = item.userId || item
       const applicationData = item.userId ? item : {}
-
       const skillsArray = parseSkills(user.Skill ?? user.skills ?? item.skills)
-
-      // preserve raw fields for robust parsing in the cards
       const qualificationRaw = user.qualification ?? ""
       const experienceRaw = user.Experience ?? user.experience ?? ""
-
-      // Build derived text for filtering and quick display
       const quals = parseQualOrExpArray(qualificationRaw)
       const qualificationText = quals.length
         ? quals
@@ -121,22 +116,41 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
             .filter(Boolean)
             .join(", ")
         : typeof qualificationRaw === "string"
-          ? qualificationRaw
-          : "Not Provided"
+        ? qualificationRaw
+        : "Not Provided"
 
-      // years for filtering
       let experienceYears = 0
       if (user.yearsofExperience) {
         const match = String(user.yearsofExperience).match(/(\d+)/)
         experienceYears = match ? Number(match[1]) : 0
       }
 
+      // FIX: Ensure all links (introvideo, portfolio, certification) are retrieved
+      // from all possible locations (user root, user.candidate, or applicationData)
+
+      const introvideo = 
+        user.introvideo ||              // Check user root (Database View style)
+        user.candidate?.introvideo ||   // Check user.candidate (Applied User style)
+        null;
+        
+      const certificationlink = 
+        user.certificationlink ||              // Check user root
+        user.candidate?.certificationlink ||   // Check user.candidate
+        null;
+
+      const portfioliolink = 
+        user.portfioliolink || 
+        user.portfoliolink ||               // Check user root
+        user.candidate?.portfioliolink ||   // Check user.candidate
+        user.candidate?.portfoliolink ||    // Check user.candidate (typo check)
+        null;
+
+
       return {
         _id: user._id || user.id,
         username: user.username || "No Name",
         useremail: user.useremail || "No Email",
         designation: user.designation || "No Designation",
-        // provide both raw and derived
         qualification: qualificationRaw,
         qualificationText,
         experience: experienceRaw,
@@ -146,14 +160,20 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         // expectedSalary: user.salaryExpectation || user.expectedSalary || "N/A",
         phonenumber: user.phonenumber || "Not Provided",
         resume: user.resume || null,
-        portfioliolink: user.portfioliolink || user.portfoliolink || null,
+        
+        // --- UPDATED LINKS ---
+        introvideo: introvideo,
+        certificationlink: certificationlink,
+        portfioliolink: portfioliolink, 
+        // ---------------------
+
         profilePhoto: user.profilphoto || user.profilePhoto || null,
         appliedDate: applicationData.appliedAt || user.appliedDate || user.createdAt || new Date().toISOString(),
         status: applicationData.status || "applied",
         jobId: applicationData.jobId || item.jobId || null,
       }
     })
-  }, [])
+  }, []) 
 
   const fetchCandidates = useCallback(
     async (apiCall, setter, jobId = null) => {
@@ -358,7 +378,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
     setError(null)
     setActiveCandidate(null)
     if (t === "Saved") handleFetchSaved()
-    else handleFetchApplied() // Applied or Rejected both refresh same source
+    else handleFetchApplied()
   }
 
   useEffect(() => {
@@ -633,7 +653,7 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
 
         <button
           onClick={resetFilters}
-          className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          className="w-full bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white py-2 rounded-lg hover:bg-[#caa057] transition-colors"
         >
           Clear Filters
         </button>
@@ -663,8 +683,8 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
               {t === "Applied"
                 ? appliedCandidates.length
                 : t === "Rejected"
-                  ? rejectedCandidates.length
-                  : savedCandidates.length}
+                ? rejectedCandidates.length
+                : savedCandidates.length}
               )
             </button>
           ))}

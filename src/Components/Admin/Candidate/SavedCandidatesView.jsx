@@ -12,6 +12,57 @@ import "rc-slider/assets/index.css"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
+// --- Helper Functions from Previous Logic (Re-implemented for Consistency) ---
+
+const parseSkills = (skillField) => {
+  if (!skillField) return []
+  if (Array.isArray(skillField))
+    return skillField
+      .filter(Boolean)
+      .map((s) => (typeof s === "string" ? s : s?.name || s?.skill || "").trim())
+      .filter(Boolean)
+  if (typeof skillField === "string") {
+    try {
+      const arr = JSON.parse(skillField)
+      if (Array.isArray(arr))
+        return arr
+          .filter(Boolean)
+          .map((s) => (typeof s === "string" ? s : s?.name || s?.skill || "").trim())
+          .filter(Boolean)
+    } catch {}
+    return skillField
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+const parseQualOrExpArray = (field) => {
+  if (!field) return []
+  if (Array.isArray(field)) return field
+  if (typeof field === "string") {
+    const low = field.trim().toLowerCase()
+    if (!low || low === "not provided" || low === "not specified") return []
+    return field
+      .split("@")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => {
+        try {
+          const fixed = item.replace(/'/g, '"').replace(/(\b\w+\b)\s*:/g, '"$1":')
+          return JSON.parse(fixed)
+        } catch {
+          return { degree: item }
+        }
+      })
+      .filter(Boolean)
+  }
+  if (typeof field === "object") return [field]
+  return []
+}
+
+// --- Main Component ---
 const SavedCandidatesView = () => {
   const token = Cookies.get("userToken")
   const [savedCandidates, setSavedCandidates] = useState([])
@@ -35,6 +86,7 @@ const SavedCandidatesView = () => {
     dateTo: "",
   })
 
+  // FIX: Updated to use the comprehensive transformCandidateData logic
   const transformCandidateData = useCallback((candidatesArray) => {
     if (!Array.isArray(candidatesArray)) {
       console.error("Expected array, got:", typeof candidatesArray, candidatesArray)
@@ -42,71 +94,83 @@ const SavedCandidatesView = () => {
     }
 
     return candidatesArray.map((item) => {
-      const user = item.userId || item
+      const user = item.userId || item // User object is often item.userId or item itself
       const applicationData = item.userId ? item : {}
 
-      let qualificationText = "Not Provided"
-      if (user.qualification) {
-        try {
-          const parsed = JSON.parse(user.qualification)
-          if (Array.isArray(parsed)) {
-            qualificationText = parsed
-              .map((q) => `${q.degree || ""}${q.institution ? " - " + q.institution : ""}`)
-              .join(", ")
-          }
-        } catch {
-          qualificationText = user.qualification
-        }
-      }
+      // Comprehensive Data Parsing (Qualification, Experience, Skills)
+      const skillsArray = parseSkills(user.Skill ?? user.skills ?? item.skills)
+      const qualificationRaw = user.qualification ?? ""
+      const experienceRaw = user.Experience ?? user.experience ?? ""
+      
+      const quals = parseQualOrExpArray(qualificationRaw)
+      const qualificationText = quals.length
+        ? quals
+            .map((q) => {
+              const deg = q.degree || q.title || ""
+              const inst = q.institution || q.instution || ""
+              return [deg, inst].filter(Boolean).join(" - ")
+            })
+            .filter(Boolean)
+            .join(", ")
+        : typeof qualificationRaw === "string"
+        ? qualificationRaw
+        : "Not Provided"
 
-      let experienceText = "0"
       let experienceYears = 0
       if (user.yearsofExperience) {
-        const match = user.yearsofExperience.match(/(\d+)/)
+        const match = String(user.yearsofExperience).match(/(\d+)/)
         experienceYears = match ? Number(match[1]) : 0
-        experienceText = user.yearsofExperience
-      } else if (user.Experience) {
-        try {
-          const expParsed = JSON.parse(user.Experience)
-          if (Array.isArray(expParsed)) {
-            experienceText = expParsed.map((e) => `${e.designation || "Role"} at ${e.company || "Company"}`).join(", ")
-          }
-        } catch {
-          experienceText = user.Experience
-        }
       }
 
-      let skillsArray = []
-      if (user.Skill) {
-        try {
-          skillsArray = JSON.parse(user.Skill)
-        } catch {
-          if (Array.isArray(user.Skill)) skillsArray = user.Skill
-          else skillsArray = [user.Skill]
-        }
-      }
+      // FIX: Combined link fetching logic from all previous versions for maximum compatibility
+      const introvideo = 
+        user.introvideo ||              // Check user root
+        user.candidate?.introvideo ||   // Check user.candidate
+        null;
+        
+      const certificationlink = 
+        user.certificationlink ||              // Check user root
+        user.candidate?.certificationlink ||   // Check user.candidate
+        null;
+
+      const portfioliolink = 
+        user.portfioliolink || 
+        user.portfoliolink ||               // Check user root
+        user.candidate?.portfioliolink ||   // Check user.candidate
+        user.candidate?.portfoliolink ||    // Check user.candidate (typo check)
+        null;
 
       return {
         _id: user._id || user.id,
         username: user.username || "No Name",
         useremail: user.useremail || "No Email",
         designation: user.designation || "No Designation",
-        qualification: qualificationText,
+        
+        // Use raw fields for complex parsing in cards, and Text for filtering/display
+        qualification: qualificationRaw, 
+        qualificationText, // Used for filtering
+        experience: experienceRaw,
+        experienceYears, // Used for filtering
+        
         skills: skillsArray,
         location: user.location || "Not Provided",
         expectedSalary: user.salaryExpectation || user.expectedSalary || "N/A",
-        experience: experienceText,
-        experienceYears,
         phonenumber: user.phonenumber || "Not Provided",
         resume: user.resume || null,
-        portfioliolink: user.portfioliolink || user.portfoliolink || null,
+        
+        // --- ALL LINKS NOW INCLUDED ---
+        introvideo: introvideo,
+        certificationlink: certificationlink,
+        portfioliolink: portfioliolink, 
+        // ------------------------------
+
         profilePhoto: user.profilphoto || user.profilePhoto || null,
         appliedDate: applicationData.appliedAt || user.appliedDate || user.createdAt || new Date().toISOString(),
         status: applicationData.status || "saved",
         jobId: applicationData.jobId || item.jobId || null,
       }
     })
-  }, [])
+  }, []) // Dependency array is correctly empty
 
   const fetchSavedCandidates = useCallback(async () => {
     if (!token) {
@@ -141,15 +205,20 @@ const SavedCandidatesView = () => {
     } finally {
       setLoading(false)
     }
-  }, [token, transformCandidateData])
+  }, [token, transformCandidateData]) // Dependencies are token and transformCandidateData
 
   const handleRemoveFromSaved = async (candidateId) => {
+    // NOTE: This function currently only updates the UI and calls fetch. 
+    // It should ideally call an API endpoint to unsave the candidate first.
     if (!candidateId) {
       toast.error("Candidate ID is missing!")
       return
     }
 
     try {
+      // Assuming you will implement the unsave API call here, e.g.:
+      // await unsaveCandidate(token, candidateId); 
+
       // Remove from saved list locally
       setSavedCandidates((prev) => prev.filter((c) => c._id !== candidateId))
 
@@ -160,13 +229,14 @@ const SavedCandidatesView = () => {
       toast.success("Candidate removed from saved list!")
       console.log(`[v0] Candidate removed from saved list`)
 
-      // Refresh the list to sync with backend
+      // Refresh the list to sync with backend (Keeping fetch for now, though direct state update is better)
       setTimeout(() => {
         fetchSavedCandidates()
       }, 500)
     } catch (err) {
       console.error("Error removing candidate:", err)
       toast.error("Failed to remove candidate!")
+      // In a real app, you would rollback the UI change here if the API failed.
     }
   }
 
@@ -207,7 +277,8 @@ const SavedCandidatesView = () => {
       }
     })
   }
-
+  
+  // NOTE: Filtering now uses qualificationText and experienceYears provided by transformCandidateData
   const filteredCandidates = savedCandidates.filter((c) => {
     const skillsMatch =
       !filters.skills.length ||
@@ -218,11 +289,12 @@ const SavedCandidatesView = () => {
 
     const locationMatch = !filters.location || c.location?.toLowerCase().includes(filters.location.toLowerCase())
 
+    const qualSource = c.qualificationText || (typeof c.qualification === "string" ? c.qualification : "")
     const qualificationMatch =
-      !filters.qualification || c.qualification?.toLowerCase().includes(filters.qualification.toLowerCase())
+      !filters.qualification || qualSource.toLowerCase().includes(filters.qualification.toLowerCase())
 
     const customQualificationMatch =
-      !filters.customQualification || c.qualification?.toLowerCase().includes(filters.customQualification.toLowerCase())
+      !filters.customQualification || qualSource.toLowerCase().includes(filters.customQualification.toLowerCase())
 
     const experienceMatch = !filters.experience || Number(c.experienceYears || 0) >= Number(filters.experience)
 
@@ -431,7 +503,7 @@ const SavedCandidatesView = () => {
 
         <button
           onClick={resetFilters}
-          className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          className="w-full bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] text-white py-2 rounded-lg hover:bg-[#caa057] transition-colors"
         >
           Clear Filters
         </button>

@@ -237,8 +237,25 @@ const JobDetails = () => {
       if (!window.__APPLIED_IDS.includes(jobId)) window.__APPLIED_IDS.push(jobId)
       setApplied(true)
       setApplicationStatus("Applied")
-
       window.dispatchEvent(new Event("appliedJobsUpdated"))
+
+      // if saved, unsave now
+      if (saved) {
+        try {
+          const unsaveResp = await fetch(`${BASE_URL}/jobseeker/removesavedjob/${jobId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (unsaveResp.ok) {
+            setSaved(false)
+            window.__SAVED_IDS = (window.__SAVED_IDS || []).filter((id) => id !== jobId)
+            window.dispatchEvent(new Event("savedJobsUpdated"))
+          }
+        } catch (e) {
+          console.error("Failed to unsave after apply:", e)
+        }
+      }
+
       toast.success("✅ Application submitted!")
     } catch (err) {
       console.error(err)
@@ -251,6 +268,10 @@ const JobDetails = () => {
   const handleSave = async () => {
     if (!token) {
       toast.error("❌ Please log in to save jobs.")
+      return
+    }
+    if (applied) {
+      toast.info("You have already applied to this job. Saving is not allowed.")
       return
     }
     try {
@@ -473,16 +494,19 @@ const JobDetails = () => {
               >
                 {loading ? "Applying..." : applied ? applicationStatus || "✅ Applied" : "Apply Now"}
               </button>
-              <button
-                onClick={handleSave}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
-                  saved
-                    ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {saved ? "⭐ Saved" : <Bookmark size={18} />}
-              </button>
+
+              {!applied && (
+                <button
+                  onClick={handleSave}
+                  className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
+                    saved
+                      ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {saved ? "⭐ Saved" : <Bookmark size={18} />}
+                </button>
+              )}
             </div>
           </div>
 
@@ -615,14 +639,17 @@ const JobDetails = () => {
         >
           {loading ? "Applying..." : applied ? applicationStatus || "✅ Applied" : "Apply Now"}
         </button>
-        <button
-          onClick={handleSave}
-          className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
-            saved ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]" : "border-gray-300 text-gray-600 hover:bg-gray-50"
-          }`}
-        >
-          {saved ? "⭐ Saved" : <Bookmark size={18} />}
-        </button>
+
+        {!applied && (
+          <button
+            onClick={handleSave}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm border transition shadow-sm ${
+              saved ? "border-[#caa057] text-[#caa057] bg-[#fff1ed]" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            {saved ? "⭐ Saved" : <Bookmark size={18} />}
+          </button>
+        )}
       </div>
     </div>
   )

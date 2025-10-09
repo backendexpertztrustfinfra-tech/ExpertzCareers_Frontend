@@ -264,7 +264,7 @@ if (qualifications.length) {
         duration: `${start} - ${end}`,
       });
     })
-    .join("@"); // Join multiple qualifications by '@'
+    .join("@"); 
   payload.append("qualification", qualString);
 }
 
