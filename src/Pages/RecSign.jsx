@@ -137,8 +137,8 @@ const RecSign = () => {
                     // ⚡ Pass full data into login so context stays consistent
                     login(
                         response.token,
-                        "recruiter", // since this is recruiter flow
-                        true,        // they’ve verified email at this point
+                        "recruiter", 
+                        true,      
                         formData.name,
                         formData.email
                     );
@@ -188,7 +188,6 @@ const RecSign = () => {
                                 placeholder="Email Address"
                                 value={formData.email}
                                 onChange={handleChange}
-                                readOnly
                                 className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
                                 required
                             />
