@@ -110,7 +110,7 @@ const Register = () => {
   const [qualifications, setQualifications] = useState([
     {
       degree: "",
-      institution: "",
+      instution: "",
       startDate: "",
       endDate: "",
       fieldOfStudy: "",
@@ -189,7 +189,7 @@ const Register = () => {
       ...prev,
       {
         degree: "",
-        institution: "",
+        instution: "",
         startDate: "",
         endDate: "",
         fieldOfStudy: "",
@@ -259,7 +259,7 @@ if (qualifications.length) {
       const end = q.pursuing ? "Present" : monthYearFormat(q.endDate);
       return JSON.stringify({
         degree: q.degree,
-        institution: q.institution,
+        instution: q.instution,
         fieldOfStudy: q.fieldOfStudy,
         duration: `${start} - ${end}`,
       });
@@ -462,10 +462,10 @@ if (experienceType !== "Fresher" && Experience.length) {
                   />
                   <InputField
                     type="text"
-                    name="institution"
-                    value={q.institution}
+                    name="instution"
+                    value={q.instution}
                     onChange={(e) => handleQualificationChange(index, e)}
-                    placeholder="Institution / University Name"
+                    placeholder="instution / University Name"
                     required
                   />
 

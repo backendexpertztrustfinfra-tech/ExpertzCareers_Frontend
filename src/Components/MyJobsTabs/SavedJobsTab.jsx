@@ -69,12 +69,12 @@ const SavedJobsTab = () => {
   }, [user]);
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
-  if (error) return <p className="text-red-500">Error: {error}</p>;
+  // if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
     <div>
       {savedJobs.length === 0 ? (
-        <p className="text-gray-500">No saved jobs yet.</p>
+        <p className="text-gray-500">You haven’t Saved for any jobs yet.</p>
       ) : (
         <div className="space-y-4">
           {savedJobs.map((job, index) => (
@@ -85,7 +85,7 @@ const SavedJobsTab = () => {
   initialSaved={true}
   onUpdate={fetchSavedJobs}
   onUnsave={handleUnsave}
-  savedAt={job.savedAt} // 👈 add this
+  savedAt={job.savedAt} 
 />
 
           ))}

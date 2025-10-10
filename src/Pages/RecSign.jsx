@@ -179,7 +179,6 @@ const RecSign = () => {
                                 placeholder="Full Name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                readOnly
                                 className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
                                 required
                             />
