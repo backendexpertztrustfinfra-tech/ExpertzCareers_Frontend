@@ -300,7 +300,7 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   if (loginData?.token) {
     const { token, usertype, varification } = loginData
     saveTokenInCookie(token, usertype)
-    login(token, usertype, varification)   // ✅ pass varification here
+    login(token, usertype, varification)   
 
     navigate(
       usertype === "jobseeker"
