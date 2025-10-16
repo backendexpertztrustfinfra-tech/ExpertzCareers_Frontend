@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
+import { AuthContext } from "../context/AuthContext"; 
 
 const monthYearFormat = (date) => {
   if (!date) return "";
@@ -96,10 +97,11 @@ const Notification = ({ message, type, onClose }) => {
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
+    const { user } = useContext(AuthContext)
   const signupData = location.state || {};
   const [formData, setFormData] = useState({
-    username: "",
-    useremail: signupData.useremail || "",
+     username: user?.username || Cookies.get("prefillName") || "",
+  useremail: user?.useremail || Cookies.get("prefillEmail") || "",
     phonenumber: "",
     designation: "",
     profilphoto: null,
@@ -129,6 +131,8 @@ const Register = () => {
       currentlyWorking: false,
     },
   ]);
+
+
 
   const [notification, setNotification] = useState({ message: "", type: "" });
   const showNotification = (message, type = "success") => {
@@ -353,6 +357,7 @@ if (experienceType !== "Fresher" && Experience.length) {
                 readOnly
                 disabled
               />
+
               <InputField
                 icon={Phone}
                 type="tel"

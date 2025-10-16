@@ -131,7 +131,7 @@ const StatCards = ({ setActiveTab }) => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-[#caa057] to-[#caa057] bg-clip-text text-transparent">
-            Welcome Back, {userProfile?.user?.username || "User"} 👋
+            Welcome Back, {userProfile?.user?.username || "User"} 
           </h1>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">Here’s a quick overview of your hiring activity.</p>
         </div>

@@ -581,16 +581,6 @@ const CandidateView = ({ selectedJob, showAllSaved = false }) => {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Max Distance: {filters.distance} km</label>
-          <Slider
-            min={0}
-            max={100}
-            value={filters.distance}
-            onChange={(val) => setFilters({ ...filters, distance: val })}
-          />
-        </div>
-
-        <div>
           <label className="block text-sm mb-1">Min Experience: {filters.experience} years</label>
           <Slider
             min={0}

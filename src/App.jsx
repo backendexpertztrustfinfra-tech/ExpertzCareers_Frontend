@@ -138,6 +138,7 @@ import ResetPassword from "./Pages/ResetPassword"
 import EmailVerification from "./Pages/emailverification"
 import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css'
+import { SubscriptionProvider } from "./context/SubscriptionContext";
 
 const LoadingScreen = () => (
   <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-100 flex items-center justify-center">
@@ -223,6 +224,7 @@ function App() {
       <SearchProvider>
         <AuthProvider>
           <SavedJobsProvider>
+            <SubscriptionProvider>
             <ScrollToTop />
             <AppContent />
               <ToastContainer
@@ -236,7 +238,7 @@ function App() {
               draggable
               pauseOnHover
               theme="light"
-            />
+            /></SubscriptionProvider>
           </SavedJobsProvider>
         </AuthProvider>
       </SearchProvider>

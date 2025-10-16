@@ -21,8 +21,8 @@ const RecSign = () => {
     const { user, login } = useContext(AuthContext);
 
     const [formData, setFormData] = useState({
-        name: user?.username || "",
-        email: user?.useremail || "",
+         name: user?.username || Cookies.get("prefillName") || "",
+  email: user?.useremail || Cookies.get("prefillEmail") || "",
         recruterPhone: "",
         recruterCompany: "",
         recruterCompanyAddress: "",
@@ -190,6 +190,7 @@ const RecSign = () => {
                                 onChange={handleChange}
                                 className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF37] outline-none"
                                 required
+                                readOnly
                             />
                             <input
                                 type="tel"
