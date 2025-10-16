@@ -9,11 +9,11 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+} from "../Components/ui/card";
+import { Button } from "../Components/ui/button";
+import { Badge } from "../Components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../Components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Components/ui/tabs";
 import {
   MapPin,
   Phone,
