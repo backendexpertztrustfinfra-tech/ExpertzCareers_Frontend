@@ -3,7 +3,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback, useMemo, useTransition } from "react"
 import Cookies from "js-cookie"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/Card"
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
