@@ -3,11 +3,17 @@
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback, useMemo, useTransition } from "react"
 import Cookies from "js-cookie"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card.jsx"
-import { Button } from "@/components/ui/button.jsx"
-import { Badge } from "@/components/ui/badge.jsx" 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx" 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MapPin,
   Phone,
