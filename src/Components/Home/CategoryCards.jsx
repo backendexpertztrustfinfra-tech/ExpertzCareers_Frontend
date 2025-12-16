@@ -34,18 +34,15 @@ const CategoryCards = () => {
   const [visibleCount, setVisibleCount] = useState(8)
   const [showNoJobsMsg, setShowNoJobsMsg] = useState(false)
   const navigate = useNavigate()
-
   const handleShowMore = () => setVisibleCount((prev) => prev + 4)
-
   const handleClick = (title) => {
     navigate(`/jobs?category=${encodeURIComponent(title)}`)
   }
-
   const visibleCategories = jobCategories.slice(0, visibleCount)
   const hasMore = visibleCount < jobCategories.length
 
   return (
-    <section className="relative py-12 sm:py-16 px-4 sm:px-8 bg-gradient-to-br from-[#fff1ed] via-white to-[#fff1ed]">
+    <section className="relative py-12 sm:py-16 px-4 sm:px-8 bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6]">
       {/* Jobs Not Found Alert */}
       {showNoJobsMsg && (
         <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">

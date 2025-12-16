@@ -109,14 +109,20 @@ const JobDetails = () => {
     return jobData?.jobCreatedby?.recruterCompany || jobData?.companyName || jobData?.company || "Company Name"
   }
 
-  const getCompanyLogo = (jobData) => {
-    if (!jobData) return "/default-logo.png"
-    return jobData.companyLogo
-      ? jobData.companyLogo.startsWith("http")
-        ? jobData.companyLogo
-        : `${BASE_URL}${jobData.companyLogo}`
-      : "/default-logo.png"
-  }
+const getCompanyLogo = (job) => {
+  if (!job) return "/default-logo.png";
+
+  const rawLogo =
+    job.companyLogo ||
+    job.logo ||     
+    job.companyLogoURL ||
+    null;
+
+  if (!rawLogo) return "/default-logo.png";
+
+  return rawLogo.startsWith("http") ? rawLogo : `${BASE_URL}${rawLogo}`;
+};
+
 
   useEffect(() => {
     if (!token || !jobId) return

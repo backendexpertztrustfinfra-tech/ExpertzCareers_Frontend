@@ -53,7 +53,7 @@ const FaqSection = () => {
   };
 
   return (
-    <section className="relative py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#fff1ed] via-[#fff1ed]/30 to-[#fff1ed]/50 overflow-hidden">
+    <section className="relative py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6] overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-60 sm:w-80 h-60 sm:h-80 bg-gradient-to-br from-[#caa057]/20 to-[#caa057]/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-60 sm:w-80 h-60 sm:h-80 bg-gradient-to-tr from-[#caa057]/20 to-[#caa057]/20 rounded-full blur-3xl"></div>

@@ -30,7 +30,6 @@ const JobBoard = () => {
   const location = useLocation();
   const token = Cookies.get("userToken");
 
-  // Fetch all jobs
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
@@ -60,6 +59,7 @@ const JobBoard = () => {
         }
 
         const data = await res.json();
+        console.log(data);
         const jobsArray = Array.isArray(data.liveJobs)
           ? data.liveJobs
           : Array.isArray(data.jobs)
@@ -132,7 +132,6 @@ const JobBoard = () => {
     fetchJobs();
   }, []);
 
-  // Handle URL search parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const type = urlParams.get("type");
@@ -144,7 +143,6 @@ const JobBoard = () => {
     if (qualification) setFilters((prev) => ({ ...prev, qualification: [qualification] }));
   }, [location.search]);
 
-  // Fetch saved/applied jobs
   useEffect(() => {
     if (!token) return;
     const fetchStatus = async () => {
@@ -178,10 +176,8 @@ const JobBoard = () => {
     fetchStatus();
   }, [token]);
 
-  // Filtering and sorting
   useEffect(() => {
     let filtered = [...jobs];
-
     if (searchTerm.trim() !== "") {
       const q = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -233,7 +229,6 @@ const JobBoard = () => {
     setFilteredJobs(filtered);
   }, [searchTerm, filters, sortOption, jobs]);
 
-  // Global updates
   useEffect(() => {
     const onSavedUpdated = () => setSavedJobs((window.__SAVED_IDS || []).filter(Boolean));
     const onAppliedUpdated = () => setAppliedJobs((window.__APPLIED_IDS || []).filter(Boolean));
@@ -245,7 +240,6 @@ const JobBoard = () => {
     };
   }, []);
 
-  // Save/Apply handlers
   const handleSaveJob = async (jobId) => {
     if (!token) return toast.error("Please log in to save jobs");
     if (appliedJobs.includes(jobId)) return toast.info("Already applied.");
@@ -310,9 +304,9 @@ const JobBoard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6]">
       {/* Hero */}
-      <div className="relative bg-gradient-to-r from-[#fff1ed] via-[#fff1ed] to-white">
+      <div className="relative bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6]">
         <div className="container mx-auto px-4 py-8 sm:py-12 text-center">
           <h1 className="text-3xl sm:text-5xl font-extrabold mb-4">
             Find Your{" "}

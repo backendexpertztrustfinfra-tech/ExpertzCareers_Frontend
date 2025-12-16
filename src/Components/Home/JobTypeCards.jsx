@@ -34,14 +34,12 @@ const jobTypes = [
 const JobTypeCards = () => {
   const navigate = useNavigate()
   const [showNoJobsMsg, setShowNoJobsMsg] = useState(false)
-
   const handleTypeClick = (type) => {
     navigate(`/jobs?type=${encodeURIComponent(type)}`)
   }
 
   return (
     <div className="py-16 px-6 max-w-7xl mx-auto relative">
-      {/* Jobs Not Found Popup */}
       {showNoJobsMsg && (
         <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">
           Jobs Not Found

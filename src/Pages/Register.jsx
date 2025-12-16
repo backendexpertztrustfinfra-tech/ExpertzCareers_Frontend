@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
-import { AuthContext } from "../context/AuthContext"; 
+import { AuthContext } from "../context/AuthContext";
 
 const monthYearFormat = (date) => {
   if (!date) return "";
@@ -97,11 +97,11 @@ const Notification = ({ message, type, onClose }) => {
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
-    const { user } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
   const signupData = location.state || {};
   const [formData, setFormData] = useState({
-     username: user?.username || Cookies.get("prefillName") || "",
-  useremail: user?.useremail || Cookies.get("prefillEmail") || "",
+    username: user?.username || Cookies.get("prefillName") || "",
+    useremail: user?.useremail || Cookies.get("prefillEmail") || "",
     phonenumber: "",
     designation: "",
     profilphoto: null,
@@ -131,8 +131,6 @@ const Register = () => {
       currentlyWorking: false,
     },
   ]);
-
-
 
   const [notification, setNotification] = useState({ message: "", type: "" });
   const showNotification = (message, type = "success") => {
@@ -255,39 +253,40 @@ const Register = () => {
     if (formData.Skill.length)
       payload.append("Skill", formData.Skill.join(", "));
 
-// Qualifications
-if (qualifications.length) {
-  const qualString = qualifications
-    .map((q) => {
-      const start = monthYearFormat(q.startDate);
-      const end = q.pursuing ? "Present" : monthYearFormat(q.endDate);
-      return JSON.stringify({
-        degree: q.degree,
-        instution: q.instution,
-        fieldOfStudy: q.fieldOfStudy,
-        duration: `${start} - ${end}`,
-      });
-    })
-    .join("@"); 
-  payload.append("qualification", qualString);
-}
+    // Qualifications
+    if (qualifications.length) {
+      const qualString = qualifications
+        .map((q) => {
+          const start = monthYearFormat(q.startDate);
+          const end = q.pursuing ? "Present" : monthYearFormat(q.endDate);
+          return JSON.stringify({
+            degree: q.degree,
+            instution: q.instution,
+            fieldOfStudy: q.fieldOfStudy,
+            duration: `${start} - ${end}`,
+          });
+        })
+        .join("@");
+      payload.append("qualification", qualString);
+    }
 
-// Experience
-if (experienceType !== "Fresher" && Experience.length) {
-  const expString = Experience.map((exp) => {
-    const start = monthYearFormat(exp.startDate);
-    const end = exp.currentlyWorking ? "Present" : monthYearFormat(exp.endDate);
-    return JSON.stringify({
-      companyName: exp.companyName,
-      position: exp.position,
-      duration: `${start} - ${end}`,
-    });
-  }).join("@");
-  payload.append("Experience", expString);
-} else {
-  payload.append("Experience", "");
-}
-
+    // Experience
+    if (experienceType !== "Fresher" && Experience.length) {
+      const expString = Experience.map((exp) => {
+        const start = monthYearFormat(exp.startDate);
+        const end = exp.currentlyWorking
+          ? "Present"
+          : monthYearFormat(exp.endDate);
+        return JSON.stringify({
+          companyName: exp.companyName,
+          position: exp.position,
+          duration: `${start} - ${end}`,
+        });
+      }).join("@");
+      payload.append("Experience", expString);
+    } else {
+      payload.append("Experience", "");
+    }
 
     // Files
     if (formData.profilphoto)
@@ -295,15 +294,22 @@ if (experienceType !== "Fresher" && Experience.length) {
     if (formData.resume) payload.append("resume", formData.resume);
 
     try {
-      const res = await fetch(
-        "https://expertzcareers-backend.onrender.com/jobseeker/updateProfile",
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: payload,
-        }
-      );
-      const data = await res.json();
+      const res = await fetch("http://localhost:3000/user/update", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: payload,
+      });
+
+      let data;
+try {
+  data = await res.json();
+} catch {
+  data = { message: "Invalid JSON response" };
+}
+
+
+      // const data = await res.json();
+      console.log(data);
       if (!res.ok) throw new Error(data.message || "Update failed");
 
       showNotification("Profile updated successfully!", "success");
@@ -711,6 +717,7 @@ if (experienceType !== "Fresher" && Experience.length) {
           {/* Submission Button */}
           <button
             type="submit"
+            onClick={handleSubmit}
             className={`w-full bg-[${accentColor}] hover:bg-[${accentColorHover}] text-white font-bold text-lg tracking-wide px-4 py-4 rounded-xl transition duration-300 shadow-lg shadow-[${accentColor}]/50 hover:shadow-xl`}
           >
             Save and Complete Profile

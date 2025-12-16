@@ -1,10 +1,16 @@
-
-import { useEffect, useMemo, useRef, useState } from "react"
-import Cookies from "js-cookie"
-import { postJob, updateJob, sendNotification, getRecruiterProfile } from "../../../services/apis"
-import { indianStates } from "../../Admin/Location/locations"
-import { toast } from "react-toastify"
-import { BASE_URL } from "../../../config"
+import { useEffect, useMemo, useRef, useState } from "react";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+import {
+  postJob,
+  updateJob,
+  sendNotification,
+  getRecruiterProfile,
+  getActiveSubscription,
+} from "../../../services/apis";
+import { indianStates } from "../../Admin/Location/locations";
+import { toast } from "react-toastify";
+import { BASE_URL } from "../../../config";
 
 function RichTextEditor({
   label = "Description",
@@ -15,42 +21,48 @@ function RichTextEditor({
   name = "description",
   id = "description",
 }) {
-  const editorRef = useRef(null)
-  const [isFocused, setIsFocused] = useState(false)
+  const editorRef = useRef(null);
+  const [isFocused, setIsFocused] = useState(false);
   useEffect(() => {
     if (editorRef.current && value !== editorRef.current.innerHTML) {
-      editorRef.current.innerHTML = value || ""
+      editorRef.current.innerHTML = value || "";
     }
-  }, [value])
+  }, [value]);
 
   const exec = (cmd) => {
-    if (!editorRef.current) return
-    editorRef.current.focus()
-    document.execCommand(cmd, false, null)
-    onChange(editorRef.current.innerHTML)
-  }
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    document.execCommand(cmd, false, null);
+    onChange(editorRef.current.innerHTML);
+  };
 
   const plainText = (html) => {
-    if (!html) return ""
-    const el = document.createElement("div")
-    el.innerHTML = html
-    return (el.textContent || "").trim()
-  }
-  const invalid = required && !plainText(value)
+    if (!html) return "";
+    const el = document.createElement("div");
+    el.innerHTML = html;
+    return (el.textContent || "").trim();
+  };
+  const invalid = required && !plainText(value);
 
   return (
     <div className="w-full">
       <label className="block mb-1 font-medium text-gray-800" htmlFor={id}>
         {label} {required && <span className="text-red-600">*</span>}
       </label>
-      <div className={`rounded-xl border overflow-hidden bg-white ${invalid ? "border-red-400" : "border-gray-300"}`}>
+      <div
+        className={`rounded-xl border overflow-hidden bg-white ${
+          invalid ? "border-red-400" : "border-gray-300"
+        }`}
+      >
         {/* toolbar */}
         {/* (keep your toolbar buttons same) */}
 
         {/* editor area */}
         <div className="relative">
           {!value && !isFocused && (
-            <div className="pointer-events-none absolute left-3 top-3 text-gray-400 text-sm pr-3">{placeholder}</div>
+            <div className="pointer-events-none absolute left-3 top-3 text-gray-400 text-sm pr-3">
+              {placeholder}
+            </div>
           )}
           <div
             id={id}
@@ -69,20 +81,26 @@ function RichTextEditor({
           />
         </div>
       </div>
-      {invalid && <p className="mt-1 text-sm text-red-600">This field is required.</p>}
+      {invalid && (
+        <p className="mt-1 text-sm text-red-600">This field is required.</p>
+      )}
     </div>
-  )
+  );
 }
 
 const PostJobForm = ({ onClose, onSubmit, initialData }) => {
-  const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [salaryAmount, setSalaryAmount] = useState("")
-  const [incentiveAmount, setIncentiveAmount] = useState("")
-  const [totalSalary, setTotalSalary] = useState("")
-  const [skills, setSkills] = useState(initialData?.skills || [])
-  const [input, setInput] = useState("")
-  const [recruiterProfile, setRecruiterProfile] = useState({})
+  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [salaryAmount, setSalaryAmount] = useState("");
+  const [incentiveAmount, setIncentiveAmount] = useState("");
+  const [totalSalary, setTotalSalary] = useState("");
+  const [skills, setSkills] = useState(initialData?.skills || []);
+  const [input, setInput] = useState("");
+  const [activePlan, setActivePlan] = useState(null);
+  const [jobLimitReached, setJobLimitReached] = useState(false);
+  const [showPackInfo, setShowPackInfo] = useState(false);
+  const [recruiterProfile, setRecruiterProfile] = useState({});
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -111,10 +129,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
     endTime: "",
     recruiterCompany: "",
     profilePhoto: "",
-  })
-  const [skillInput, setSkillInput] = useState("")
-  const [benefitInput, setBenefitInput] = useState("")
-  const [docInput, setDocInput] = useState("")
+  });
+  const [skillInput, setSkillInput] = useState("");
+  const [benefitInput, setBenefitInput] = useState("");
+  const [docInput, setDocInput] = useState("");
   const defaultSkills = useMemo(
     () => [
       "Good Communication Skills",
@@ -124,35 +142,71 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       "Time Management",
       "Leadership",
     ],
-    [],
-  )
-  const defaultDocuments = useMemo(() => ["Aadhar Card", "PAN Card", "Bank Account", "Driving License", "Passport"], [])
+    []
+  );
+  const defaultDocuments = useMemo(
+    () => [
+      "Aadhar Card",
+      "PAN Card",
+      "Bank Account",
+      "Driving License",
+      "Passport",
+    ],
+    []
+  );
   const defaultBenefits = useMemo(
-    () => ["Health Insurance", "PF / ESI", "Work From Home", "Paid Leaves", "Performance Bonus"],
-    [],
-  )
-  const [otherCategory, setOtherCategory] = useState("")
-  const [otherDocument, setOtherDocument] = useState("")
-  const normalizeJobData = (job) => {
-    const initialSalary = job.SalaryIncentive || job.salary || ""
-    const initialSalaryType = job.salaryType || "salary"
-    let initialSalaryAmount = ""
-    let initialIncentiveAmount = ""
-
-    if (initialSalaryType === "salary+incentives" && initialSalary) {
-      const parts = initialSalary.split("+").map((s) => s.trim())
-      initialSalaryAmount = parts[0] || ""
-      initialIncentiveAmount = parts[1] || ""
-    } else {
-      initialSalaryAmount = initialSalary
+    () => [
+      "Health Insurance",
+      "PF / ESI",
+      "Work From Home",
+      "Paid Leaves",
+      "Performance Bonus",
+    ],
+    []
+  );
+  const [selectedPlan, setSelectedPlan] = useState("free"); // default free
+  useEffect(() => {
+    const savedData = sessionStorage.getItem("postJobFormData");
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      setFormData(parsed.formData || {});
+      setSalaryAmount(parsed.salaryAmount || "");
+      setIncentiveAmount(parsed.incentiveAmount || "");
+      setStep(parsed.step || 1);
+      setOtherCategory(parsed.otherCategory || "");
+      // Remove saved data so it doesn’t persist forever
+      sessionStorage.removeItem("postJobFormData");
     }
+  }, []);
 
-    // Split timing
-    const [startTime, endTime] = (job.timing || "").split(" - ").map((t) => t.trim())
+  const handlePlanSelect = (plan) => {
+    if (plan === "paid") {
+      navigate("/admin?tab=Credits");
+      return;
+    }
+    setSelectedPlan(plan);
+  };
 
-    // Split working days
-    const [workingDaysFrom, workingDaysTo] = (job.workingDays || "").split(" - ").map((d) => d.trim())
-
+  const [otherCategory, setOtherCategory] = useState("");
+  const [otherDocument, setOtherDocument] = useState("");
+  const normalizeJobData = (job) => {
+    const initialSalary = job.SalaryIncentive || job.salary || "";
+    const initialSalaryType = job.salaryType || "salary";
+    let initialSalaryAmount = "";
+    let initialIncentiveAmount = "";
+    if (initialSalaryType === "salary+incentives" && initialSalary) {
+      const parts = initialSalary.split("+").map((s) => s.trim());
+      initialSalaryAmount = parts[0] || "";
+      initialIncentiveAmount = parts[1] || "";
+    } else {
+      initialSalaryAmount = initialSalary;
+    }
+    const [startTime, endTime] = (job.timing || "")
+      .split(" - ")
+      .map((t) => t.trim());
+    const [workingDaysFrom, workingDaysTo] = (job.workingDays || "")
+      .split(" - ")
+      .map((d) => d.trim());
     return {
       title: job.jobTitle || job.title || "",
       category: job.jobCategory || job.category || "",
@@ -167,282 +221,343 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
       relevantExp: job.relevantExperience || job.relevantExp || "",
       salary: initialSalary,
       salaryType: initialSalaryType,
-      benefits: job.jobBenefits ? job.jobBenefits.split(",").map((b) => b.trim()) : [],
-      skills: job.jobSkills ? job.jobSkills.split(",").map((s) => s.trim()) : [],
-      documents: job.documentRequired ? job.documentRequired.split(",").map((d) => d.trim()) : [],
+      benefits: job.jobBenefits
+        ? job.jobBenefits.split(",").map((b) => b.trim())
+        : [],
+      skills: job.jobSkills
+        ? job.jobSkills.split(",").map((s) => s.trim())
+        : [],
+      documents: job.documentRequired
+        ? job.documentRequired.split(",").map((d) => d.trim())
+        : [],
       shift: job.shift || "",
       workingDaysFrom: workingDaysFrom,
       workingDaysTo: workingDaysTo,
       weekend: job.weekend || "",
       startTime: startTime,
       endTime: endTime,
- companyName: job.companyName || job.recruiterCompany || "expertz",
-      companyLogo:job.companyLogo|| job.profilePhoto || "expertz",
-    }
-  }
+      companyName: job.companyName || job.recruiterCompany || "expertz",
+      companyLogo: job.companyLogo || job.profilePhoto || "expertz",
+    };
+  };
 
   useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const res = await getRecruiterProfile()
-      const profile = res.user || {}   // ✅ define it here
+    const loadSubscription = async () => {
+      const sub = await getActiveSubscription();
+      if (sub) {
+        setActivePlan(sub);
+        if (sub.jobsPosted >= sub.jobPostLimit) {
+          setJobLimitReached(true);
+        }
 
-      setRecruiterProfile(profile)
+        // ⭐ SHOW PACK INFO WHEN PLAN ID MATCHES
+        if (sub.planId === "68d8def03b752e5019d8ec65") {
+          setShowPackInfo(true);
+        }
+      }
+    };
+    loadSubscription();
+  }, []);
 
-      setFormData((prev) => ({
-        ...prev,
-        companyName: profile.recruterCompany || "",
-        companyLogo: profile.profilphoto || "",
-      }))
-    } catch (err) {
-      console.warn("Could not fetch recruiter profile:", err)
-    }
-  }
-  fetchProfile()
-}, [])
-
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getRecruiterProfile();
+        const profile = res.user || {};
+        setRecruiterProfile(profile);
+        setFormData((prev) => ({
+          ...prev,
+          companyName: profile.recruterCompany || "",
+          companyLogo: profile.profilphoto || "",
+        }));
+      } catch (err) {
+        console.warn("Could not fetch recruiter profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     if (initialData) {
-      const normalized = normalizeJobData(initialData)
-      setFormData(normalized)
+      const normalized = normalizeJobData(initialData);
+      setFormData(normalized);
       if (normalized.salaryType === "salary+incentives") {
-        const parts = normalized.salary.split("+").map((s) => s.trim())
-        setSalaryAmount(parts[0] || "")
-        setIncentiveAmount(parts[1] || "")
+        const parts = normalized.salary.split("+").map((s) => s.trim());
+        setSalaryAmount(parts[0] || "");
+        setIncentiveAmount(parts[1] || "");
       } else {
-        setSalaryAmount(normalized.salary)
+        setSalaryAmount(normalized.salary);
       }
-      setTotalSalary(normalized.salary)
+      setTotalSalary(normalized.salary);
     }
-  }, [initialData])
+  }, [initialData]);
 
-  // Generic input change
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  // ---- Tag handlers ----
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
   const handleSkillKeyDown = (e) => {
     if (e.key === "Enter" && skillInput.trim()) {
-      e.preventDefault()
+      e.preventDefault();
       // Check if the skill already exists (case-insensitive)
-      if (!formData.skills.some((s) => s.toLowerCase() === skillInput.trim().toLowerCase())) {
+      if (
+        !formData.skills.some(
+          (s) => s.toLowerCase() === skillInput.trim().toLowerCase()
+        )
+      ) {
         setFormData((prev) => ({
           ...prev,
           skills: [...prev.skills, skillInput.trim()],
-        }))
-        setSkillInput("")
+        }));
+        setSkillInput("");
       } else {
-        toast.warn("Skill already exists!")
+        toast.warn("Skill already exists!");
       }
     }
-  }
+  };
   const handleBenefitKeyDown = (e) => {
     if (e.key === "Enter" && benefitInput.trim()) {
-      e.preventDefault()
-      // Check if the benefit already exists (case-insensitive)
-      if (!formData.benefits.some((b) => b.toLowerCase() === benefitInput.trim().toLowerCase())) {
+      e.preventDefault();
+      if (
+        !formData.benefits.some(
+          (b) => b.toLowerCase() === benefitInput.trim().toLowerCase()
+        )
+      ) {
         setFormData((prev) => ({
           ...prev,
           benefits: [...prev.benefits, benefitInput.trim()],
-        }))
-        setBenefitInput("")
+        }));
+        setBenefitInput("");
       } else {
-        toast.warn("Benefit already exists!")
+        toast.warn("Benefit already exists!");
       }
     }
-  }
+  };
   const handleDocKeyDown = (e) => {
     if (e.key === "Enter" && docInput.trim()) {
-      e.preventDefault()
+      e.preventDefault();
       // Check if the document already exists (case-insensitive)
-      if (!formData.documents.some((d) => d.toLowerCase() === docInput.trim().toLowerCase())) {
+      if (
+        !formData.documents.some(
+          (d) => d.toLowerCase() === docInput.trim().toLowerCase()
+        )
+      ) {
         setFormData((prev) => ({
           ...prev,
           documents: [...prev.documents, docInput.trim()],
-        }))
-        setDocInput("")
+        }));
+        setDocInput("");
       } else {
-        toast.warn("Document already exists!")
+        toast.warn("Document already exists!");
       }
     }
-  }
-
-  // Salary calculation
+  };
   useEffect(() => {
     if (formData.salaryType === "salary+incentives") {
-      const total = (Number.parseFloat(salaryAmount) || 0) + (Number.parseFloat(incentiveAmount) || 0)
-      setTotalSalary(total ? total.toString() : "")
+      const total =
+        (Number.parseFloat(salaryAmount) || 0) +
+        (Number.parseFloat(incentiveAmount) || 0);
+      setTotalSalary(total ? total.toString() : "");
       setFormData((prev) => ({
         ...prev,
         salary: total ? total.toString() : "",
-      }))
+      }));
     } else {
-      setFormData((prev) => ({ ...prev, salary: salaryAmount }))
-      setTotalSalary("")
+      setFormData((prev) => ({ ...prev, salary: salaryAmount }));
+      setTotalSalary("");
     }
-  }, [salaryAmount, incentiveAmount, formData.salaryType])
+  }, [salaryAmount, incentiveAmount, formData.salaryType]);
 
   const scrollToField = (selector) => {
-    const el = typeof selector === "string" ? document.querySelector(selector) : selector
-    if (el && "scrollIntoView" in el) el.scrollIntoView({ behavior: "smooth", block: "center" })
-  }
+    const el =
+      typeof selector === "string"
+        ? document.querySelector(selector)
+        : selector;
+    if (el && "scrollIntoView" in el)
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
   const getDescriptionText = () => {
-    const div = document.createElement("div")
-    div.innerHTML = formData.description || ""
-    return (div.textContent || "").trim()
-  }
+    const div = document.createElement("div");
+    div.innerHTML = formData.description || "";
+    return (div.textContent || "").trim();
+  };
+  const checkSubscriptionLimit = async () => {
+    try {
+      const sub = await getActiveSubscription();
+      if (!sub) return { allowed: true };
+      const { jobPostLimit, jobsPosted, planId } = sub;
+      if (jobsPosted >= jobPostLimit) {
+        return { allowed: false };
+      }
+      return { allowed: true, planId };
+    } catch (err) {
+      console.error("Subscription check error:", err);
+      return { allowed: true };
+    }
+  };
 
   const handleNextStep = () => {
-    const missing = []
-    if (!formData.title) missing.push("Job Title")
-    if (!formData.category) missing.push("Category")
-    if (formData.category === "Other" && !otherCategory.trim()) missing.push("Custom Category")
-    if (!formData.openings) missing.push("No. of Openings")
-    if (!formData.type) missing.push("Job Type")
-    if (!formData.location) missing.push("Location")
-    if (!formData.address) missing.push("Address")
-    if (!formData.qualification) missing.push("Qualification")
-    if (!getDescriptionText()) missing.push("Job Description")
+    const missing = [];
+    if (!formData.title) missing.push("Job Title");
+    if (!formData.category) missing.push("Category");
+    if (formData.category === "Other" && !otherCategory.trim())
+      missing.push("Custom Category");
+    if (!formData.openings) missing.push("No. of Openings");
+    if (!formData.type) missing.push("Job Type");
+    if (!formData.location) missing.push("Location");
+    if (!formData.address) missing.push("Address");
+    if (!formData.qualification) missing.push("Qualification");
+    if (!getDescriptionText()) missing.push("Job Description");
 
     if (missing.length) {
-      toast.error(`Please fill: ${missing.join(", ")}`)
-      if (!formData.title) return scrollToField("[name='title']")
-      if (!formData.category) return scrollToField("[name='category']")
-      if (formData.category === "Other" && !otherCategory.trim()) return scrollToField("#otherCategory")
-      if (!formData.openings) return scrollToField("[name='openings']")
-      if (!formData.type) return scrollToField("[name='type']")
-      if (!formData.location) return scrollToField("[name='location']")
-      if (!formData.address) return scrollToField("[name='address']")
-      if (!formData.qualification) return scrollToField("[name='qualification']")
-      return
+      toast.error(`Please fill: ${missing.join(", ")}`);
+      if (!formData.title) return scrollToField("[name='title']");
+      if (!formData.category) return scrollToField("[name='category']");
+      if (formData.category === "Other" && !otherCategory.trim())
+        return scrollToField("#otherCategory");
+      if (!formData.openings) return scrollToField("[name='openings']");
+      if (!formData.type) return scrollToField("[name='type']");
+      if (!formData.location) return scrollToField("[name='location']");
+      if (!formData.address) return scrollToField("[name='address']");
+      if (!formData.qualification)
+        return scrollToField("[name='qualification']");
+      return;
     }
-    setStep(2)
-  }
+    setStep(2);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const formEl = e.currentTarget
+    e.preventDefault();
 
-    if (formEl && !formEl.checkValidity()) {
-      formEl.reportValidity()
-      return
-    }
-
-    const descText = getDescriptionText()
+    const descText = getDescriptionText();
     if (!descText) {
-      toast.error("Job Description is required.")
-      return scrollToField("#description")
+      toast.error("Job Description is required.");
+      return scrollToField("#description");
     }
 
-    if (formData.category === "Other" && !otherCategory.trim()) {
-      toast.error("Please enter a custom category.")
-      return scrollToField("#otherCategory")
-    }
-
-    if (formData.salaryType === "salary" && !salaryAmount) {
-      toast.error("Please enter Salary amount.")
-      return
-    }
-
-    if (formData.salaryType === "salary+incentives" && (!salaryAmount || !incentiveAmount || !totalSalary)) {
-      toast.error("Please enter Salary, Incentives and ensure Total is calculated.")
-      return
-    }
-
-    if (!formData.workingDaysFrom || !formData.workingDaysTo) {
-      toast.error("Please select Working Days range.")
-      return
-    }
-
-    if (!formData.startTime || !formData.endTime) {
-      toast.error("Please set Timing (start and end).")
-      return
-    }
-
-    setLoading(true)
-
-    const salaryValue =
-      formData.salaryType === "salary+incentives" ? `${salaryAmount} + ${incentiveAmount}` : salaryAmount
-    const payload = {
-      jobTitle: formData.title,
-      jobCategory: otherCategory || formData.category,
-      description: formData.description,
-      noofOpening: formData.openings,
-      jobType: formData.type,
-      location: formData.location,
-      address: formData.address,
-      gender: formData.gender,
-      Qualification: formData.qualification,
-      totalExperience: formData.totalExp,
-      relevantExperience: formData.relevantExp,
-      SalaryIncentive: salaryValue,
-      salaryType: formData.salaryType,
-      jobBenefits: formData.benefits.join(","),
-      jobSkills: formData.skills.join(","),
-      documentRequired: formData.documents.join(","),
-      workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
-      weekend: formData.weekend,
-      timing: `${formData.startTime} - ${formData.endTime}`,
-      shift: formData.shift,
-      status: formData.status,
-      ClosedDate: formData.closedDate,
-      companyName: formData.companyName, 
-      companyLogo: formData.companyLogo, 
-    }
+    setLoading(true);
 
     try {
-      const token = Cookies.get("userToken")
-      const userId = Cookies.get("userId")
+      const res = await getActiveSubscription();
+      console.log("Active subscription response:", res);
+      const sub = res;
+      if (!sub) {
+        toast.error("Could not fetch subscription details. Try again.");
+        return;
+      }
+      const jobsPosted = Number(sub.jobsPosted ?? 0);
+      const jobLimit = Number(sub.jobPostLimit ?? 0);
+      console.log("jobsPosted:", jobsPosted, "jobLimit:", jobLimit);
 
-      let data
-      if (initialData) {
-        data = await updateJob(token, initialData.id, payload)
-        if (!data) throw new Error("Failed to update job")
+      if (jobsPosted >= jobLimit) {
+        sessionStorage.setItem(
+          "postJobFormData",
+          JSON.stringify({
+            formData,
+            salaryAmount,
+            incentiveAmount,
+            step,
+            otherCategory,
+          })
+        );
 
-        toast.success("✅ Job Updated Successfully")
-        if (onSubmit) onSubmit(data.UpdatedData)
-      } else {
-        data = await postJob(token, payload, userId)
-        console.log(data)
-        if (!data) throw new Error("Failed to post job")
+        const confirmResult = window.confirm(
+          "Job post limit reached. Upgrade your plan to post more jobs.\n\nPress OK to upgrade or Cancel to go back."
+        );
 
-        toast.success("🎉 Job Posted Successfully")
-        if (onSubmit) onSubmit(data.job)
-        console.log(data)
+        if (confirmResult) {
+          navigate("/admin?tab=Credits");
+        } else {
+          navigate("/admin");
+        }
+        return;
+      }
+      const isFreePlan = sub.planId === "68d8def03b752e5019d8ec65";
+      // 3️⃣ Prepare payload
+      const salaryValue =
+        formData.salaryType === "salary+incentives"
+          ? `${salaryAmount} + ${incentiveAmount}`
+          : salaryAmount;
+
+      const payload = {
+        jobTitle: formData.title,
+        jobCategory: otherCategory || formData.category,
+        description: formData.description,
+        noofOpening: formData.openings,
+        jobType: formData.type,
+        location: formData.location,
+        address: formData.address,
+        gender: formData.gender,
+        Qualification: formData.qualification,
+        totalExperience: formData.totalExp,
+        relevantExperience: formData.relevantExp,
+        SalaryIncentive: salaryValue,
+        salaryType: formData.salaryType,
+        jobBenefits: formData.benefits.join(","),
+        jobSkills: formData.skills.join(","),
+        documentRequired: formData.documents.join(","),
+        workingDays: `${formData.workingDaysFrom} - ${formData.workingDaysTo}`,
+        weekend: formData.weekend,
+        timing: `${formData.startTime} - ${formData.endTime}`,
+        shift: formData.shift,
+        status: formData.status,
+        ClosedDate: formData.closedDate,
+        companyName: formData.companyName,
+        companyLogo: formData.companyLogo,
+        free: isFreePlan,
+      };
+
+      // 4️⃣ Call API
+      const token = Cookies.get("userToken");
+      const userId = Cookies.get("userId");
+      const data = await postJob(token, payload, userId);
+
+      if (data?.job) {
+        toast.success("🎉 Job Posted Successfully");
+        if (onSubmit) onSubmit(data.job);
+        if (onClose) onClose();
+
         await sendNotification({
           token,
           type: "NEW_JOB",
           extraData: { job: data.job },
-        })
+        });
+      } else {
+        toast.error("Job could not be posted. Please try again.");
       }
-
-      onClose && onClose()
     } catch (err) {
-      console.error("❌ Error saving job:", err)
-      toast.error(err.message || "Something went wrong while saving the job.")
+      console.error("Error posting job:", err);
+      toast.error("Something went wrong. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const inputClass =
-    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
+    "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white";
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6 px-3 md:py-10 md:px-6 overflow-y-auto bg-transparent">
       <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 w-full max-w-4xl">
-        {/* Header */}
         <div className="px-6 md:px-8 pt-6 pb-4 border-b">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{initialData ? "Edit Job" : "Post a Job"}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#D4AF37]">
+            {initialData ? "Edit Job" : "Post a Job"}
+          </h2>
           <p className="text-sm text-gray-500 mt-1">
-            Fill the details below. Fields marked with * are required. Mobile responsive and accessible.
+            {" "}
+            Fill the details below. Fields marked with * are required. Mobile
+            responsive and accessible.{" "}
           </p>
-
           <div className="mt-4 flex items-center gap-3" aria-hidden="true">
-            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
-            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"}`} />
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                step >= 1 ? "bg-[#D4AF37]" : "bg-gray-200"
+              }`}
+            />
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                step >= 2 ? "bg-[#D4AF37]" : "bg-gray-200"
+              }`}
+            />{" "}
           </div>
           <div className="mt-2 flex justify-between text-xs text-gray-500">
             <span>Job Details</span>
@@ -451,41 +566,15 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-          {/* -------- STEP 1 -------- */}
           {step === 1 && (
             <>
-              {/* grid layout for better responsiveness */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {/* Recruiter Info (Readonly) */}
-                <div className="md:col-span-2 flex items-center gap-4 mb-4">
-                  {/* Profile Photo */}
-                  {/* {formData.profilePhoto ? (
-                    <img
-                      src={formData.profilPhoto ? `${BASE_URL}${formData.profilPhoto}` : "/placeholder.svg"}
-                      alt="Profile"
-                      className="w-16 h-16 rounded-full object-cover border"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                      No Image
-                    </div>
-                  )} */}
-
-                  {/* Company Name */}
-                  {/* <div className="flex-1">
-                    <label className="block mb-1 font-medium text-gray-800">Recruiter Company</label>
-                    <input
-                      type="text"
-                      value={formData.companyName || ""}
-                      readOnly
-                      className="w-full p-3 border rounded-xl bg-gray-100 cursor-not-allowed"
-                    />
-                  </div> */}
-                </div>
-
-                {/* Job Title */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="title">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="title"
+                  >
+                    {" "}
                     Job Title <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -498,11 +587,12 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     placeholder="e.g., Frontend Developer"
                   />
                 </div>
-
-                {/* Category */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="category">
-                    Category <span className="text-red-600">*</span>
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="category"
+                  >
+                    Category <span className="text-red-600">*</span>{" "}
                   </label>
                   <select
                     id="category"
@@ -530,10 +620,11 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     />
                   )}
                 </div>
-
-                {/* Openings */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="openings">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="openings"
+                  >
                     No. of Openings <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -552,10 +643,11 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     ))}
                   </select>
                 </div>
-
-                {/* Job Type */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="type">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="type"
+                  >
                     Job Type <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -573,10 +665,11 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="Contract">Contract</option>
                   </select>
                 </div>
-
-                {/* Location */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="location">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="location"
+                  >
                     Location <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -590,15 +683,17 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="">Select State/UT</option>
                     {indianStates.map((state, idx) => (
                       <option key={idx} value={state}>
-                        {state}
+                        {" "}
+                        {state}{" "}
                       </option>
                     ))}
                   </select>
                 </div>
-
-                {/* Address */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="address">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="address"
+                  >
                     Address <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -611,22 +706,22 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     placeholder="Street, City, Zip"
                   />
                 </div>
-
-                {/* Gender */}
                 <div className="md:col-span-2">
                   <fieldset>
-                    <legend className="block mb-1 font-medium text-gray-800">Preferred Gender</legend>
+                    <legend className="block mb-1 font-medium text-gray-800">
+                      Preferred Gender
+                    </legend>
                     <div className="flex flex-wrap gap-4">
                       {[
-                        {
-                          label: "Any",
-                          value: "",
-                        },
+                        { label: "Any", value: "" },
                         { label: "Male", value: "Male" },
                         { label: "Female", value: "Female" },
                         { label: "Other", value: "Other" },
                       ].map((g) => (
-                        <label key={g.label} className="flex items-center gap-2 text-gray-700">
+                        <label
+                          key={g.label}
+                          className="flex items-center gap-2 text-gray-700"
+                        >
                           <input
                             type="radio"
                             name="gender"
@@ -636,14 +731,15 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                           />
                           {g.label}
                         </label>
-                      ))}
+                      ))}{" "}
                     </div>
                   </fieldset>
                 </div>
-
-                {/* Qualification */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="qualification">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="qualification"
+                  >
                     Qualification <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -663,18 +759,18 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="Other">Other</option>
                   </select>
                 </div>
-
-                {/* Description -> Rich Text Editor */}
                 <div className="md:col-span-2">
                   <RichTextEditor
                     id="description"
                     name="description"
                     value={formData.description || ""}
-                    onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                    onChange={(html) =>
+                      setFormData((prev) => ({ ...prev, description: html }))
+                    }
                     label="Job Description"
                     placeholder="Describe the responsibilities of this job and other specific requirements here..."
                     required
-                  />
+                  />{" "}
                 </div>
               </div>
 
@@ -689,14 +785,14 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
               </div>
             </>
           )}
-
-          {/* -------- STEP 2 -------- */}
           {step === 2 && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {/* Experience */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="totalExp">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="totalExp"
+                  >
                     Total Experience <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -715,8 +811,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="5+ years">5+ years</option>
                   </select>
                 </div>
-
-                {/* Salary */}
                 <div className="md:col-span-2">
                   <fieldset>
                     <legend className="block mb-1 font-medium text-gray-800">
@@ -760,7 +854,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                       required
                     />
                   )}
-
                   {formData.salaryType === "salary+incentives" && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <input
@@ -794,13 +887,17 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     </div>
                   )}
                 </div>
-
-                {/* Benefits */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">Job Benefits</label>
+                  <label className="block mb-1 font-medium text-gray-800">
+                    {" "}
+                    Job Benefits{" "}
+                  </label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.benefits.map((b) => (
-                      <span key={b} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
+                      <span
+                        key={b}
+                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
+                      >
                         {b}
                         <button
                           type="button"
@@ -813,10 +910,10 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                           className="text-red-500 font-bold"
                           aria-label={`Remove ${b}`}
                         >
-                          ×
+                          {" "}
                         </button>
                       </span>
-                    ))}
+                    ))}{" "}
                   </div>
                   <input
                     value={benefitInput}
@@ -839,18 +936,22 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                         }
                         className="px-3 py-1 border rounded-full text-sm hover:bg-[#D4AF37] hover:text-white"
                       >
-                        {s}
+                        {" "}
+                        {s}{" "}
                       </button>
-                    ))}
-                  </div>
+                    ))}{" "}
+                  </div>{" "}
                 </div>
-
-                {/* Skills */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">Skills</label>
+                  <label className="block mb-1 font-medium text-gray-800">
+                    Skills
+                  </label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.skills.map((skill) => (
-                      <span key={skill} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
+                      <span
+                        key={skill}
+                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
+                      >
                         {skill}
                         <button
                           type="button"
@@ -894,13 +995,16 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     ))}
                   </div>
                 </div>
-
-                {/* Documents */}
                 <div className="md:col-span-2">
-                  <label className="block mb-1 font-medium text-gray-800">Documents Required</label>
+                  <label className="block mb-1 font-medium text-gray-800">
+                    Documents Required
+                  </label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.documents.map((d) => (
-                      <span key={d} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
+                      <span
+                        key={d}
+                        className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2"
+                      >
                         {d}
                         <button
                           type="button"
@@ -952,8 +1056,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     />
                   </div>
                 </div>
-
-                {/* Working Days */}
                 <div className="md:col-span-2">
                   <label className="block mb-1 font-medium text-gray-800">
                     Working Days <span className="text-red-600">*</span>
@@ -996,8 +1098,6 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     </select>
                   </div>
                 </div>
-
-                {/* Timing */}
                 <div className="md:col-span-2">
                   <label className="block mb-1 font-medium text-gray-800">
                     Timing <span className="text-red-600">*</span>
@@ -1031,10 +1131,11 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     />
                   </div>
                 </div>
-
-                {/* Shift */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="shift">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="shift"
+                  >
                     Shift <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -1051,10 +1152,11 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="Rotational">Rotational</option>
                   </select>
                 </div>
-
-                {/* Weekend */}
                 <div>
-                  <label className="block mb-1 font-medium text-gray-800" htmlFor="weekend">
+                  <label
+                    className="block mb-1 font-medium text-gray-800"
+                    htmlFor="weekend"
+                  >
                     Weekend <span className="text-red-600">*</span>
                   </label>
                   <select
@@ -1071,10 +1173,54 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
                     <option value="Rotational Off">Rotational</option>
                   </select>
                 </div>
-              </div>
+                {showPackInfo && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                      {/* Free Plan */}
+                      <div
+                        className={`p-4 border rounded-lg cursor-pointer ${
+                          selectedPlan === "free"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300 bg-white"
+                        }`}
+                        onClick={() => handlePlanSelect("free")}
+                      >
+                        <h3 className="font-semibold text-blue-700">
+                          Free Plan
+                        </h3>
+                        <p className="text-sm text-blue-600 mt-1">
+                          No database points needed. You can post jobs without
+                          paying.
+                        </p>
+                      </div>
 
+                      {/* Paid Plan */}
+                      <div
+                        className={`p-4 border rounded-lg cursor-pointer ${
+                          selectedPlan === "paid"
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-300 bg-white"
+                        }`}
+                        onClick={() => handlePlanSelect("paid")}
+                      >
+                        <h3 className="font-semibold text-green-700">
+                          Paid Plan
+                        </h3>
+                        <p className="text-sm text-green-600 mt-1">
+                          Database points are required to view candidates. Click
+                          to add credits.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center justify-between pt-2">
-                <button type="button" onClick={() => setStep(1)} className="text-[#D4AF37] hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="text-[#D4AF37] hover:underline"
+                >
                   Back
                 </button>
                 <button
@@ -1090,7 +1236,7 @@ const PostJobForm = ({ onClose, onSubmit, initialData }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PostJobForm
+export default PostJobForm;

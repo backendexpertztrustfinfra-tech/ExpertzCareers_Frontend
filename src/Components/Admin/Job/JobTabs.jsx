@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import DashboardJobCard from "./dashboardJobCard";
@@ -18,22 +19,27 @@ import { SubscriptionContext } from "../../../context/SubscriptionContext";
 
 const statusTabs = ["All", "Live Jobs", "Pending Jobs", "Closed Jobs"];
 
+const jobTabMap = {
+  live: "Live Jobs",
+  all: "All",
+  pending: "Pending Jobs",
+  closed: "Closed Jobs",
+};
+
 const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   const [jobs, setJobs] = useState([]);
   const [activeStatus, setActiveStatus] = useState("All");
   const [showForm, setShowForm] = useState(false);
   const [selectedJobEdit, setSelectedJobEdit] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [searchParams] = useSearchParams();
+  const activeMainTab = searchParams.get("tab");
+  const activeJobTab = searchParams.get("jobTab");
   const token = Cookies.get("userToken");
   const navigate = useNavigate();
   const location = useLocation();
 
   const { subscription, loading: subLoading } = useContext(SubscriptionContext);
-
-  // ✅ Corrected: Determine if post job button should be disabled
-  const isPostJobDisabled =
-    !subscription || subscription.jobsPosted >= subscription.jobPostLimit;
 
   // Fetch jobs from API
   const fetchJobsFromAPI = async (status = "All") => {
@@ -71,14 +77,16 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
         normalized.map(async (job) => {
           try {
             const res = await getAppliedUser(token, job.id);
-            const count = res?.candidatesApplied?.length ?? 0;
-            return { ...job, appliedCount: count };
+            const appliedCount = res?.candidatesApplied?.length ?? 0;
+
+            // ✅ Count contacted candidates
+            const contactedCount =
+              res?.candidatesApplied?.filter((c) => c.contacted).length ?? 0;
+
+            return { ...job, appliedCount, contactedCount };
           } catch (err) {
-            console.error(
-              `Error fetching applied count for job ${job.id}`,
-              err
-            );
-            return job;
+            console.error(`Error fetching counts for job ${job.id}`, err);
+            return { ...job, appliedCount: 0, contactedCount: 0 };
           }
         })
       );
@@ -152,19 +160,19 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
   };
 
   const handlePostJobClick = () => {
-    if (isPostJobDisabled) {
-      if (!subscription) {
-        return alert("⚠️ No active plan. Please buy a plan first.");
-      }
-      return alert(
-        "❌ Job post limit reached for your current subscription plan."
-      );
-    }
-
     navigate("/post-job", {
       state: { returnTo: { tab: "Job", refresh: true } },
     });
   };
+
+  useEffect(() => {
+    if (activeMainTab === "Job") {
+      const mappedStatus = jobTabMap[activeJobTab] || "All";
+
+      setActiveStatus(mappedStatus);
+      fetchJobsFromAPI(mappedStatus);
+    }
+  }, [activeMainTab, activeJobTab]);
 
   return (
     <div className="space-y-6 pb-20 relative">
@@ -204,6 +212,17 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
               onClick={() => {
                 setActiveStatus(tab);
                 fetchJobsFromAPI(tab);
+
+                const reverseMap = {
+                  All: "all",
+                  "Live Jobs": "live",
+                  "Pending Jobs": "pending",
+                  "Closed Jobs": "closed",
+                };
+
+                navigate(`/admin?tab=Job&jobTab=${reverseMap[tab]}`, {
+                  replace: true,
+                });
               }}
               whileTap={{ scale: 0.9 }}
               animate={{ scale: activeStatus === tab ? 1.05 : 1 }}
@@ -222,34 +241,24 @@ const JobTabs = ({ setActiveTab, setSelectedJob }) => {
 
         {/* Desktop Post Job Button */}
         <motion.button
-          whileHover={{ scale: isPostJobDisabled ? 1 : 1.05 }}
-          whileTap={{ scale: isPostJobDisabled ? 1 : 0.95 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handlePostJobClick}
-          disabled={isPostJobDisabled}
-          className={`px-6 py-2 rounded-lg font-semibold shadow-md text-white 
-            ${
-              isPostJobDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] hover:from-[#b4924c] hover:to-[#b4924c]"
-            } 
-            transition`}
+          className="px-6 py-2 rounded-lg font-semibold shadow-md text-white 
+             bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057]
+             hover:from-[#b4924c] hover:to-[#b4924c] transition"
         >
           + Post New Job
         </motion.button>
 
         {/* Mobile Floating Post Job Button */}
         <motion.button
-          whileHover={{ scale: isPostJobDisabled ? 1 : 1.1 }}
-          whileTap={{ scale: isPostJobDisabled ? 1 : 0.9 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={handlePostJobClick}
-          disabled={isPostJobDisabled}
-          className={`sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg text-white w-16 h-16 flex items-center justify-center text-3xl
-            ${
-              isPostJobDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057]"
-            } 
-            transition`}
+          className="sm:hidden fixed bottom-5 right-5 z-50 rounded-full shadow-lg 
+             text-white w-16 h-16 flex items-center justify-center text-3xl
+             bg-gradient-to-r from-[#caa057] via-[#caa057] to-[#caa057] transition"
         >
           +
         </motion.button>

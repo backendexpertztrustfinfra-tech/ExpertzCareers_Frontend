@@ -147,7 +147,6 @@ const Hero = forwardRef(({ onlogin }, ref) => {
 
   const handleSignup = async (e) => {
     e.preventDefault()
-
     const trimmedEmail = signupData.useremail.trim()
     if (!validateEmail(trimmedEmail)) {
       setEmailError("Please enter a valid email address.")
@@ -209,66 +208,6 @@ const Hero = forwardRef(({ onlogin }, ref) => {
   googleProvider.addScope("email")
   googleProvider.addScope("profile")
 
-  // const loginWithGoogle = async () => {
-  //   setLoading(true)
-  //   try {
-  //     const result = await signInWithPopup(auth, googleProvider)
-  //     const user = result.user
-
-  //     const useremail = user.email || user.providerData[0]?.email
-  //     const password = user.uid
-
-  //     if (!useremail) {
-  //       alert("Cannot fetch email from Google. Please use another login method.")
-  //       return
-  //     }
-
-  //     const checkRes = await fetch(`${BASE_URL}/user/finduser/${encodeURIComponent(useremail)}`)
-  //     const checkData = await checkRes.json()
-  //     // console.log("User check result:", checkData);
-
-  //     if (checkData.userFound) {
-  //       const loginRes = await fetch(`${BASE_URL}/user/login`, {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ useremail, password }),
-  //       })
-
-  //       if (loginRes.ok) {
-  //         const loginData = await loginRes.json()
-  //         if (loginData?.token) {
-  //           saveTokenInCookie(loginData.token, loginData.usertype)
-  //           login(loginData.token)
-  //           onlogin?.()
-  //           navigate(
-  //             loginData.usertype === "jobseeker" ? "/jobs" : loginData.usertype === "recruiter" ? "/admin" : "/signup",
-  //           )
-  //         } else {
-  //           alert("Credentials are wrong")
-  //         }
-  //       } else {
-  //         alert("Credentials are wrong")
-  //       }
-  //     } else {
-  //       Cookies.set("userEmail", useremail, { expires: 7 })
-  //       Cookies.set("userPassword", password, { expires: 7 })
-  //       Cookies.set("userName", user.displayName || "Google User", { expires: 7 })
-
-  //       navigate("/signup", {
-  //         state: {
-  //           useremail,
-  //           password,
-  //           username: user.displayName || "Google User",
-  //         },
-  //       })
-  //     }
-  //   } catch (err) {
-  //     console.error(err)
-  //     alert(err.message || "Google login failed")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
 const loginWithGoogle = async () => {
   setLoading(true);
   try {
@@ -336,13 +275,10 @@ const loginWithGoogle = async () => {
   }
 };
 
-
   if (showSuccessAnimation) return <SuccessfullyLogin />
   const isverified = Cookies.get("isVerified")
-  // console.log(isverified)
-
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#fff1ed] via-[#fff1ed] to-[#fff1ed] overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6] overflow-hidden">
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[9999]">
           <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-xl">

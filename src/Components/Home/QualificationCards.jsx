@@ -41,7 +41,7 @@ const QualificationCards = () => {
   }
 
   return (
-    <section className="py-14 px-4 sm:px-6 bg-gradient-to-br from-[#fff1ed] via-white to-[#fff1ed] relative">
+    <section className="py-14 px-4 sm:px-6 bg-gradient-to-br from-[#fdfbfb] via-[#fdfbfa] to-[#f8f6f6] relative">
       {/* Jobs Not Found Popup */}
       {showNoJobsMsg && (
         <div className="fixed top-40 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">

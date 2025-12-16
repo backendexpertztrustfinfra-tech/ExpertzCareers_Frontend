@@ -41,7 +41,7 @@ export const getActiveSubscription = async () => {
     });
 
     const data = await res.json();
-    // console.log("Active Subscription:", data); 
+    console.log("Active Subscription:", data); 
     if (!res.ok) throw new Error(data.message || "Failed to fetch active subscription");
 
     return data.subscription || null;

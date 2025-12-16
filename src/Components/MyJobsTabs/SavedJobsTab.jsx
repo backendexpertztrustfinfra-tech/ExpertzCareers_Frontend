@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useContext } from "react";
 import JobCard from "../JobBoard/JobCard";
 import { AuthContext } from "../../context/AuthContext";
@@ -26,8 +25,8 @@ const SavedJobsTab = () => {
     setError(null);
 
     try {
-      const res = await fetch(`${BASE_URL}/jobseeker/getsavedJobs` ,{
-        headers: { Authorization: `Bearer ${token} `},
+      const res = await fetch(`${BASE_URL}/jobseeker/getsavedJobs`, {
+        headers: { Authorization: `Bearer ${token} ` },
       });
 
       if (!res.ok) {
@@ -37,7 +36,11 @@ const SavedJobsTab = () => {
 
       const data = await res.json();
       const formatted = (data.savedJobs || [])
-        .map((item) => ({ ...item.job, savedAt: item.savedAt }))
+        .map((item) => ({
+  ...item.job,
+  savedAt: item.savedAt,
+  logo: item.job.companyLogo || item.job.logo || "/placeholder.svg"
+}))
         .filter((job) => job.isSaved !== false); // only keep saved jobs
 
       setSavedJobs(formatted);
@@ -51,7 +54,9 @@ const SavedJobsTab = () => {
   };
 
   const handleUnsave = (jobId) => {
-    setSavedJobs((prev) => prev.filter((job) => job._id !== jobId && job.id !== jobId));
+    setSavedJobs((prev) =>
+      prev.filter((job) => job._id !== jobId && job.id !== jobId)
+    );
   };
 
   useEffect(() => {
@@ -79,15 +84,14 @@ const SavedJobsTab = () => {
         <div className="space-y-4">
           {savedJobs.map((job, index) => (
             <JobCard
-  key={job._id || job.id || index}
-  job={job}
-  isSaved={true}
-  initialSaved={true}
-  onUpdate={fetchSavedJobs}
-  onUnsave={handleUnsave}
-  savedAt={job.savedAt} 
-/>
-
+              key={job._id || job.id || index}
+              job={job}
+              isSaved={true}
+              initialSaved={true}
+              onUpdate={fetchSavedJobs}
+              onUnsave={handleUnsave}
+              savedAt={job.savedAt}
+            />
           ))}
         </div>
       )}

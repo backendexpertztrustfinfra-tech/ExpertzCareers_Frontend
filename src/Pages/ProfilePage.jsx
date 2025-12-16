@@ -49,8 +49,6 @@ import generateResume from "../utils/generateResume"
 import { BASE_URL } from "../config"
 import { deDupeFetch } from "../utils/request"
 
-// --- Helper Functions ---
-
 const safeJSONParse = (str, fallback = []) => {
   if (!str) return fallback
   if (typeof str !== "string") return str
@@ -58,72 +56,47 @@ const safeJSONParse = (str, fallback = []) => {
     return JSON.parse(str)
   } catch (e) {
     console.error("JSON parse error:", e)
-    return fallback
-  }
-}
-
+    return fallback  }}
 const parseRegisterStyleObject = (item) => {
   if (!item || typeof item !== "string") return null
-  // strip outer braces if present
   const trimmed = item.trim().replace(/^\{|\}$/g, "")
   const regex = /(\w+)\s*:\s*'([^']*)'/g
   const obj = {}
   let m
   while ((m = regex.exec(trimmed))) {
-    obj[m[1]] = m[2]
-  }
-  return Object.keys(obj).length ? obj : null
-}
-
+    obj[m[1]] = m[2] }
+  return Object.keys(obj).length ? obj : null}
 const monthYearFormatLocal = (date) => {
   if (!date) return ""
   const d = new Date(date)
   if (isNaN(d.getTime())) return ""
-  // Check if the date is a full date string (YYYY-MM-DD), if so, format to only show Month Year
-  return d.toLocaleString("default", { month: "long", year: "numeric" })
-}
-
-// **NEW Helper to extract Month/Year from duration string**
+  return d.toLocaleString("default", { month: "long", year: "numeric" })}
 const parseMonthYearFromDuration = (durationPart) => {
   if (!durationPart || durationPart === "Present") return ""
-  // Normalize string to handle formats like "April 2026"
-  // Use the first day of the month for date input compatibility
   const date = new Date(durationPart)
   if (!isNaN(date.getTime())) {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, "0")
-    // Return YYYY-MM-DD format (using day 01)
-    return `${year}-${month}-01`
-  }
-  return "" // Invalid date format
-}
-
+    return `${year}-${month}-01`  }
+  return "" }
 const parseSkills = (skillField) => {
   if (!skillField) return []
   if (Array.isArray(skillField)) return skillField
   if (typeof skillField === "string") {
-    // try parse as JSON array first
     try {
       const parsed = JSON.parse(skillField)
       if (Array.isArray(parsed)) return parsed
-    } catch {
-      // fallback: CSV string
-    }
+    } catch {    }
     return skillField
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean)
-  }
-  return []
-}
-
+      .filter(Boolean) }
+  return []}
 const parseQualOrExp = (field) => {
   if (!field) return []
   if (Array.isArray(field)) return field
-
   if (typeof field === "string") {
     const items = field.includes("@") ? field.split("@") : [field]
-
     return items
       .map((item) => {
         try {
@@ -132,16 +105,12 @@ const parseQualOrExp = (field) => {
           parsedObject.pursuing = parsedObject.pursuing === true || parsedObject.pursuing === "true"
           parsedObject.currentlyWorking =
             parsedObject.currentlyWorking === true || parsedObject.currentlyWorking === "true"
-
           if ((!parsedObject.startDate || !parsedObject.endDate) && parsedObject.duration) {
             const isPresent = parsedObject.duration.includes("Present")
             const parts = parsedObject.duration.split(isPresent ? " - " : / - |-/).map((p) => p.trim())
-
             if (parts.length >= 2) {
               if (!parsedObject.startDate) {
-                parsedObject.startDate = parseMonthYearFromDuration(parts[0])
-              }
-
+                parsedObject.startDate = parseMonthYearFromDuration(parts[0])   }
               if (isPresent) {
                 parsedObject.endDate = ""
                 parsedObject.currentlyWorking = parsedObject.currentlyWorking || true
@@ -149,28 +118,16 @@ const parseQualOrExp = (field) => {
               } else if (!parsedObject.endDate) {
                 parsedObject.endDate = parseMonthYearFromDuration(parts[1])
                 parsedObject.currentlyWorking = parsedObject.currentlyWorking || false
-                parsedObject.pursuing = parsedObject.pursuing || false
-              }
-            }
-          }
-
+                parsedObject.pursuing = parsedObject.pursuing || false           }            }          }
           parsedObject.startDate = parsedObject.startDate || ""
           parsedObject.endDate = parsedObject.endDate || ""
-
           return parsedObject
         } catch (e) {
           console.error("JSON parse error for item:", item, e)
-          return null
-        }
-      })
-      .filter(Boolean)
-  }
-
+          return null        }      })
+      .filter(Boolean)  }
   if (typeof field === "object") return [field]
-
-  return []
-}
-
+  return []}
 const formatBackendData = (data) => {
   const u = data?.user || {}
   return {
@@ -191,12 +148,7 @@ const formatBackendData = (data) => {
     Skills: parseSkills(u.Skill),
     qualification: parseQualOrExp(u.qualification),
     experience: parseQualOrExp(u.Experience),
-    previouscompanyName: u.previouscompanyName || "",
-  }
-}
-
-// --- Reusable Components (Updated) ---
-
+    previouscompanyName: u.previouscompanyName || "", }}
 const EditableField = ({
   field,
   value,
@@ -256,7 +208,6 @@ const EditableField = ({
       </div>
     )
   }
-
   return (
     <span
       className={`cursor-pointer hover:text-orange-600 transition-colors ${
@@ -268,7 +219,6 @@ const EditableField = ({
     </span>
   )
 }
-
 const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
   <div
     className={`text-center p-4 ${bg} rounded-xl hover:scale-105 transition-transform duration-300 border border-orange-100/50`}
@@ -279,7 +229,6 @@ const StatCard = ({ label, value, icon: Icon, color, bg, trend }) => (
     {trend && <div className="text-xs text-green-600 mt-1">{trend}</div>}
   </div>
 )
-
 const AddQualificationFormFixed = ({ onSave, onCancel }) => {
   const [form, setForm] = useState({
     degree: "",
@@ -369,8 +318,6 @@ const AddQualificationFormFixed = ({ onSave, onCancel }) => {
     </div>
   )
 }
-
-// **FIXED: Added required attributes and validation**
 const AddExperienceFormFixed = ({ onSave, onCancel }) => {
   const [form, setForm] = useState({
     position: "",
@@ -379,16 +326,12 @@ const AddExperienceFormFixed = ({ onSave, onCancel }) => {
     endDate: "",
     currentlyWorking: false,
   })
-
   const isFormValid = () => {
     return (
       form.position.trim() !== "" &&
       form.companyName.trim() !== "" &&
       form.startDate.trim() !== "" &&
-      (form.currentlyWorking || form.endDate.trim() !== "")
-    )
-  }
-
+      (form.currentlyWorking || form.endDate.trim() !== "")   )}
   return (
     <div className="p-4 border-2 border-dashed rounded-lg bg-gray-50 space-y-4">
       <h3 className="text-lg font-semibold">Add New Experience</h3>
@@ -398,39 +341,34 @@ const AddExperienceFormFixed = ({ onSave, onCancel }) => {
         onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
         placeholder="Job Role / position *"
         className="w-full p-2 border rounded"
-        required // REQUIRED
-      />
+        required   />
       <input
         type="text"
         value={form.companyName}
         onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))}
         placeholder="Company Name *"
         className="w-full p-2 border rounded"
-        required // REQUIRED
-      />
+        required    />
       <div className="flex gap-2">
         <input
           type="date"
           value={form.startDate}
           onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
           className="w-1/2 p-2 border rounded"
-          required // REQUIRED
-        />
+          required  />
         <input
           type="date"
           value={form.endDate}
           onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
           disabled={form.currentlyWorking}
           className="w-1/2 p-2 border rounded"
-          required={!form.currentlyWorking} // Conditional REQUIRED
-        />
+          required={!form.currentlyWorking}  />
       </div>
       <label className="flex items-center gap-2 text-sm text-gray-600">
         <input
           type="checkbox"
           checked={form.currentlyWorking}
-          onChange={(e) => setForm((p) => ({ ...p, currentlyWorking: e.target.checked }))}
-        />
+          onChange={(e) => setForm((p) => ({ ...p, currentlyWorking: e.target.checked }))} />
         Currently Working Here
       </label>
       <div className="flex space-x-2">
@@ -440,21 +378,15 @@ const AddExperienceFormFixed = ({ onSave, onCancel }) => {
               alert(
                 "Please fill in all required fields (Job Role, Company Name, Start Date, and End Date/Currently Working).",
               )
-              return
-            }
-            onSave(form)
-          }}
-        >
+ return }
+            onSave(form) }} >
           Save
         </Button>
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
       </div>
-    </div>
-  )
-}
-
+    </div> )}
 const EditableSkillRow = ({ skill, index, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [value, setValue] = useState(skill || "")
@@ -513,7 +445,6 @@ const EditableSkillRow = ({ skill, index, onSave, onDelete }) => {
     </div>
   )
 }
-
 const AddSkillFormFixed = ({ onSave, onCancel }) => {
   const [name, setName] = useState("")
   return (
@@ -544,8 +475,6 @@ const AddSkillFormFixed = ({ onSave, onCancel }) => {
     </div>
   )
 }
-
-// **FIXED: Use original date fields for display and editing**
 const EditableQualificationCard = ({ qualification, index, onSave, onDelete }) => {
   // IMPORTANT: Use qualification's startDate/endDate/pursuing for initial state
   const [isEditing, setIsEditing] = useState(false)
@@ -689,8 +618,6 @@ const EditableQualificationCard = ({ qualification, index, onSave, onDelete }) =
     </Card>
   )
 }
-
-// **FIXED: Use original date fields for display and editing**
 const EditableExperienceCard = ({ experience, index, onSave, onDelete }) => {
   // IMPORTANT: Use experience's startDate/endDate/currentlyWorking for initial state
   const [isEditing, setIsEditing] = useState(false)
@@ -828,8 +755,6 @@ const EditableExperienceCard = ({ experience, index, onSave, onDelete }) => {
     </Card>
   )
 }
-
-// --- Full Component ---
 const ProfilePage = () => {
   const navigate = useNavigate()
   const [profile, setProfile] = useState({
@@ -850,138 +775,84 @@ const ProfilePage = () => {
     certificationlink: "",
     portfioliolink: "",
     resume: "",
-    previouscompanyName: "",
-  })
+    previouscompanyName: "", })
   const [jobStats, setJobStats] = useState({ applied: 0, saved: 0 })
   const [editingField, setEditingField] = useState("")
   const [tempValue, setTempValue] = useState("")
   const [activeTab, setActiveTab] = useState("overview")
   const [showModal, setShowModal] = useState(false)
   const [modalMessage, setModalMessage] = useState("")
-
-  // State for Skills
   const [isAddingSkill, setIsAddingSkill] = useState(false)
-
-  // State for Qualifications
   const [isAddingQualification, setIsAddingQualification] = useState(false)
-
-  // State for Experience
   const [isAddingExperience, setIsAddingExperience] = useState(false)
-
-  // State for Portfolio links
   const [isEditingPortfolio, setIsEditingPortfolio] = useState(false)
   const [isEditingProjects, setIsEditingProjects] = useState(false)
   const [isEditingCert, setIsEditingCert] = useState(false)
   const [tempPortfolioValue, setTempPortfolioValue] = useState("")
   const [tempProjectValue, setTempProjectValue] = useState("")
   const [tempCertValue, setTempCertValue] = useState("")
-
-  // Other state for file uploads
   const [videoFile, setVideoFile] = useState(null)
   const [previewVideo, setPreviewVideo] = useState(null)
-
   const [loading, setLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
-
   const showNotification = (message) => {
     setModalMessage(message)
-    setShowModal(true)
-  }
-
-  // --- API Functions ---
+    setShowModal(true) }
   const fetchJobStats = useCallback(async () => {
     const token = Cookies.get("userToken")
     if (!token) return
-
     try {
       const [appliedData, savedData] = await Promise.all([
         deDupeFetch(
           `${BASE_URL}/jobseeker/appliedjobs`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-          { ttlMs: 15000 },
-        ),
+          { headers: { Authorization: `Bearer ${token}` }, },
+          { ttlMs: 15000 }, ),
         deDupeFetch(
           `${BASE_URL}/jobseeker/getsavedJobs`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-          { ttlMs: 15000 },
-        ),
-      ])
-
+          { headers: { Authorization: `Bearer ${token}` }, },
+          { ttlMs: 15000 },  ),  ])
       startTransition(() => {
         setJobStats({
           applied: appliedData?.appliedJobs?.length || 0,
-          saved: savedData?.savedJobs?.length || 0,
-        })
-      })
+          saved: savedData?.savedJobs?.length || 0,  }) })
     } catch (err) {
       console.error("fetchJobStats error:", err)
-      startTransition(() => setJobStats({ applied: 0, saved: 0 }))
-    }
-  }, [])
-
+      startTransition(() => setJobStats({ applied: 0, saved: 0 }))  } }, [])
   const fetchProfile = useCallback(async () => {
-    try {
-      const token = Cookies.get("userToken")
+    try { const token = Cookies.get("userToken")
       if (!token) {
         console.error("No token found in cookies")
         setLoading(false)
-        return
-      }
-
+        return }
       const data = await deDupeFetch(
         `${BASE_URL}/jobseeker/getjobseekerprofile`,
-        {
-          method: "GET",
+        { method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-        { ttlMs: 15000 },
-      )
-
+            Authorization: `Bearer ${token}`, },  },
+        { ttlMs: 15000 }, )
+console.log(data)
       if (data?.message && !data?.user) {
-        throw new Error(data.message || "Failed to fetch profile")
-      }
-
+        throw new Error(data.message || "Failed to fetch profile") }
       startTransition(() => {
         setProfile(formatBackendData(data))
-        setLoading(false)
-      })
+        setLoading(false)  })
     } catch (error) {
       console.error("Error fetching profile:", error)
       setLoading(false)
-    }
-  }, [])
-
+    } }, [])
   const setProfileSafely = useCallback(
     (data) => {
       if (data && data.user) {
         startTransition(() => setProfile(formatBackendData(data)))
       } else {
-        // If the update response doesn't contain a full user object, refetch the profile
-        fetchProfile()
-      }
-    },
-    [fetchProfile],
-  )
-
-  /**
-   * IMPORTANT FIX: This function has been significantly modified to resolve the res.json() error.
-   * FIX 1: It now directly uses fetch with a manual .json() call and proper error checking.
-   * FIX 2: It maintains the original data structure for the backend (stringified objects joined by '@').
-   */
+        fetchProfile()  }  },
+    [fetchProfile], )
   const saveArrayToBackend = async (key, arrayData) => {
     try {
       const token = Cookies.get("userToken")
       if (!token) throw new Error("No auth token")
-
       const formData = new FormData()
-
       if (key === "Skill") {
         const csv = (arrayData || [])
           .map((s) => s.trim())
@@ -994,18 +865,12 @@ const ProfilePage = () => {
             const start = q.startDate ? monthYearFormatLocal(q.startDate) : ""
             const end = q?.pursuing ? "Present" : q.endDate ? monthYearFormatLocal(q.endDate) : ""
             const duration = `${start} - ${end}`
-
-            // Only save essential fields + duration for cross-platform compatibility
             const objectToSave = {
               degree: q.degree,
               instution: q.instution,
-              fieldOfStudy: q.fieldOfStudy || "", // Keep this if necessary for app/display
-              duration: duration,
-            }
-
-            // Using single quotes for the outer string as per the original structure
-            return JSON.stringify(objectToSave).replace(/"/g, "'")
-          })
+              fieldOfStudy: q.fieldOfStudy || "", 
+              duration: duration, }
+            return JSON.stringify(objectToSave).replace(/"/g, "'")  })
           .join("@")
         formData.append("qualification", finalString)
       } else if (key === "Experience") {
@@ -1014,66 +879,36 @@ const ProfilePage = () => {
             const start = e.startDate ? monthYearFormatLocal(e.startDate) : ""
             const end = e?.currentlyWorking ? "Present" : e.endDate ? monthYearFormatLocal(e.endDate) : ""
             const duration = `${start} - ${end}`
-
-            // Only save essential fields + duration for cross-platform compatibility
             const objectToSave = {
               position: e.position,
               companyName: e.companyName,
-              duration: duration,
-            }
-
-            // Using single quotes for the outer string as per the original structure
-            return JSON.stringify(objectToSave).replace(/"/g, "'")
-          })
+              duration: duration,  }
+            return JSON.stringify(objectToSave).replace(/"/g, "'") })
           .join("@")
         formData.append("Experience", finalString)
-      } else {
-        // Fallback for other array types if needed
-        formData.append(key, JSON.stringify(arrayData))
-      }
-
-      // Use plain fetch API or ensure deDupeFetch returns a standard Response object
-      const apiRes = await fetch(`${BASE_URL}/jobseeker/updateProfile`, {
+      } else {  formData.append(key, JSON.stringify(arrayData))  }
+      const apiRes = await fetch(`${BASE_URL}/user/update`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
-      
-      // Attempt to parse JSON regardless of status, as the server sends JSON errors too
-      let data = {}
-      try {
-          data = await apiRes.json()
-      } catch (jsonError) {
-          // Ignore if unable to parse JSON (e.g., if response body is empty or not JSON)
-      }
-
-      if (!apiRes.ok) {
-          // If the status is not 2xx, throw an error with the message from the backend
-          throw new Error(data.message || `Failed to save data with status: ${apiRes.status}`)
-      }
-
+        body: formData, })
+    let data = {}
+      try {  data = await apiRes.json()
+      } catch (jsonError) {}
+      if (!apiRes.ok) {  throw new Error(data.message || `Failed to save data with status: ${apiRes.status}`)}
       setProfileSafely(data)
       return true
     } catch (err) {
-      // The catch block handles both network/parsing errors AND explicit API errors
       console.error(`saveArrayToBackend error for ${key}:`, err)
-      // Only show a generic fail message if the specific error is not useful
       showNotification(err.message || `Failed to save ${key}.`)
-      return false
-    }
-  }
-
-// **FIXED: Better error handling to prevent "Error: Profile Updated Successfully" issue**
+      return false } }
   const handleUpdateProfile = async (payloadOrFormData) => {
     try {
       const token = Cookies.get("userToken")
       if (!token) throw new Error("No auth token")
-
       let body
       if (payloadOrFormData instanceof FormData) {
         body = payloadOrFormData
       } else {
-        // optimistic merge to prevent flicker
         startTransition(() => {
           setProfile((prev) => {
             const optimistic = { ...prev }
@@ -1089,59 +924,31 @@ const ProfilePage = () => {
               projectlink: "projects",
               certificationlink: "certificationlink",
               portfioliolink: "portfioliolink",
-              previouscompanyName: "previouscompanyName",
-            }
+              previouscompanyName: "previouscompanyName",  }
             for (const [k, v] of Object.entries(payloadOrFormData)) {
               const uiKey = beToUi[k]
-              if (uiKey) optimistic[uiKey] = v
-            }
-            return optimistic
-          })
-        })
-
+              if (uiKey) optimistic[uiKey] = v }
+            return optimistic  }) })
         body = new FormData()
         Object.entries(payloadOrFormData).forEach(([key, value]) => {
           if (value !== null && value !== undefined) {
-            body.append(key, value)
-          }
-        })
-      }
-
-      // Use plain fetch or handle deDupeFetch's response manually
+            body.append(key, value)   } }) }
       const apiRes = await fetch(
-        `${BASE_URL}/jobseeker/updateProfile`,
-        {
-          method: "PUT",
+        `${BASE_URL}/user/update`,
+        {  method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
-          body,
-        },
-      )
-
+          body,  }, )
       let data = {}
-      try {
-          data = await apiRes.json()
-      } catch (jsonError) {
-          // Server might return 200/201 without a body, that's okay.
-      }
-
-
-      // Check for HTTP status first
+      try {  data = await apiRes.json()
+      } catch (jsonError) { }
       if (!apiRes.ok) {
-          // Throw an actual error if the update failed based on status
-          throw new Error(data.message || `Failed to update profile with status: ${apiRes.status}`)
-      }
-      
+          throw new Error(data.message || `Failed to update profile with status: ${apiRes.status}`)}
       setProfileSafely(data)
-      // Success: No need to throw an error, just show the notification.
       showNotification("Profile updated successfully!") 
     } catch (error) {
       console.error("Error updating profile:", error)
       showNotification(error.message || "Failed to update profile.")
-      // Revert optimistic changes by refetching
-      fetchProfile()
-    }
-  }
-
+      fetchProfile()  } }
   const uiToBackendMap = {
     name: "username",
     email: "useremail",
@@ -1154,171 +961,105 @@ const ProfilePage = () => {
     projects: "projectlink",
     certificationlink: "certificationlink",
     portfioliolink: "portfioliolink",
-    previouscompanyName: "previouscompanyName",
-  }
-
+    previouscompanyName: "previouscompanyName", }
   const handleSaveAll = async () => {
     const payload = {}
     for (const [uiKey, beKey] of Object.entries(uiToBackendMap)) {
-      payload[beKey] = profile[uiKey]
-    }
+      payload[beKey] = profile[uiKey]}
     if (videoFile) {
-      payload.introvideo = videoFile
-    }
-
-    await handleUpdateProfile(payload)
-  }
-
+      payload.introvideo = videoFile }
+    await handleUpdateProfile(payload) }
   const handleEdit = (field, value) => {
     setEditingField(field)
-    setTempValue(value)
-  }
-
+    setTempValue(value)  }
   const handleSave = async () => {
     const updatePayload = {}
     let needsUpdate = false
-
-    // Use the uiToBackendMap for field mapping
     const beKey = uiToBackendMap[editingField]
     if (beKey) {
       if (profile[editingField] !== tempValue) {
         needsUpdate = true
-        updatePayload[beKey] = tempValue
-      }
-    }
-
-    if (needsUpdate) {
-      await handleUpdateProfile(updatePayload)
-    }
-
+        updatePayload[beKey] = tempValue } }
+    if (needsUpdate) { await handleUpdateProfile(updatePayload)}
     setEditingField("")
-    setTempValue("")
-  }
-
+    setTempValue("") }
   const handleCancel = () => {
     setEditingField("")
-    setTempValue("")
-  }
-
-  // --- Skills Logic ---
+    setTempValue("") }
   const handleAddSkill = async (skillName) => {
     if (!skillName.trim()) {
       showNotification("Skill name cannot be empty.")
-      return
-    }
+      return }
     const newSkillsList = [...profile.Skills, skillName.trim()]
     const success = await saveArrayToBackend("Skill", newSkillsList)
-    if (success) {
-      setIsAddingSkill(false)
-      showNotification("Skill added successfully!")
-    }
-  }
-
+    if (success) { setIsAddingSkill(false)
+      showNotification("Skill added successfully!") }}
   const saveSkillAtIndex = async (index, updated) => {
     const newSkillsList = profile.Skills.map((s, i) => (i === index ? updated : s))
     const success = await saveArrayToBackend("Skill", newSkillsList)
-    if (success) showNotification("Skill updated successfully!")
-  }
-
+    if (success) showNotification("Skill updated successfully!") }
   const handleRemoveSkill = async (index) => {
     if (!window.confirm("Are you sure you want to remove this skill?")) return
     const newSkillsList = profile.Skills.filter((_, i) => i !== index)
     const success = await saveArrayToBackend("Skill", newSkillsList)
     if (success) {
-      showNotification("Skill removed successfully!")
-    }
-  }
-
-  // --- Qualifications Logic ---
+      showNotification("Skill removed successfully!")  } }
   const handleAddQualification = async (newQualData) => {
     if (!newQualData.degree || !newQualData.instution) {
       showNotification("Please fill in degree and instution.")
-      return
-    }
+      return  }
     const newQualsList = [...profile.qualification, newQualData]
     const success = await saveArrayToBackend("qualification", newQualsList)
-    if (success) {
-      setIsAddingQualification(false)
-      showNotification("Qualification added successfully!")
-    }
-  }
-
+    if (success) { setIsAddingQualification(false)
+      showNotification("Qualification added successfully!") }}
   const saveQualificationAtIndex = async (index, updated) => {
     const newQualsList = profile.qualification.map((q, i) => (i === index ? updated : q))
     const success = await saveArrayToBackend("qualification", newQualsList)
-    if (success) showNotification("Qualification updated successfully!")
-  }
-
+    if (success) showNotification("Qualification updated successfully!") }
   const handleRemoveQualification = async (index) => {
     if (!window.confirm("Are you sure you want to remove this qualification?")) return
     const newQualsList = profile.qualification.filter((_, i) => i !== index)
     const success = await saveArrayToBackend("qualification", newQualsList)
-    if (success) {
-      showNotification("Qualification removed successfully!")
-    }
-  }
-
-  // --- Experience Logic ---
+    if (success) { showNotification("Qualification removed successfully!") }}
   const handleAddExperience = async (newExpData) => {
     if (!newExpData.position || !newExpData.companyName) {
       showNotification("Please fill in job role and companyName.")
-      return
-    }
+      return }
     const newExpList = [...profile.experience, newExpData]
     const success = await saveArrayToBackend("Experience", newExpList)
-    if (success) {
-      setIsAddingExperience(false)
-      showNotification("Experience added successfully!")
-    }
-  }
-
+    if (success) {  setIsAddingExperience(false)
+      showNotification("Experience added successfully!")  }}
   const saveExperienceAtIndex = async (index, updated) => {
     const newExpList = profile.experience.map((e, i) => (i === index ? updated : e))
     const success = await saveArrayToBackend("Experience", newExpList)
-    if (success) showNotification("Experience updated successfully!")
-  }
-
+    if (success) showNotification("Experience updated successfully!") }
   const handleRemoveExperience = async (index) => {
     if (!window.confirm("Are you sure you want to remove this experience?")) return
     const newExpList = profile.experience.filter((_, i) => i !== index)
     const success = await saveArrayToBackend("Experience", newExpList)
-    if (success) {
-      showNotification("Experience removed successfully!")
-    }
-  }
-
-  // --- Other profile field logic (video, resume, etc.) ---
+    if (success) { showNotification("Experience removed successfully!") }}
   const handleVideoDelete = async () => {
     const fd = new FormData()
     fd.append("introvideo", "")
-    await handleUpdateProfile(fd)
-  }
-
+    await handleUpdateProfile(fd)}
   const handleVideoUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
     const fd = new FormData()
     fd.append("introvideo", file)
-    await handleUpdateProfile(fd)
-  }
-
+    await handleUpdateProfile(fd)}
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
     const fd = new FormData()
     fd.append("resume", file)
-    await handleUpdateProfile(fd)
-  }
-
+    await handleUpdateProfile(fd) }
   const handleDownloadResume = () => {
     if (!profile.name && !profile.email) {
       showNotification("Please fill in at least your name and email before generating the resume.")
-      return
-    }
+      return}
     generateResume(profile)
-    showNotification("Your resume has been generated and downloaded!")
-  }
-
+    showNotification("Your resume has been generated and downloaded!")}
   const handleSavePortfolioField = async (field) => {
     let valueToSave
     let uiKey
@@ -1331,18 +1072,12 @@ const ProfilePage = () => {
     } else if (field === "portfioliolink") {
       valueToSave = tempPortfolioValue
       uiKey = "portfioliolink"
-    } else {
-      return
-    }
-
+    } else { return}
     const payload = { [uiToBackendMap[uiKey]]: valueToSave }
     await handleUpdateProfile(payload)
-
     if (field === "projects") setIsEditingProjects(false)
     if (field === "certificationlink") setIsEditingCert(false)
-    if (field === "portfioliolink") setIsEditingPortfolio(false)
-  }
-
+    if (field === "portfioliolink") setIsEditingPortfolio(false)}
   const handleCancelPortfolioEdit = (field) => {
     if (field === "projects") {
       setIsEditingProjects(false)
@@ -1352,69 +1087,43 @@ const ProfilePage = () => {
       setTempCertValue(profile.certificationlink)
     } else if (field === "portfioliolink") {
       setIsEditingPortfolio(false)
-      setTempPortfolioValue(profile.portfioliolink)
-    }
-  }
-
-  // **NEW: Use useMemo for expensive calculations**
-  const contactInfo = useMemo(
-    () => [
-      {
-        key: "location",
+      setTempPortfolioValue(profile.portfioliolink) }}
+  const contactInfo = useMemo(() => [ { key: "location",
         icon: MapPin,
         value: profile.location,
         color: "text-[#caa057]",
         editable: true,
-        placeholder: "Enter your city",
-      },
-      {
-        key: "phone",
+        placeholder: "Enter your city", },
+      { key: "phone",
         icon: Phone,
         value: profile.phone,
         color: "text-yellow-500",
         editable: true,
-        placeholder: "Enter your phone number",
-      },
-      {
-        key: "email",
+        placeholder: "Enter your phone number",  },
+      { key: "email",
         icon: Mail,
         value: profile.email,
         color: "text-orange-600",
         editable: false, // Email usually not directly editable in profile
-        placeholder: "Your email address",
-      },
-      // Removed previouscompanyName from contactInfo as it's handled elsewhere
-    ],
-    [profile.location, profile.phone, profile.email],
-  )
-
+        placeholder: "Your email address", }, ],
+    [profile.location, profile.phone, profile.email], )
   const jobStatsData = useMemo(
-    () => [
-      {
-        label: "Applied",
+    () => [  { label: "Applied",
         value: jobStats.applied,
         icon: Rocket,
         color: "text-[#caa057]",
-        bg: "bg-orange-100",
-      },
-      {
-        label: "Saved",
+        bg: "bg-orange-100", },
+      {label: "Saved",
         value: jobStats.saved,
         icon: Heart,
         color: "text-red-500",
-        bg: "bg-red-100",
-      },
-    ],
-    [jobStats.applied, jobStats.saved],
-  )
-
+        bg: "bg-red-100",}, ],
+    [jobStats.applied, jobStats.saved],)
   useEffect(() => {
     fetchJobStats()
     fetchProfile()
-
     const updateStatsHandler = () => {
-      fetchJobStats()
-    }
+      fetchJobStats()}
     window.addEventListener("savedJobsUpdated", updateStatsHandler)
     window.addEventListener("appliedJobsUpdated", updateStatsHandler)
     return () => {
@@ -1422,9 +1131,7 @@ const ProfilePage = () => {
       window.removeEventListener("appliedJobsUpdated", updateStatsHandler)
     }
   }, [fetchJobStats, fetchProfile])
-
-  if (loading) {
-    return (
+  if (loading) {  return (
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
@@ -1449,9 +1156,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-    )
-  }
-
+    ) }
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1463,7 +1168,7 @@ const ProfilePage = () => {
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-4 border-gradient-to-br from-orange-400 to-yellow-400 shadow-2xl ring-4 ring-orange-200/50">
                     <AvatarImage
-                      src={profile.profilphoto ? `${BASE_URL}${profile.profilphoto}` : "/placeholder.svg"}
+                      src={profile.profilphoto ? `${BASE_URL}/uploads/${profile.profilphoto}` : "/placeholder.svg"}
                       alt={profile.name}
                     />
                     <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-orange-500 to-yellow-500 text-white">
@@ -1484,7 +1189,7 @@ const ProfilePage = () => {
                       if (!file) return
                       const formData = new FormData()
                       formData.append("profilphoto", file)
-                      fetch(`${BASE_URL}/jobseeker/updateProfile`, {
+                      fetch(`${BASE_URL}/user/update`, {
                         method: "PUT",
                         headers: {
                           Authorization: `Bearer ${Cookies.get("userToken")}`,
@@ -1517,7 +1222,7 @@ const ProfilePage = () => {
                   {previewVideo || profile.videoIntro ? (
                     <div className="relative">
                       <video
-                        src={previewVideo || `${BASE_URL}${profile.videoIntro}`}
+                        src={previewVideo || `${BASE_URL}/uploads/${profile.videoIntro}`}
                         controls
                         className="w-full max-w-xs mx-auto h-24 rounded-xl object-cover border-2 border-orange-300/50 shadow-lg"
                       />
@@ -1849,7 +1554,7 @@ const ProfilePage = () => {
                     </Button>
                     {profile.resume && (
                       <a
-                        href={`${BASE_URL}${profile.resume}`}
+                        href={`${BASE_URL}/uploads/${profile.resume}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full max-w-xs"

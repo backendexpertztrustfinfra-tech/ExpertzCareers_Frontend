@@ -80,12 +80,13 @@ const DashboardJobCard = ({
   return (
     <div
       className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm 
-                 hover:shadow-md hover:scale-[1.01] transition-all duration-200 
-                 cursor-pointer flex flex-col gap-3"
+             hover:shadow-md hover:scale-[1.01] transition-all duration-200 
+             cursor-pointer flex flex-col gap-3 relative pt-7"
       onClick={() => onJobClick && onJobClick(job)}
     >
       {/* ---------- Top Section ---------- */}
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start relative">
+        {/* ---------- Left: Logo & Info ---------- */}
         <div className="flex items-center gap-3">
           {/* Company Logo or First Letter Fallback */}
           {showImage ? (
@@ -104,30 +105,44 @@ const DashboardJobCard = ({
           )}
 
           {/* Company Info */}
-          <div className="max-w-[160px]">
+          <div className="max-w-[160px] flex flex-col gap-1">
             <h3 className="font-semibold text-sm md:text-base text-gray-800 truncate">
               {job.jobTitle}
             </h3>
             <p className="text-xs text-gray-500 truncate">
               {job.company || "Company Name"}
             </p>
-            <span
-              className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${
-                job.status === "Active"
-                  ? "bg-green-100 text-green-600"
-                  : job.status === "Closed"
-                  ? "bg-red-100 text-red-600"
-                  : job.status === "Pending"
-                  ? "bg-yellow-100 text-yellow-600"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {job.status}
-            </span>
+
+            {/* ---------- Status & Free/Premium Badges ---------- */}
+            <div className="flex items-center gap-2 mt-1">
+              <span
+                className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                  job.status === "Active"
+                    ? "bg-green-100 text-green-600"
+                    : job.status === "Closed"
+                    ? "bg-red-100 text-red-600"
+                    : job.status === "Pending"
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {job.status}
+              </span>
+
+              <span
+                className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full ${
+                  job.free
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {job.free ? "Free" : "Premium"}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* ---------- Menu ---------- */}
+        {/* ---------- Right: Menu & Time ---------- */}
         <div className="flex items-center gap-1 relative" ref={menuRef}>
           <span className="text-[11px] text-gray-400">
             {getTimeAgo(job.createdAt)}
@@ -199,7 +214,7 @@ const DashboardJobCard = ({
         </button>
         <button
           className="py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 
-                     hover:bg-green-100 text-green-700"
+             hover:bg-green-100 text-green-700"
           onClick={(e) => e.stopPropagation()}
         >
           📞 {job.contactedCount ?? 0} Contacted
