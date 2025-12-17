@@ -17,7 +17,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { BASE_URL } from "../config";
+import { BASE_URL } from "../../../config";
 
 const parseSkills = (skillField) => {
   if (!skillField) return [];
