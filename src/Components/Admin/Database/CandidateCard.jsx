@@ -374,7 +374,7 @@ const CandidateCard = ({
         {/* Document Links */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs mt-3 border-t pt-3">
           <LinkButton
-            link={`http://localhost:3000/uploads/${resume}`}
+            link={`${BASE_URL}/uploads/${resume}`}
             Icon={FaFilePdf}
             label="Resume"
             colorClass="text-red-600"
@@ -392,7 +392,7 @@ const CandidateCard = ({
           {introvideo && (
             <button
               onClick={() => {
-                setVideoSrc(`http://localhost:3000/uploads/${introvideo}`);
+                setVideoSrc(`${BASE_URL}/uploads/${introvideo}`);
                 setIsVideoOpen(true);
               }}
               className="flex items-center gap-2 text-purple-600 hover:underline"

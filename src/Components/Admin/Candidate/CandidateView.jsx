@@ -17,6 +17,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { BASE_URL } from "../config";
 
 const parseSkills = (skillField) => {
   if (!skillField) return [];
@@ -312,7 +313,7 @@ const handleFetchApplied = useCallback(() => {
       const jobId = selectedJob._id || selectedJob.id;
 
       await fetch(
-        `http://localhost:3000/recruiter/updateapplyjobstatus/${jobId}`,
+        `${BASE_URL}/recruiter/updateapplyjobstatus/${jobId}`,
         {
           method: "PUT",
           headers: {
@@ -556,7 +557,7 @@ const candidatesToShow =
 
   try {
     await fetch(
-      `http://localhost:3000/recruiter/contacted/${selectedJob._id}`,
+      `${BASE_URL}/recruiter/contacted/${selectedJob._id}`,
       {
         method: "PUT",
         headers: {

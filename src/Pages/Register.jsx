@@ -16,6 +16,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import { BASE_URL } from "../config";
 
 const monthYearFormat = (date) => {
   if (!date) return "";
@@ -294,7 +295,7 @@ const Register = () => {
     if (formData.resume) payload.append("resume", formData.resume);
 
     try {
-      const res = await fetch("http://localhost:3000/user/update", {
+      const res = await fetch(`${BASE_URL}/user/update`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: payload,
