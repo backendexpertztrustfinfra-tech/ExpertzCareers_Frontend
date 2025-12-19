@@ -40,7 +40,6 @@ const InfoItem = ({ icon, label, value, isEditing, name, onChange }) => {
   if (!isEditing && (value === "" || value === null)) return null;
 
   const displayValue = Array.isArray(value) ? value.join(", ") : value;
-
   return (
     <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
       <p className="flex items-center gap-2 text-gray-600 mb-1 sm:mb-0 text-sm font-medium sm:w-1/3">
@@ -182,8 +181,8 @@ const ProfilePage = ({ onUpdate }) => {
     recruterGstIn: "",
     companyWebsite: "",
     companyLinkedIn: "",
-    recruterCompanyDoc: "",
-    recruterCompanyDocFile: null,
+    recruterCompanyDoc: [],
+    recruterCompanyDocFiles: [],
   });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -213,7 +212,7 @@ const ProfilePage = ({ onUpdate }) => {
             recruterCompanyAddress: user.user.recruterCompanyAddress || "",
             recruterGstIn: user.user.recruterGstIn || "",
             companyWebsite: user.user.companyWebsite || "",
-            recruterLinkedIn: user.user.companyLinkedIn || "",
+companyLinkedIn: user.user.companyLinkedIn || "",
             recruterCompanyDoc: user.user.recruterCompanyDoc || "",
           }));
         }
@@ -242,22 +241,29 @@ const ProfilePage = ({ onUpdate }) => {
     }
   };
   const handleDeletePhoto = () =>
-    setFormData((prev) => ({ ...prev, profilphotoFile: null, profilphotoUrl: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      profilphotoFile: null,
+      profilphotoUrl: "",
+    }));
 
   // Document upload
   const handleDocClick = () => docInputRef.current?.click();
   const handleDocUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        recruterCompanyDocFile: file,
-        recruterCompanyDoc: file.name,
-      }));
-    }
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
+      ...prev,
+      recruterCompanyDocFiles: files,
+    }));
   };
-  const handleDeleteDoc = () =>
-    setFormData((prev) => ({ ...prev, recruterCompanyDocFile: null, recruterCompanyDoc: "" }));
+
+  const handleDeleteDoc = () => {
+    setFormData((prev) => ({
+      ...prev,
+      recruterCompanyDoc: [],
+      recruterCompanyDocFiles: [],
+    }));
+  };
 
   // Save
   const handleSave = async () => {
@@ -266,24 +272,27 @@ const ProfilePage = ({ onUpdate }) => {
     try {
       const data = new FormData();
 
-      // text fields
+      const skipKeys = [
+        "profilphotoFile",
+        "profilphotoUrl",
+        "recruterCompanyDoc",
+        "recruterCompanyDocFiles",
+      ];
+
       for (const key in formData) {
-        if (
-          !["profilphotoFile", "profilphotoUrl", "recruterCompanyDocFile"].includes(
-            key
-          )
-        ) {
+        if (!skipKeys.includes(key)) {
           data.append(key, formData[key]);
         }
       }
 
-      // files
-      if (formData.profilphotoFile) {
-        data.append("profilphoto", formData.profilphotoFile);
-      }
-      if (formData.recruterCompanyDocFile) {
-        data.append("recruterCompanyDoc", formData.recruterCompanyDocFile);
-      }
+     if (formData.profilphotoFile) {
+  data.append("profilphoto", formData.profilphotoFile);
+}
+
+formData.recruterCompanyDocFiles.forEach(file => {
+  data.append("recruterCompanyDoc", file);
+});
+
 
       await updateRecruiterProfile(token, data);
       alert("✅ Profile updated successfully!");
@@ -296,6 +305,13 @@ const ProfilePage = ({ onUpdate }) => {
       setLoading(false);
     }
   };
+
+const getViewablePdfUrl = (url) => {
+  if (!url) return "";
+  const base = url.replace("/raw/upload/", "/image/upload/f_auto,q_auto/");
+  return base.endsWith(".pdf") ? base : `${base}.pdf`;
+};
+
 
   if (fetching) {
     return (
@@ -311,13 +327,7 @@ const ProfilePage = ({ onUpdate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-6">
         <div className="relative flex-shrink-0 self-center sm:self-start">
           <img
-            src={
-              formData.profilphotoFile
-                ? formData.profilphotoUrl
-                : formData.profilphotoUrl
-                ? `${BASE_URL}${formData.profilphotoUrl}`
-                : "/default-logo.png"
-            }
+            src={formData.profilphotoUrl || "/default-logo.png"}
             alt="Profile"
             className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#caa057] object-cover shadow cursor-pointer"
             onClick={isEditing ? handleLogoClick : undefined}
@@ -406,7 +416,11 @@ const ProfilePage = ({ onUpdate }) => {
             disabled={loading}
             className="bg-gradient-to-r from-[#caa057] to-[#caa057] hover:opacity-90 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
           >
-            {isEditing ? (loading ? "Saving..." : "Save Changes") : "Edit Profile"}
+            {isEditing
+              ? loading
+                ? "Saving..."
+                : "Save Changes"
+              : "Edit Profile"}
           </button>
         </div>
       </div>
@@ -484,47 +498,40 @@ const ProfilePage = ({ onUpdate }) => {
 
             {/* Document Upload */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <p className="flex items-center gap-2 text-gray-600 mb-1 sm:mb-0 text-sm font-medium sm:w-1/3">
-                <FaFileInvoice /> Document:
+              <p className="flex items-center gap-2 text-gray-600 text-sm font-medium sm:w-1/3">
+                <FaFileInvoice /> Documents:
               </p>
-              <div className="sm:w-2/3 flex items-center gap-2">
-                {formData.recruterCompanyDoc ? (
+
+              <div className="sm:w-2/3 space-y-1">
+                {Array.isArray(formData.recruterCompanyDoc) &&
+                  formData.recruterCompanyDoc.map((doc, i) => (
                   <a
-                    href={`${BASE_URL}${formData.recruterCompanyDoc}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 underline text-sm"
-                  >
-                    {formData.recruterCompanyDocFile
-                      ? formData.recruterCompanyDocFile.name
-                      : "View Document"}
-                  </a>
-                ) : (
-                  <p className="text-gray-400 text-sm">No document uploaded</p>
-                )}
+  href={`https://docs.google.com/gview?url=${encodeURIComponent(doc)}&embedded=true`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-600 underline text-sm block"
+>
+  View Document {i + 1}
+</a>
+
+
+                  ))}
+
                 {isEditing && (
-                  <>
-                    <button
-                      onClick={handleDocClick}
-                      className="bg-[#caa057] text-white px-3 py-1 text-xs rounded-lg hover:bg-[#b4924c] transition"
-                    >
-                      Upload
-                    </button>
-                    {formData.recruterCompanyDoc && (
-                      <button
-                        onClick={handleDeleteDoc}
-                        className="bg-red-500 text-white px-3 py-1 text-xs rounded-lg hover:bg-red-600 transition"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </>
+                  <button
+                    onClick={handleDocClick}
+                    className="mt-2 bg-[#caa057] text-white px-3 py-1 text-xs rounded-lg"
+                  >
+                    Upload Documents
+                  </button>
                 )}
+
                 <input
                   type="file"
                   ref={docInputRef}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  multiple
+                  accept=".pdf"
                   onChange={handleDocUpload}
                 />
               </div>
