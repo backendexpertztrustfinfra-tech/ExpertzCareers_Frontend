@@ -331,11 +331,7 @@ const CandidateCard = ({
         {/* Core Info */}
         <div className="grid grid-cols-2 gap-3 text-sm border-y py-3">
           <InfoRow Icon={FaMapMarkerAlt} title="Location" content={location} />
-          <InfoRow
-            Icon={FaRupeeSign}
-            title="Expected Salary"
-            content={expectedSalary}
-          />
+          
           <InfoRow
             Icon={FaGraduationCap}
             title="Education"
@@ -374,7 +370,7 @@ const CandidateCard = ({
         {/* Document Links */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs mt-3 border-t pt-3">
           <LinkButton
-            link={`${BASE_URL}/uploads/${resume}`}
+            link={resume}
             Icon={FaFilePdf}
             label="Resume"
             colorClass="text-red-600"
@@ -392,7 +388,7 @@ const CandidateCard = ({
           {introvideo && (
             <button
               onClick={() => {
-                setVideoSrc(`${BASE_URL}/uploads/${introvideo}`);
+                setVideoSrc(introvideo);
                 setIsVideoOpen(true);
               }}
               className="flex items-center gap-2 text-purple-600 hover:underline"
@@ -480,7 +476,7 @@ const CandidateCard = ({
               onClick={() => onReject(_id)}
               className="w-1/4 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1.5 rounded-lg transition"
             >
-              <MdClose />
+              <MdClose />Reject
             </button>
           )}
 
